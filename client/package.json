@@ -23,7 +23,7 @@
     "framer-motion": "^12.23.22",
     "katex": "^0.16.22",
     "lucide-react": "^0.544.0",
-    "react": "^19.1.0",
+    "react": "^19.2.0",
     "react-calendar-heatmap": "^1.10.0",
     "react-dom": "^19.1.1",
     "react-icons": "^5.5.0",
@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
-    "@types/react": "^19.1.16",
+    "@types/react": "^19.2.0",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
     "eslint": "^9.36.0",
