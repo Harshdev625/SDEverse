@@ -95,7 +95,7 @@ const StatCard = ({ title, value, trend, description }) => {
 const Codechef = () => {
   const dispatch = useDispatch();
   const { myProfile, status, error } = useSelector((state) => state.user);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const isDarkMode = useSelector((state) => state.theme.mode === "dark");
   const [heatmapRange, setHeatmapRange] = useState(6);
   const [showContestDetails, setShowContestDetails] = useState(false);
   const [currentContestPage, setCurrentContestPage] = useState(1);
@@ -109,13 +109,6 @@ const Codechef = () => {
     dispatch(refreshSingleCompetitiveStat("codechef"));
   }, [dispatch]);
 
-  useEffect(() => {
-    const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    setIsDarkMode(darkModeQuery.matches);
-    const handler = (e) => setIsDarkMode(e.matches);
-    darkModeQuery.addEventListener("change", handler);
-    return () => darkModeQuery.removeEventListener("change", handler);
-  }, []);
 
   const codechefStats = myProfile?.extraCompetitiveStats?.codechef;
   const summary = codechefStats?.summary || {};

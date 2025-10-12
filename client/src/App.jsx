@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { setTheme } from "./features/theme/themeSlice";
 
 import Layout from "./components/Layout";
 import Loader from "./components/Loader";
@@ -166,6 +167,11 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    // Initialize theme on app startup
+    const storedTheme = localStorage.getItem("theme") || "light";
+    // console.log("Initializing theme with:", storedTheme);
+    dispatch(setTheme(storedTheme));
+
     const fetchUser = async () => {
       const token = localStorage.getItem("token");
       if (token) {
