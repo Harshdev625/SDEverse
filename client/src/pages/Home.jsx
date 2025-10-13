@@ -44,7 +44,7 @@ const Home = () => {
                 </Button>
               </Link>
               <Link to="/community-guidelines">
-                <Button className="px-8 py-4 bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg transition duration-300 text-lg font-medium">
+                <Button className="px-8 py-4 bg-white dark:bg-gray-800 !text-black dark:!text-indigo-400 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg transition duration-300 text-lg font-medium">
                   Join Community
                 </Button>
               </Link>
