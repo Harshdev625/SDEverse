@@ -17,16 +17,21 @@ const NotificationBell = () => {
   const { notifications, loading, error } = useSelector(
     (state) => state.notification
   );
+  const { user, token } = useSelector((state) => state.auth);
   const [open, setOpen] = useState(false);
+  const isLoggedIn = !!user || !!token;
   const ref = useRef();
 
+
   useEffect(() => {
-    dispatch(fetchNotifications());
-    const intervalId = setInterval(() => {
+    if (isLoggedIn) {
       dispatch(fetchNotifications());
-    }, 30000);
-    return () => clearInterval(intervalId);
-  }, [dispatch]);
+      const intervalId = setInterval(() => {
+        dispatch(fetchNotifications());
+      }, 30000);
+      return () => clearInterval(intervalId);
+    } 
+  }, [dispatch, isLoggedIn]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -71,7 +76,8 @@ const NotificationBell = () => {
     }
   };
 
-  return (
+  return isLoggedIn ? (
+    
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
@@ -142,14 +148,14 @@ const NotificationBell = () => {
                   <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                     {new Date(note.createdAt).toLocaleString()}
                   </div>
-                </li>
+                </li> 
               ))}
             </ul>
           )}
         </div>
       )}
     </div>
-  );
+  ): null;
 };
 
 export default NotificationBell;

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../features/auth/authSlice";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import SDEverse from "../assets/sdeverse.png";
 
 const Register = () => {
@@ -49,14 +49,18 @@ const Register = () => {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="relative z-10 max-w-md w-full bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 border border-white/30"
       >
+        <Link to="/" className="p-1 rounded-sm border w-6 text-indigo-700 flex items-center hover:bg-indigo-700 hover:text-white ">
+         <ArrowLeft className="w-5 h-5" />
+        </Link>
         <div className="text-center mb-8">
           <motion.div
             whileHover={{ scale: 1.05 }}
             className="mx-auto mb-4"
-          >
-            <img 
-              src={SDEverse} 
-              alt="SDEverse Logo" 
+                    >
+          
+            <img
+              src={SDEverse}
+              alt="SDEverse Logo"
               className="w-20 h-20 mx-auto object-contain"
             />
           </motion.div>
