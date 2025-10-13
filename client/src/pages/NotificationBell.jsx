@@ -18,20 +18,20 @@ const NotificationBell = () => {
     (state) => state.notification
   );
   const { user, token } = useSelector((state) => state.auth);
-  const isLoggedIn = !!user || !!token;
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const isLoggedIn = !!user || !!token;
   const ref = useRef();
 
 
   useEffect(() => {
-    if (isLoggedIn) {
-      dispatch(fetchNotifications());
-      const intervalId = setInterval(() => {
-        dispatch(fetchNotifications());
-      }, 30000);
-      return () => clearInterval(intervalId);
-    } 
-  }, [dispatch, isLoggedIn]);
+    if (isLoggedIn) {
+      dispatch(fetchNotifications());
+      const intervalId = setInterval(() => {
+        dispatch(fetchNotifications());
+      }, 30000);
+      return () => clearInterval(intervalId);
+    } 
+  }, [dispatch, isLoggedIn]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
