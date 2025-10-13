@@ -10,6 +10,7 @@ import {
 } from "../features/notification/notificationSlice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { selectCurrentUser } from "../features/auth/authSlice";
 
 const NotificationBell = () => {
   const dispatch = useDispatch();
@@ -17,16 +18,18 @@ const NotificationBell = () => {
   const { notifications, loading, error } = useSelector(
     (state) => state.notification
   );
+  const user = useSelector(selectCurrentUser);
   const [open, setOpen] = useState(false);
   const ref = useRef();
 
   useEffect(() => {
+    if (!user) return;
     dispatch(fetchNotifications());
     const intervalId = setInterval(() => {
       dispatch(fetchNotifications());
     }, 30000);
     return () => clearInterval(intervalId);
-  }, [dispatch]);
+  }, [dispatch, user]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -39,10 +42,10 @@ const NotificationBell = () => {
   }, []);
 
   useEffect(() => {
-    if (error) {
+    if (error && user) {
       toast.error("Failed to load notifications.");
     }
-  }, [error]);
+  }, [error, user]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 

@@ -95,6 +95,18 @@ const Sidebar = () => {
       active: "bg-gradient-to-r from-teal-500 to-cyan-600",
       border: "border-l-teal-500",
     },
+    sheets: {
+      bg: "bg-emerald-50/80 dark:bg-emerald-900/30",
+      hover: "hover:bg-emerald-100 dark:hover:bg-emerald-900/40",
+      active: "bg-gradient-to-r from-emerald-500 to-green-600",
+      border: "border-l-emerald-500",
+    },
+    blogs: {
+      bg: "bg-cyan-50/80 dark:bg-cyan-900/30",
+      hover: "hover:bg-cyan-100 dark:hover:bg-cyan-900/40",
+      active: "bg-gradient-to-r from-cyan-500 to-sky-600",
+      border: "border-l-cyan-500",
+    },
     profile: {
       bg: "bg-amber-50/80 dark:bg-amber-900/30",
       hover: "hover:bg-amber-100 dark:hover:bg-amber-900/40",
@@ -283,6 +295,30 @@ const Sidebar = () => {
               <ChevronRight className="ml-auto opacity-70" size={16} />
             </NavLink>
 
+            <NavLink
+              to="/sheets"
+              className={({ isActive }) =>
+                getNavItemClass("sheets", isActive)
+              }
+              onClick={handleLinkClick}
+            >
+              <ClipboardList size={20} className="min-w-[20px]" />
+              <span className="truncate">Sheets</span>
+              <ChevronRight className="ml-auto opacity-70" size={16} />
+            </NavLink>
+
+            <NavLink
+              to="/blogs"
+              className={({ isActive }) =>
+                getNavItemClass("blogs", isActive)
+              }
+              onClick={handleLinkClick}
+            >
+              <ClipboardList size={20} className="min-w-[20px]" />
+              <span className="truncate">Blogs</span>
+              <ChevronRight className="ml-auto opacity-70" size={16} />
+            </NavLink>
+
             {/* Profile Link - Always at the top */}
             {token && (
               <NavLink
@@ -335,6 +371,30 @@ const Sidebar = () => {
                 >
                   <Database size={20} className="min-w-[20px]" />
                   <span className="truncate">Manage Data Structures</span>
+                  <ChevronRight className="ml-auto opacity-70" size={16} />
+                </NavLink>
+
+                <NavLink
+                  to="/admin/manage-sheets"
+                  className={({ isActive }) =>
+                    getNavItemClass("manageDataStructures", isActive)
+                  }
+                  onClick={handleLinkClick}
+                >
+                  <ClipboardList size={20} className="min-w-[20px]" />
+                  <span className="truncate">Manage Sheets</span>
+                  <ChevronRight className="ml-auto opacity-70" size={16} />
+                </NavLink>
+
+                <NavLink
+                  to="/admin/manage-blogs"
+                  className={({ isActive }) =>
+                    getNavItemClass("manageAlgorithms", isActive)
+                  }
+                  onClick={handleLinkClick}
+                >
+                  <ClipboardList size={20} className="min-w-[20px]" />
+                  <span className="truncate">Manage Blogs</span>
                   <ChevronRight className="ml-auto opacity-70" size={16} />
                 </NavLink>
 
@@ -406,6 +466,24 @@ const Sidebar = () => {
                       />
                       <span className="truncate">Data Structure Proposals</span>
                     </NavLink>
+
+                    <NavLink
+                      to="/admin/sheets/proposals/review"
+                      className={({ isActive }) =>
+                        getNavItemClass(
+                          "reviewDataStructureProposals",
+                          isActive,
+                          true
+                        )
+                      }
+                      onClick={handleLinkClick}
+                    >
+                      <ChevronRight
+                        size={16}
+                        className="min-w-[16px] opacity-70"
+                      />
+                      <span className="truncate">Sheet Proposals</span>
+                    </NavLink>
                   </>
                 )}
 
@@ -441,6 +519,18 @@ const Sidebar = () => {
                   <span className="truncate">My Proposals</span>
                   <ChevronRight className="ml-auto opacity-70" size={16} />
                 </NavLink>
+
+                <NavLink
+                  to="/my/sheet-proposals"
+                  className={({ isActive }) =>
+                    getNavItemClass("myProposals", isActive)
+                  }
+                  onClick={handleLinkClick}
+                >
+                  <ClipboardList size={20} className="min-w-[20px]" />
+                  <span className="truncate">My Sheet Proposals</span>
+                  <ChevronRight className="ml-auto opacity-70" size={16} />
+                </NavLink>
                 <NavLink
                   to="/proposals/new"
                   className={({ isActive }) =>
@@ -450,6 +540,17 @@ const Sidebar = () => {
                 >
                   <FilePlus size={20} className="min-w-[20px]" />
                   <span className="truncate">Submit Algorithm Proposal</span>
+                  <ChevronRight className="ml-auto opacity-70" size={16} />
+                </NavLink>
+                <NavLink
+                  to="/blogs/submit"
+                  className={({ isActive }) =>
+                    getNavItemClass("submitAlgorithmProposal", isActive)
+                  }
+                  onClick={handleLinkClick}
+                >
+                  <FilePlus size={20} className="min-w-[20px]" />
+                  <span className="truncate">Submit Blog</span>
                   <ChevronRight className="ml-auto opacity-70" size={16} />
                 </NavLink>
                 <NavLink

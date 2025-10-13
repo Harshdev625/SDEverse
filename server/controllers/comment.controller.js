@@ -7,6 +7,7 @@ const Notification = require("../models/notification.model");
 
 const DataStructure = require("../models/dataStructure.model");
 const DataStructureProposal = require("../models/dataStructureProposal.model");
+const Blog = require("../models/blog.model");
 
 const extractMentions = (text) => {
   const matches = text.match(/@(\w+)/g) || [];
@@ -23,6 +24,8 @@ const getParentModel = (parentType) => {
       return DataStructure;
     case "DataStructureProposal":
       return DataStructureProposal;
+    case "Blog":
+      return Blog;
     default:
       throw new Error("Invalid parent type provided.");
   }
@@ -48,6 +51,7 @@ const addComment = asyncHandler(async (req, res) => {
     "Proposal",
     "DataStructure",
     "DataStructureProposal",
+    "Blog",
   ];
   if (!allowedParentTypes.includes(parentType)) {
     res.status(400);

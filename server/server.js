@@ -13,6 +13,11 @@ const feedbackRoutes = require("./routes/feedback.routes");
 const communityRoutes = require("./routes/community.routes");
 const dataStructureRoutes = require("./routes/dataStructure.routes");
 const dataStructureProposalRoutes = require("./routes/dataStructureProposal.routes");
+const sheetRoutes = require("./routes/sheet.routes");
+const sheetProposalRoutes = require("./routes/sheetProposal.routes");
+const progressRoutes = require("./routes/progress.routes");
+const seedRoutes = require("./routes/seed.routes");
+const blogRoutes = require("./routes/blog.routes");
 
 const { notFound, errorHandler } = require("./middleware/error.middleware");
 
@@ -33,6 +38,11 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/community", communityRoutes);
 app.use("/api/data-structures", dataStructureRoutes);
 app.use("/api/data-structure-proposals", dataStructureProposalRoutes);
+app.use("/api/sheets", sheetRoutes);
+app.use("/api/sheet-proposals", sheetProposalRoutes);
+app.use("/api/progress", progressRoutes);
+app.use("/api/seed", seedRoutes);
+app.use("/api/blogs", blogRoutes);
 
 // Health check endpoint for keep-alive
 app.get("/health", (req, res) => {

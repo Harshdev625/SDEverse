@@ -21,6 +21,10 @@ import DataStructures from "./pages/DataStructures";
 import DataStructureDetail from "./pages/DataStructureDetail";
 import CreateDataStructureProposal from "./pages/CreateDataStructureProposal";
 import EditDataStructureProposal from "./pages/EditDataStructureProposal";
+import Sheets from "./pages/Sheets";
+import SheetDetail from "./pages/SheetDetail";
+import Blogs from "./pages/Blogs";
+import BlogDetail from "./pages/BlogDetail";
 
 import CreateProposal from "./pages/CreateProposal";
 import EditProposal from "./pages/EditProposal";
@@ -33,8 +37,13 @@ import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminDataStructures from "./pages/AdminDataStructures";
 import AdminDataStructureProposalReview from "./pages/AdminDataStructureProposalReview";
+import AdminSheets from "./pages/AdminSheets";
+import AdminSheetProposalReview from "./pages/AdminSheetProposalReview";
+import MySheetProposals from "./pages/MySheetProposals";
+import AdminBlogs from "./pages/AdminBlogs";
 import { getMe } from "./features/auth/authSlice";
 import { toast } from "react-toastify";
+
 
 const router = createBrowserRouter([
   {
@@ -49,114 +58,41 @@ const router = createBrowserRouter([
     path: "/",
     element: <Layout />,
     children: [
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: "feedback",
-        element: <Feedback />,
-      },
-      {
-        path: "moreinfo/:platform",
-        element: <MoreInfoPage />,
-      },
-      {
-        path: "profile/:username",
-        element: <Profile />,
-      },
-      {
-        path: "algorithms",
-        element: <Algorithms />,
-      },
-      {
-        path: "algorithms/:slug",
-        element: <AlgorithmDetail />,
-      },
-      {
-        path: "algorithms/proposals/new",
-        element: <CreateProposal />,
-      },
-      {
-        path: "algorithms/proposals/:slug/edit",
-        element: <EditProposal />,
-      },
-      {
-        path: "algorithms/:slug/contribute",
-        element: <CreateProposal />,
-      },
-      {
-        path: "data-structures",
-        element: <DataStructures />,
-      },
-      {
-        path: "data-structures/:slug",
-        element: <DataStructureDetail />,
-      },
-      {
-        path: "data-structures/proposals/new",
-        element: <CreateDataStructureProposal />,
-      },
-      {
-        path: "data-structures/proposals/:slug/edit",
-        element: <EditDataStructureProposal />,
-      },
-      {
-        path: "proposals",
-        element: <MyProposals />,
-      },
-      {
-        path: "community-guidelines",
-        element: <CommunityGuidelines />,
-      },
-      {
-        path: "admin/manage-algorithms",
-        element: (
-          <AdminRoute>
-            <AdminAlgorithms />
-          </AdminRoute>
-        ),
-      },
-      {
-        path: "admin/manage-data-structures",
-        element: (
-          <AdminRoute>
-            <AdminDataStructures />
-          </AdminRoute>
-        ),
-      },
-      {
-        path: "admin/proposals/review",
-        element: (
-          <AdminRoute>
-            <AdminProposalReview />
-          </AdminRoute>
-        ),
-      },
-      {
-        path: "admin/data-structures/proposals/review",
-        element: (
-          <AdminRoute>
-            <AdminDataStructureProposalReview />
-          </AdminRoute>
-        ),
-      },
-      {
-        path: "admin/manage-users",
-        element: (
-          <AdminRoute>
-            <AdminUsersPage />
-          </AdminRoute>
-        ),
-      },
-      {
-        path: "admin/analytics",
-        element: (
-          <AdminRoute>
-            <AdminAnalytics />
-          </AdminRoute>
-        ),
-      },
+      { index: true, element: <Home /> },
+      { path: "feedback", element: <Feedback /> },
+      { path: "moreinfo/:platform", element: <MoreInfoPage /> },
+      { path: "profile/:username", element: <Profile /> },
+
+      { path: "algorithms", element: <Algorithms /> },
+      { path: "algorithms/:slug", element: <AlgorithmDetail /> },
+      { path: "algorithms/proposals/new", element: <CreateProposal /> },
+      { path: "algorithms/proposals/:slug/edit", element: <EditProposal /> },
+      { path: "algorithms/:slug/contribute", element: <CreateProposal /> },
+
+      { path: "data-structures", element: <DataStructures /> },
+      { path: "data-structures/:slug", element: <DataStructureDetail /> },
+      { path: "data-structures/proposals/new", element: <CreateDataStructureProposal /> },
+      { path: "data-structures/proposals/:slug/edit", element: <EditDataStructureProposal /> },
+
+      { path: "proposals", element: <MyProposals /> },
+      { path: "my/sheet-proposals", element: <MySheetProposals /> },
+      { path: "community-guidelines", element: <CommunityGuidelines /> },
+
+      { path: "sheets", element: <Sheets /> },
+      { path: "sheets/:slug", element: <SheetDetail /> },
+
+      { path: "blogs", element: <Blogs /> },
+      { path: "blogs/:slug", element: <BlogDetail /> },
+
+      { path: "admin/manage-algorithms", element: (<AdminRoute><AdminAlgorithms /></AdminRoute>) },
+      { path: "admin/manage-data-structures", element: (<AdminRoute><AdminDataStructures /></AdminRoute>) },
+      { path: "admin/proposals/review", element: (<AdminRoute><AdminProposalReview /></AdminRoute>) },
+      { path: "admin/data-structures/proposals/review", element: (<AdminRoute><AdminDataStructureProposalReview /></AdminRoute>) },
+      { path: "admin/sheets/proposals/review", element: (<AdminRoute><AdminSheetProposalReview /></AdminRoute>) },
+      { path: "admin/manage-users", element: (<AdminRoute><AdminUsersPage /></AdminRoute>) },
+      { path: "admin/analytics", element: (<AdminRoute><AdminAnalytics /></AdminRoute>) },
+      { path: "admin/manage-sheets", element: (<AdminRoute><AdminSheets /></AdminRoute>) },
+      { path: "admin/manage-blogs", element: (<AdminRoute><AdminBlogs /></AdminRoute>) },
     ],
   },
 ]);
