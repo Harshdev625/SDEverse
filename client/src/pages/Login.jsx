@@ -45,7 +45,7 @@ const Login = () => {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="relative z-10 max-w-md w-full bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 border border-white/30"
       >
-<Link to="/" className="p-1 rounded-sm border w-6 text-indigo-700 flex items-center hover:bg-indigo-700 hover:text-white ">
+        <Link to="/" className="p-1 rounded-sm border w-6 text-indigo-700 flex items-center hover:bg-indigo-700 hover:text-white ">
          <ArrowLeft className="w-5 h-5" />
         </Link>
 
