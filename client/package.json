@@ -33,7 +33,7 @@
     "react-spinners": "^0.17.0",
     "react-syntax-highlighter": "^15.6.6",
     "react-toastify": "^11.0.5",
-    "react-tooltip": "^5.29.1",
+    "react-tooltip": "^5.30.0",
     "recharts": "^3.2.1",
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
