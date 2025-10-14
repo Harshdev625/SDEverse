@@ -3,9 +3,6 @@ import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 
 const Layout = () => {
-  const location = useLocation();
-
-
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-white">
       <Sidebar />
