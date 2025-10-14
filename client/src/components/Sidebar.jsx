@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation ,useNavigate} from "react-router-dom";
 import {
   Home,
   Users,
@@ -71,9 +71,11 @@ const Sidebar = () => {
       setIsSidebarOpen(false);
     }
   };
+  const navigate = useNavigate();
   const handleLogout = () => {
     dispatch(logout());
     setIsSidebarOpen(false);
+    navigate("/");
   };
 
   const colorSchemes = {
