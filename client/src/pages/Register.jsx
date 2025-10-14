@@ -26,7 +26,7 @@ const Register = () => {
     dispatch(registerUser(formData));
   };
 
-  useEffect(() => {
+ useEffect(() => {
     if (user) navigate("/");
   }, [user, navigate]);
 
@@ -76,7 +76,7 @@ const Register = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 p-3 bg-red-50 text-red-700 rounded-lg text-sm"
           >
-            {error.message || error}
+            {typeof error === "string" ? error : error?.message}
           </motion.div>
         )}
 
