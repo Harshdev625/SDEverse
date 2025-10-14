@@ -6,7 +6,7 @@ import {
   searchAllDataStructures,
 } from "../features/dataStructure/dataStructureSlice";
 import { Link } from "react-router-dom";
-import { ChevronDown, Search, ArrowLeft, ArrowRight } from "lucide-react";
+import { ChevronDown, Search, ArrowLeft, ArrowRight, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -24,6 +24,7 @@ const DataStructures = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [expandedCategories, setExpandedCategories] = useState({});
+  const [allowMultipleDropdowns, setAllowMultipleDropdowns] = useState(true);
 
   useEffect(() => {
     dispatch(fetchDataStructureCategories());
@@ -42,10 +43,27 @@ const DataStructures = () => {
 
   const toggleCategory = (category) => {
     setSelectedCategory(selectedCategory === category ? null : category);
-    setExpandedCategories((prev) => ({
-      ...prev,
-      [category]: !prev[category],
-    }));
+    
+    if (allowMultipleDropdowns) {
+      // Allow multiple dropdowns to be open
+      setExpandedCategories((prev) => ({
+        ...prev,
+        [category]: !prev[category],
+      }));
+    } else {
+      // Only allow one dropdown to be open at a time
+      const isCurrentlyOpen = expandedCategories[category];
+      if (isCurrentlyOpen) {
+        // Close the current category
+        setExpandedCategories((prev) => ({
+          ...prev,
+          [category]: false,
+        }));
+      } else {
+        // Close all other categories and open the selected one
+        setExpandedCategories({ [category]: true });
+      }
+    }
   };
 
   const isSearching = searchQuery.trim().length > 0;
@@ -85,6 +103,39 @@ const DataStructures = () => {
           specialized formats for organizing and storing data efficiently, forming
           the foundation of efficient algorithms and software systems.
         </p>
+      </div>
+
+      {/* Dropdown Toggle Control */}
+      <div className="mb-6 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto">
+        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Allow Multiple Dropdowns
+              </span>
+              <div className="relative group">
+                <Info size={16} className="text-gray-500 dark:text-gray-400 cursor-help" />
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                  When enabled, multiple categories can be expanded simultaneously. When disabled, only one category can be expanded at a time.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center">
+            <button
+              onClick={() => setAllowMultipleDropdowns(!allowMultipleDropdowns)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                allowMultipleDropdowns ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  allowMultipleDropdowns ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="mb-10">
