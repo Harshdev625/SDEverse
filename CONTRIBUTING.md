@@ -1,13 +1,86 @@
 # Contributing to SDEverse
 
-## Quick Start
+Thank you for your interest in contributing to SDEverse! This document provides guidelines and instructions for contributing.
 
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/SDEverse.git`
-3. Create a branch: `git checkout -b feature/your-feature`
-4. Set up development environment (see below)
-5. Make changes and commit
-6. Push and submit a pull request
+## 🔄 Contribution Workflow
+
+1.  **Fork and Clone**
+
+    First, fork the repository on GitHub, then clone your fork to your local machine.
+
+    ```bash
+    # Clone your forked repository
+    git clone https://github.com/YOUR-USERNAME/SDEverse.git
+
+    # Navigate into the project directory
+    cd SDEverse
+
+    # Add the original repository as an upstream remote
+    git remote add upstream https://github.com/Harshdev625/SDEverse
+    ```
+
+2.  **Create a Branch**
+
+    Create a new branch for your changes. Use a descriptive name that reflects the feature or fix you are working on.
+
+    ```bash
+    # Create and switch to a new branch
+    git checkout -b feature/user-profile-page
+    ```
+
+    **Branch Naming Conventions:**
+    * `feature/add-new-component`
+    * `fix/login-api-bug`
+    * `docs/update-readme`
+
+3.  **Make Your Changes**
+
+    * Navigate to the appropriate directory (`client` or `server`).
+    * Follow the **Development Setup** instructions below to install dependencies and configure your environment.
+    * Write your code, adhering to the project's existing code style and patterns.
+    * Update documentation or add tests as needed for your changes.
+
+4.  **Commit Your Changes**
+
+    Stage your changes and commit them with a clear, descriptive message.
+
+    ```bash
+    # Stage all your changes
+    git add .
+
+    # Commit with a meaningful message
+    git commit -m "feat: Add user profile page with avatar upload"
+    ```
+
+    **Commit Message Format:**
+    * `feat: Describe the new feature`
+    * `fix: Explain the bug you fixed`
+    * `docs: Detail the documentation changes`
+
+5.  **Keep Your Fork Updated**
+
+    Before pushing your changes, pull the latest changes from the upstream `main` branch to avoid merge conflicts.
+
+    ```bash
+    # Fetch the latest changes from the upstream repository
+    git fetch upstream
+
+    # Merge the upstream main branch into your feature branch
+    git merge upstream/main
+    ```
+
+6.  **Push and Create a Pull Request**
+
+    Push your branch to your forked repository on GitHub.
+
+    ```bash
+    # Push your feature branch to your fork
+    git push origin feature/user-profile-page
+    ```
+
+    After pushing, go to the SDEverse repository on GitHub and you will see a prompt to create a **Pull Request**. Fill out the PR template with details about your changes.
+
+---
 
 ## Development Setup
 
