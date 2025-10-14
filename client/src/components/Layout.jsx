@@ -1,8 +1,11 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 
 const Layout = () => {
+ 
+
+
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-white">
       <Sidebar />
