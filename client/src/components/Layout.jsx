@@ -1,11 +1,10 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 
 const Layout = () => {
-  const location = useLocation();
   const themeMode = useSelector((state) => state.theme.mode);
  
 
