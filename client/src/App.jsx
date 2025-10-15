@@ -35,6 +35,7 @@ import AdminDataStructures from "./pages/AdminDataStructures";
 import AdminDataStructureProposalReview from "./pages/AdminDataStructureProposalReview";
 import { getMe } from "./features/auth/authSlice";
 import { toast } from "react-toastify";
+import Contact from "./pages/Contact";
 
 const router = createBrowserRouter([
   {
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
       {
         path: "feedback",
         element: <Feedback />,
+      },
+      {
+        path: "contact",
+        element: <Contact />,
       },
       {
         path: "moreinfo/:platform",
