@@ -19,7 +19,7 @@ Thank you for your interest in contributing to SDEverse! This document provides 
     git remote add upstream https://github.com/Harshdev625/SDEverse
     ```
 
-2. **1. Create an Issue**
+2. **Create an Issue**
 
     Before you start working, please **create a new issue** on GitHub.
     * **Describe the Problem:** Clearly explain the bug you've found or the feature you want to add.
