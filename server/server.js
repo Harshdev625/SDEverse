@@ -1,7 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const connectDB = require("./config/db");
+// const connectDB = require("./config/db");
 const KeepAlive = require("./utils/keepAlive");
 const algorithmRoutes = require("./routes/algorithm.routes");
 const authRoutes = require("./routes/auth.routes");
@@ -17,7 +17,7 @@ const dataStructureProposalRoutes = require("./routes/dataStructureProposal.rout
 const { notFound, errorHandler } = require("./middleware/error.middleware");
 
 dotenv.config();
-connectDB();
+// connectDB();
 
 const app = express();
 app.use(cors());
