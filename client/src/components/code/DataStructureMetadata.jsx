@@ -56,7 +56,7 @@ const DataStructureMetadata = ({ dataStructure, isAdmin = false }) => {
         <Tooltip
           id={`tooltip-${title.toLowerCase().replace(/\s/g, '-')}`}
           place="top"
-          className="bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
+          className="bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
         />
         {title === "Tags" ? (
           <div className="flex flex-wrap gap-2">{items.map(renderItem)}</div>
@@ -219,7 +219,7 @@ const DataStructureMetadata = ({ dataStructure, isAdmin = false }) => {
             <Tooltip
               id="tooltip-additional-resources"
               place="top"
-              className="bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
+              className="bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
             />
             <div className="space-y-4">
               {formattedData.references.length > 0 && (
@@ -259,7 +259,7 @@ const DataStructureMetadata = ({ dataStructure, isAdmin = false }) => {
             <Tooltip
               id="tooltip-admin-metadata"
               place="top"
-              className="bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
+              className="bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
             />
             <div className="space-y-4">
               {/* Contributors */}
@@ -321,7 +321,7 @@ const DataStructureMetadata = ({ dataStructure, isAdmin = false }) => {
                     <Tooltip
                       id="tooltip-upvotes"
                       place="top"
-                      className="bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
+                      className="bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
                     />
                   </div>
                   <div
@@ -336,7 +336,7 @@ const DataStructureMetadata = ({ dataStructure, isAdmin = false }) => {
                     <Tooltip
                       id="tooltip-downvotes"
                       place="top"
-                      className="bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
+                      className="bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
                     />
                   </div>
                   <div
@@ -351,7 +351,7 @@ const DataStructureMetadata = ({ dataStructure, isAdmin = false }) => {
                     <Tooltip
                       id="tooltip-views"
                       place="top"
-                      className="bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
+                      className="bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
                     />
                   </div>
                 </div>

@@ -3,8 +3,9 @@ import remarkMath from "remark-math";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "katex/dist/katex.min.css";
+import { useSelector } from "react-redux";
 
 // Helper function to ensure blank lines before lists for correct Markdown rendering
 function ensureBlankLineBeforeLists(markdown) {
@@ -32,6 +33,7 @@ function ensureBlankLineBeforeLists(markdown) {
 
 // Markdown rendering component
 const MarkdownContentRenderer = ({ content }) => {
+  const themeMode = useSelector((state) => state.theme.mode);
   if (!content) return null;
 
   // Replace escaped newlines and backslashes, then ensure blank lines for lists
@@ -52,13 +54,13 @@ const MarkdownContentRenderer = ({ content }) => {
                 {...props}
                 PreTag="div"
                 language={match[1]}
-                style={oneDark}
+                style={themeMode === "dark" ? oneDark : oneLight}
                 customStyle={{
                   borderRadius: "0.5rem",
                   padding: "1rem",
                   fontSize: "0.875rem",
                   overflowX: "auto",
-                  backgroundColor: "#282c34", // Ensure consistent background for code blocks
+                  backgroundColor: themeMode === "dark" ? "#282c34" : "#f8f9fa", // Ensure consistent background for code blocks
                   marginTop: "1rem", // Add spacing above code blocks
                   marginBottom: "1rem", // Add spacing below code blocks
                 }}

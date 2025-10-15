@@ -855,7 +855,7 @@ const EditDataStructureForm = ({ dataStructure = {}, dataStructures = [], onSave
                         updated[selectedCodeIndex].code = code;
                         handleChange("fullImplementations", updated);
                       }}
-                      theme="vs-dark"
+                      theme={themeMode === "dark" ? "vs-dark" : "vs-light"}
                       options={{
                         minimap: { enabled: false },
                         fontSize: 16,
