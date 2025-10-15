@@ -14,6 +14,7 @@ import RoleEditModal from "./RoleEditModal";
 function AdminUsersPage() {
   const dispatch = useDispatch();
   const { users = [], totalPages = 1 } = useSelector((state) => state.user);
+  const themeMode = useSelector((state) => state.theme.mode);
 
   const [input, setInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,8 +61,8 @@ function AdminUsersPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10 text-white">
-      <h1 className="text-4xl font-bold text-center mb-8">User Management</h1>
+    <div className={`max-w-7xl mx-auto px-4 py-10 ${themeMode === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+      <h1 className={`text-4xl font-bold text-center mb-8 ${themeMode === 'dark' ? 'text-white' : 'text-gray-900'}`}>User Management</h1>
 
       {/* Search & Filters */}
       <form
@@ -76,12 +77,20 @@ function AdminUsersPage() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Search by name, email, or username"
-          className="flex-1 min-w-[200px] px-4 py-2 rounded bg-gray-800 border border-gray-600 text-white"
+          className={`flex-1 min-w-[200px] px-4 py-2 rounded border focus:ring-2 focus:border-gray-400 focus:ring-gray-300 ${
+            themeMode === 'dark' 
+              ? 'bg-gray-800 border-gray-600 text-white focus:ring-gray-500' 
+              : 'bg-white border-gray-300 text-gray-900'
+          }`}
         />
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          className="w-full md:w-48 px-4 py-2 rounded bg-gray-800 border border-gray-600 text-white"
+          className={`w-full md:w-48 px-4 py-2 rounded border ${
+            themeMode === 'dark' 
+              ? 'bg-gray-800 border-gray-600 text-white' 
+              : 'bg-white border-gray-300 text-gray-900'
+          }`}
         >
           <option value="">All Roles</option>
           <option value="admin">Admin</option>
@@ -98,13 +107,13 @@ function AdminUsersPage() {
       {/* Users Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
-          <thead className="bg-gray-800">
+          <thead className={themeMode === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}>
             <tr>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Username</th>
-              <th className="px-4 py-3">Email</th>
-              <th className="px-4 py-3">Role</th>
-              <th className="px-4 py-3">Actions</th>
+              <th className={`px-4 py-3 ${themeMode === 'dark' ? 'text-white' : 'text-gray-900'}`}>Name</th>
+              <th className={`px-4 py-3 ${themeMode === 'dark' ? 'text-white' : 'text-gray-900'}`}>Username</th>
+              <th className={`px-4 py-3 ${themeMode === 'dark' ? 'text-white' : 'text-gray-900'}`}>Email</th>
+              <th className={`px-4 py-3 ${themeMode === 'dark' ? 'text-white' : 'text-gray-900'}`}>Role</th>
+              <th className={`px-4 py-3 ${themeMode === 'dark' ? 'text-white' : 'text-gray-900'}`}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -113,11 +122,11 @@ function AdminUsersPage() {
 
               return (
                 <Fragment key={user._id}>
-                  <tr className="bg-gray-900 border-b border-gray-700">
-                    <td className="px-4 py-3 font-medium">{user.fullName}</td>
-                    <td className="px-4 py-3">{user.username}</td>
-                    <td className="px-4 py-3">{user.email}</td>
-                    <td className="px-4 py-3 capitalize">{user.role}</td>
+                  <tr className={`border-b ${themeMode === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}>
+                    <td className={`px-4 py-3 font-medium ${themeMode === 'dark' ? 'text-white' : 'text-gray-900'}`}>{user.fullName}</td>
+                    <td className={`px-4 py-3 ${themeMode === 'dark' ? 'text-white' : 'text-gray-900'}`}>{user.username}</td>
+                    <td className={`px-4 py-3 ${themeMode === 'dark' ? 'text-white' : 'text-gray-900'}`}>{user.email}</td>
+                    <td className={`px-4 py-3 capitalize ${themeMode === 'dark' ? 'text-white' : 'text-gray-900'}`}>{user.role}</td>
                     <td className="px-4 py-3 space-x-4">
                       <button
                         onClick={() => handleExpand(user._id)}
@@ -141,7 +150,7 @@ function AdminUsersPage() {
                   </tr>
 
                   {isExpanded && (
-                    <tr className="bg-gray-800">
+                    <tr className={themeMode === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}>
                       <td colSpan="5" className="px-4 py-6">
                         <ProfileForm
                           formData={{

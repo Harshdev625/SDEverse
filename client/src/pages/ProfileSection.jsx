@@ -11,7 +11,7 @@ export default function ProfileSection({ isEditing, formData, handleChange }) {
   ) => {
     return (
       <div className="space-y-2">
-        <label htmlFor={name} className="block font-medium text-gray-400 text-sm mb-1">
+        <label htmlFor={name} className="block font-medium text-gray-600 dark:text-gray-400 text-sm mb-1">
           {label}
         </label>
         {isEditing ? (
@@ -21,7 +21,7 @@ export default function ProfileSection({ isEditing, formData, handleChange }) {
             name={name}
             value={value}
             onChange={handleChange}
-            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
+            className="w-full px-4 py-2 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-gray-300 dark:focus:ring-blue-500 focus:border-gray-400 dark:focus:border-blue-500 outline-none transition-all duration-200"
             placeholder={`Enter your ${label.toLowerCase()}`}
           />
         ) : isUrl && value ? (
@@ -34,8 +34,8 @@ export default function ProfileSection({ isEditing, formData, handleChange }) {
             {value}
           </a>
         ) : (
-          <p className="text-white text-lg pt-1 pb-1 min-h-[44px] flex items-center"> {/* Removed box styling for non-editing state */}
-            {value || <span className="italic text-gray-400">Not set</span>}
+          <p className="text-gray-900 dark:text-white text-lg pt-1 pb-1 min-h-[44px] flex items-center"> {/* Removed box styling for non-editing state */}
+            {value || <span className="italic text-gray-500 dark:text-gray-400">Not set</span>}
           </p>
         )}
       </div>
@@ -43,8 +43,8 @@ export default function ProfileSection({ isEditing, formData, handleChange }) {
   };
 
   return (
-    <div className="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-700">
-      <h3 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 mb-6 border-b border-gray-700 pb-3">
+    <div className="p-6 sm:p-8 rounded-2xl shadow-lg border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+      <h3 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 mb-6 border-b border-gray-200 dark:border-gray-700 pb-3">
         Profile Details
       </h3>
 
@@ -58,7 +58,7 @@ export default function ProfileSection({ isEditing, formData, handleChange }) {
               onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/160x160/2d3748/cbd5e0?text=No+Image"; }}
             />
           ) : (
-            <div className="w-40 h-40 bg-gray-700 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-300 shadow-xl border-4 border-gray-600">
+            <div className="w-40 h-40 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-300 shadow-xl border-4 border-gray-300 dark:border-gray-600">
               <span className="text-sm">No Image</span>
             </div>
           )}
@@ -73,7 +73,7 @@ export default function ProfileSection({ isEditing, formData, handleChange }) {
                 value={formData.avatarUrl}
                 onChange={handleChange}
                 placeholder="Avatar URL"
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
+                className="w-full px-4 py-2 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-gray-300 dark:focus:ring-blue-500 focus:border-gray-400 dark:focus:border-blue-500 outline-none transition-all duration-200"
               />
             </div>
           )}
@@ -97,7 +97,7 @@ export default function ProfileSection({ isEditing, formData, handleChange }) {
         </div>
 
         <div> {/* Bio field spans full width */}
-          <label htmlFor="bio" className="block font-medium text-gray-400 text-sm mb-1">
+          <label htmlFor="bio" className="block font-medium text-gray-600 dark:text-gray-400 text-sm mb-1">
             Bio
           </label>
           {isEditing ? (
@@ -107,12 +107,12 @@ export default function ProfileSection({ isEditing, formData, handleChange }) {
               rows={4}
               value={formData.bio}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md text-white bg-gray-700 border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 resize-y"
+              className="w-full px-4 py-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-gray-300 dark:focus:ring-blue-500 focus:border-gray-400 dark:focus:border-blue-500 outline-none transition-all duration-200 resize-y"
               placeholder="Write something about yourself"
             ></textarea>
           ) : (
-            <p className="text-white text-lg pt-1 pb-1 min-h-[100px] whitespace-pre-wrap"> {/* Removed box styling for non-editing state */}
-              {formData.bio || <span className="italic text-gray-400">No bio provided</span>}
+            <p className="text-gray-900 dark:text-white text-lg pt-1 pb-1 min-h-[100px] whitespace-pre-wrap"> {/* Removed box styling for non-editing state */}
+              {formData.bio || <span className="italic text-gray-500 dark:text-gray-400">No bio provided</span>}
             </p>
           )}
         </div>

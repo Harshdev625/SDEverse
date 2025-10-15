@@ -12,6 +12,7 @@ import ProfileForm from "./ProfileForm";
 export default function Profile() {
   const dispatch = useDispatch();
   const { myProfile, status } = useSelector((state) => state.user);
+  const themeMode = useSelector((state) => state.theme.mode);
 
   const [formData, setFormData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -107,7 +108,7 @@ export default function Profile() {
 
   if (status === "loading" || !formData) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-950 text-gray-200">
+      <div className={`flex items-center justify-center min-h-screen ${themeMode === 'dark' ? 'bg-gray-950 text-gray-200' : 'bg-gray-50 text-gray-800'}`}>
         <Loader2 className="animate-spin text-blue-500 mr-3" size={48} />
         <p className="text-xl font-semibold">Loading Profile...</p>
       </div>
@@ -115,7 +116,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div className={`min-h-screen py-8 px-4 sm:px-6 lg:px-8 ${themeMode === 'dark' ? 'bg-gray-950 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
       <ProfileForm
         formData={formData}
         isEditing={isEditing}

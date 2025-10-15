@@ -133,7 +133,7 @@ const AdminAlgorithms = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search algorithms..."
-            className="w-full px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 rounded-xl bg-white dark:bg-gray-900 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500"
           />
           <button
             onClick={handleSearch}

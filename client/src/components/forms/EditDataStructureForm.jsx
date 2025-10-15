@@ -11,6 +11,7 @@ const DATA_STRUCTURE_TYPES = ["Linear", "Non-Linear", "Hierarchical", "Graph", "
 
 const EditDataStructureForm = ({ dataStructure = {}, dataStructures = [], onSave, onCancel }) => {
   const dispatch = useDispatch();
+  const themeMode = useSelector((state) => state.theme.mode);
   const { categories, loading: categoriesLoading, error } = useSelector((state) => state.dataStructure || {});
 
   const [editedData, setEditedData] = useState({
@@ -721,7 +722,7 @@ const EditDataStructureForm = ({ dataStructure = {}, dataStructures = [], onSave
                               language={editedData.operations[selectedOperationIndex].implementations[selectedImplIndex].language.toLowerCase() || "javascript"}
                               value={editedData.operations[selectedOperationIndex].implementations[selectedImplIndex].code || ""}
                               onChange={(code) => handleImplementationChange(selectedOperationIndex, selectedImplIndex, "code", code)}
-                              theme="vs-dark"
+                              theme={themeMode === "dark" ? "vs-dark" : "vs-light"}
                               options={{
                                 minimap: { enabled: false },
                                 fontSize: 16,

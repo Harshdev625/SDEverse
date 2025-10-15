@@ -16,6 +16,7 @@ const Feedback = () => {
   const [localError, setLocalError] = useState(null);
   const dispatch = useDispatch();
   const { loading, success, error } = useSelector((state) => state.feedback);
+  const themeMode = useSelector((state) => state.theme.mode);
 
   // Automatically collect device info on component mount
   useEffect(() => {
@@ -94,13 +95,13 @@ const Feedback = () => {
   }, [success]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-950 py-12 px-4 sm:px-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 dark:from-gray-900 dark:to-gray-950 py-12 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-gray-800 rounded-3xl shadow-xl overflow-hidden border border-gray-700"
+          className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700"
         >
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-10"></div>
@@ -108,8 +109,8 @@ const Feedback = () => {
             <div className="relative z-10 p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h2 className="text-3xl font-bold text-white">Share Your Feedback</h2>
-                  <p className="text-gray-400 mt-2">We value your thoughts and suggestions</p>
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Share Your Feedback</h2>
+                  <p className="text-gray-600 dark:text-gray-400 mt-2">We value your thoughts and suggestions</p>
                 </div>
                 <div className="bg-gradient-to-r from-indigo-500 to-purple-600 w-16 h-16 rounded-full flex items-center justify-center">
                   <FiSend className="text-white text-2xl" />
@@ -150,7 +151,7 @@ const Feedback = () => {
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Feedback Type
                   </label>
                   <div className="relative">
@@ -159,7 +160,7 @@ const Feedback = () => {
                       value={form.type}
                       onChange={handleChange}
                       required
-                      className="w-full pl-4 pr-10 py-3 bg-gray-700 border border-gray-600 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none text-white"
+                      className="w-full pl-4 pr-10 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none text-gray-900 dark:text-white"
                     >
                       <option value="bug">🐞 Bug Report</option>
                       <option value="feature_request">✨ Feature Request</option>
@@ -174,7 +175,7 @@ const Feedback = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Title
                   </label>
                   <input
@@ -183,12 +184,12 @@ const Feedback = () => {
                     onChange={handleChange}
                     required
                     placeholder="Brief summary of your feedback..."
-                    className="w-full p-4 bg-gray-700 border border-gray-600 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white"
+                    className="w-full p-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Description
                   </label>
                   <textarea
@@ -198,44 +199,44 @@ const Feedback = () => {
                     required
                     placeholder="Detailed description of your feedback..."
                     rows={5}
-                    className="w-full p-4 bg-gray-700 border border-gray-600 rounded-xl shadow-sm resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white"
+                    className="w-full p-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                 </div>
                 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-gray-300">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Device Information
                     </label>
-                    <div className="flex items-center text-xs text-gray-400">
+                    <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
                       <FiInfo className="mr-1" /> auto-detected
                     </div>
                   </div>
-                  <div className="w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-gray-300 text-sm">
+                  <div className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 text-sm">
                     {form.deviceInfo || "Detecting your device..."}
                   </div>
                 </div>
                 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-gray-300">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Page URL
                     </label>
                   </div>
-                  <div className="w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-gray-300 text-sm truncate">
+                  <div className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 text-sm truncate">
                     {form.pageUrl || window.location.href}
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Severity Level
                   </label>
                   <div className="grid grid-cols-3 gap-3">
                     {[
-                      { value: "low", label: "Low", color: "bg-indigo-900/50 text-indigo-200 border-indigo-700" },
-                      { value: "medium", label: "Medium", color: "bg-amber-900/50 text-amber-200 border-amber-700" },
-                      { value: "high", label: "High", color: "bg-rose-900/50 text-rose-200 border-rose-700" },
+                      { value: "low", label: "Low", color: "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-200 border-indigo-300 dark:border-indigo-700" },
+                      { value: "medium", label: "Medium", color: "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-200 border-amber-300 dark:border-amber-700" },
+                      { value: "high", label: "High", color: "bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-200 border-rose-300 dark:border-rose-700" },
                     ].map((severity) => (
                       <motion.div
                         whileHover={{ scale: 1.03 }}
@@ -271,7 +272,7 @@ const Feedback = () => {
                     disabled={loading}
                     className={`w-full py-3.5 rounded-xl font-medium shadow-md transition-all ${
                       loading
-                        ? "bg-gray-700 cursor-not-allowed text-gray-400"
+                        ? "bg-gray-300 dark:bg-gray-700 cursor-not-allowed text-gray-500 dark:text-gray-400"
                         : "bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white"
                     }`}
                   >
@@ -295,10 +296,10 @@ const Feedback = () => {
                 </div>
               </form>
               
-              <div className="mt-10 pt-6 border-t border-gray-700">
+              <div className="mt-10 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <button 
                   onClick={() => setIsOpen(!isOpen)}
-                  className="flex items-center justify-between w-full text-left text-gray-400 hover:text-indigo-300"
+                  className="flex items-center justify-between w-full text-left text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-300"
                 >
                   <span className="font-medium">How we use your feedback</span>
                   <motion.div
@@ -318,7 +319,7 @@ const Feedback = () => {
                       transition={{ duration: 0.3 }}
                       className="overflow-hidden"
                     >
-                      <div className="pt-4 pb-2 text-gray-400">
+                      <div className="pt-4 pb-2 text-gray-600 dark:text-gray-400">
                         <p className="mb-3">
                           We take your feedback seriously. Here's how we use it:
                         </p>
@@ -341,7 +342,7 @@ const Feedback = () => {
           </div>
         </motion.div>
         
-        <div className="mt-8 text-center text-gray-500 text-sm">
+        <div className="mt-8 text-center text-gray-500 dark:text-gray-400 text-sm">
           <p>© 2025 SDEverse Feedback System. All rights reserved.</p>
         </div>
       </div>

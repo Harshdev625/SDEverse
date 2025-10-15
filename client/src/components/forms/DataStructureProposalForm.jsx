@@ -3,6 +3,7 @@ import MonacoEditor from "@monaco-editor/react";
 import { Plus, Trash2, XCircle } from "lucide-react";
 import DataStructurePreview from "../../pages/DataStructurePreview";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const DATA_STRUCTURE_TYPES = ["Linear", "Non-Linear", "Hierarchical", "Graph", "Other"];
 
@@ -42,6 +43,7 @@ const calculateEditorHeight = (code) => {
 };
 
 const DataStructureProposalForm = ({ initialData = {}, dsCategories = [], dataStructures = [], onChange, onSubmit }) => {
+  const themeMode = useSelector((state) => state.theme.mode);
   const [isEditing, setIsEditing] = useState(true);
   const [formData, setFormData] = useState({
     title: initialData.title || "",
@@ -435,7 +437,7 @@ const DataStructureProposalForm = ({ initialData = {}, dsCategories = [], dataSt
                     language={impl.language?.toLowerCase() || "javascript"}
                     value={impl.code}
                     onChange={(code) => updateArrayItem("fullImplementations", index, { ...impl, code })}
-                    theme="vs-dark"
+                    theme={themeMode === "dark" ? "vs-dark" : "vs-light"}
                     options={{ minimap: { enabled: false }, fontSize: 16, wordWrap: "on", automaticLayout: true, scrollBeyondLastLine: false, tabSize: 2 }}
                   />
                 </div>
@@ -582,7 +584,7 @@ const DataStructureProposalForm = ({ initialData = {}, dsCategories = [], dataSt
                           language={impl.language?.toLowerCase() || "javascript"}
                           value={impl.code}
                           onChange={(code) => updateNestedArrayItem("operations", opIndex, "implementations", implIndex, { ...impl, code })}
-                          theme="vs-dark"
+                          theme={themeMode === "dark" ? "vs-dark" : "vs-light"}
                           options={{ minimap: { enabled: false }, fontSize: 16, wordWrap: "on", automaticLayout: true, scrollBeyondLastLine: false, tabSize: 2 }}
                         />
                       </div>
