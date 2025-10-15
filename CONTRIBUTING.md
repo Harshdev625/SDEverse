@@ -19,7 +19,16 @@ Thank you for your interest in contributing to SDEverse! This document provides 
     git remote add upstream https://github.com/Harshdev625/SDEverse
     ```
 
-2.  **Create a Branch**
+2. **1. Create an Issue**
+
+    Before you start working, please **create a new issue** on GitHub.
+    * **Describe the Problem:** Clearly explain the bug you've found or the feature you want to add.
+    * **Propose a Solution:** Briefly outline how you plan to resolve the issue.
+    * **Add Screenshots:** Include relevant screenshots to help illustrate the problem.
+    * **Ask Questions:** If you have any doubts, ask them in the issue *before* you begin coding. This helps save time for everyone.
+
+
+3.  **Create a Branch**
 
     Create a new branch for your changes. Use a descriptive name that reflects the feature or fix you are working on.
 
@@ -33,14 +42,14 @@ Thank you for your interest in contributing to SDEverse! This document provides 
     * `fix/login-api-bug`
     * `docs/update-readme`
 
-3.  **Make Your Changes**
+4.  **Make Your Changes**
 
     * Navigate to the appropriate directory (`client` or `server`).
     * Follow the **Development Setup** instructions below to install dependencies and configure your environment.
     * Write your code, adhering to the project's existing code style and patterns.
     * Update documentation or add tests as needed for your changes.
 
-4.  **Commit Your Changes**
+5.  **Commit Your Changes**
 
     Stage your changes and commit them with a clear, descriptive message.
 
@@ -57,7 +66,7 @@ Thank you for your interest in contributing to SDEverse! This document provides 
     * `fix: Explain the bug you fixed`
     * `docs: Detail the documentation changes`
 
-5.  **Keep Your Fork Updated**
+6.  **Keep Your Fork Updated**
 
     Before pushing your changes, pull the latest changes from the upstream `main` branch to avoid merge conflicts.
 
@@ -69,7 +78,7 @@ Thank you for your interest in contributing to SDEverse! This document provides 
     git merge upstream/main
     ```
 
-6.  **Push and Create a Pull Request**
+7.  **Push and Create a Pull Request**
 
     Push your branch to your forked repository on GitHub.
 
