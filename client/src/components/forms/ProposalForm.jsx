@@ -3,8 +3,10 @@ import { Trash2, Plus, ChevronDown, Info } from "lucide-react";
 import MonacoEditor from "@monaco-editor/react";
 import AlgorithmPreview from "../../pages/AlgorithmPreview"; // Assuming this path is correct
 import clsx from "clsx"; // For conditional class joining
+import { useSelector } from "react-redux";
 
 const ProposalForm = ({ proposal = {}, onSave, categories = [], mode }) => {
+  const themeMode = useSelector((state) => state.theme.mode);
   const [editedData, setEditedData] = useState({
     title: proposal.title || "",
     problemStatement: proposal.problemStatement || "",
@@ -382,7 +384,7 @@ const ProposalForm = ({ proposal = {}, onSave, categories = [], mode }) => {
                       updated[selectedCodeIndex].code = code;
                       handleChange("codes", updated);
                     }}
-                    theme="vs-dark"
+                    theme={themeMode === "dark" ? "vs-dark" : "vs-light"}
                     options={{
                       minimap: { enabled: false },
                       fontSize: 16,

@@ -74,11 +74,11 @@ const AdminProposalReview = () => {
           key={i}
           onClick={() => setPage(i)}
           disabled={i === page}
-          className={`px-3 py-1 rounded-md border 
+          className={`px-3 py-1 rounded-md border transition-colors duration-200
             ${
               i === page
                 ? "bg-blue-600 text-white cursor-default"
-                : "bg-white text-blue-600 hover:bg-blue-100"
+                : "bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 border-gray-300 dark:border-gray-700"
             }
             focus:outline-none focus:ring-2 focus:ring-blue-500`}
           aria-current={i === page ? "page" : undefined}
@@ -96,7 +96,7 @@ const AdminProposalReview = () => {
         <button
           onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
           disabled={page === 1}
-          className="px-3 py-1 rounded-md border bg-white text-blue-600 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-1 rounded-md border bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300 dark:border-gray-700"
         >
           Prev
         </button>
@@ -104,7 +104,7 @@ const AdminProposalReview = () => {
         <button
           onClick={() => setPage((prev) => Math.min(prev + 1, pages))}
           disabled={page === pages}
-          className="px-3 py-1 rounded-md border bg-white text-blue-600 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-1 rounded-md border bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300 dark:border-gray-700"
         >
           Next
         </button>
@@ -127,13 +127,13 @@ const AdminProposalReview = () => {
           placeholder="Search by title, category"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="p-2 border rounded-md w-full sm:w-64 max-w-full"
+          className="p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500 text-base w-full sm:w-80 max-w-full transition-colors duration-200"
         />
         <div className="relative inline-block w-full sm:w-auto">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="appearance-none w-full p-2 pr-8 border rounded-md bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="appearance-none w-full p-2 pr-8 border rounded-md bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500"
           >
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
@@ -269,7 +269,7 @@ const AdminProposalReview = () => {
                                     onChange={(e) =>
                                       setReviewStatus(e.target.value)
                                     }
-                                    className="appearance-none w-full p-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="appearance-none w-full p-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500"
                                   >
                                     <option value="approved">Approve</option>
                                     <option value="rejected">Reject</option>

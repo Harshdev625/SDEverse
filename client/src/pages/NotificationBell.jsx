@@ -148,7 +148,7 @@ const NotificationBell = () => {
                   <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                     {new Date(note.createdAt).toLocaleString()}
                   </div>
-                </li>
+                </li> 
               ))}
             </ul>
           )}

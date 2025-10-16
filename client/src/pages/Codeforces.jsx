@@ -47,7 +47,7 @@ const CONTESTS_PER_PAGE = 10;
 const Codeforces = () => {
   const dispatch = useDispatch();
   const { myProfile, status, error } = useSelector((state) => state.user);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const isDarkMode = useSelector((state) => state.theme.mode === "dark");
   const [heatmapRange, setHeatmapRange] = useState(6);
   const [heatmapStartDate, setHeatmapStartDate] = useState(null);
   const [heatmapEndDate, setHeatmapEndDate] = useState(null);
@@ -62,13 +62,6 @@ const Codeforces = () => {
     dispatch(refreshSingleCompetitiveStat('codeforces'));
   }, [dispatch]);
 
-  useEffect(() => {
-    const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    setIsDarkMode(darkModeQuery.matches);
-    const handler = (e) => setIsDarkMode(e.matches);
-    darkModeQuery.addEventListener("change", handler);
-    return () => darkModeQuery.removeEventListener("change", handler);
-  }, []);
 
   useEffect(() => {
     const today = new Date();

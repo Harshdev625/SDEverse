@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Trash2, Plus, ChevronDown } from "lucide-react";
 import MonacoEditor from "@monaco-editor/react";
 import AlgorithmPreview from "../../pages/AlgorithmPreview";
+import { useSelector } from "react-redux";
 
 const EditAlgorithmForm = ({ algorithm = {}, onSave, onCancel, categories }) => {
+  const themeMode = useSelector((state) => state.theme.mode);
   const [editedData, setEditedData] = useState({
     title: algorithm.title || "",
     problemStatement: algorithm.problemStatement || "",
@@ -298,7 +300,7 @@ const EditAlgorithmForm = ({ algorithm = {}, onSave, onCancel, categories }) => 
                         updated[selectedCodeIndex].code = code;
                         handleChange("codes", updated);
                       }}
-                      theme="vs-dark"
+                      theme={themeMode === "dark" ? "vs-dark" : "vs-light"}
                       options={{
                         minimap: { enabled: false },
                         fontSize: 14,

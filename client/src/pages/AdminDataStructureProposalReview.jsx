@@ -155,14 +155,14 @@ const AdminDataStructureProposalReview = () => {
           placeholder="Search by title, category"
           value={search}
           onChange={(e) => setSearch(e.target.value.trim())}
-          className="p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base w-full sm:w-80 transition-colors duration-200"
+          className="p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500 text-base w-full sm:w-80 transition-colors duration-200"
         />
         <div className="relative w-full sm:w-64">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-            className="w-full p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-base text-left flex items-center justify-between focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+            className="w-full p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-base text-left flex items-center justify-between focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500 transition-colors duration-200"
           >
             <span>{statusDisplay[statusFilter]}</span>
             <motion.div animate={{ rotate: showStatusDropdown ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -337,7 +337,7 @@ const AdminDataStructureProposalReview = () => {
                                     id="reviewStatus"
                                     value={reviewStatus}
                                     onChange={(e) => setReviewStatus(e.target.value)}
-                                    className="w-full p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base transition-colors duration-200 appearance-none pr-10"
+                                    className="w-full p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500 text-base transition-colors duration-200 appearance-none pr-10"
                                   >
                                     <option value="approved">Approve</option>
                                     <option value="rejected">Reject</option>
@@ -362,7 +362,7 @@ const AdminDataStructureProposalReview = () => {
                                 <textarea
                                   value={reviewComment}
                                   onChange={(e) => setReviewComment(e.target.value)}
-                                  className="w-full p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base transition-colors duration-200"
+                                  className="w-full p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500 text-base transition-colors duration-200"
                                   rows={5}
                                   placeholder="Optional comment for contributor"
                                 />

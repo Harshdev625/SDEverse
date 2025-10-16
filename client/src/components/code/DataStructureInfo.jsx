@@ -64,7 +64,7 @@ const DataStructureInfo = ({ dataStructure, isAdmin = false }) => {
         <Tooltip
           id="title-tooltip"
           place="top"
-          className="bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
+          className="bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-md px-3 py-1.5 z-50"
         />
         <div className="flex flex-col sm:flex-row gap-3 text-base text-gray-500 dark:text-gray-400">
           <p>
