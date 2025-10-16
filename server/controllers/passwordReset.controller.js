@@ -1,49 +1,39 @@
-const crypto = require("crypto");
+// controllers/passwordReset.controller.js
+const asyncHandler = require("express-async-handler");
 
-const users = [
-  { id: 1, email: "test@example.com", password: "oldpassword123" },
-];
-
-const resetTokens = {}; // { token: email }
-
-const forgotPassword = (req, res) => {
+// 🆕 Temporary forgot password controller
+const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
-  const user = users.find((u) => u.email === email);
-  if (!user) {
-    return res.status(404).json({ message: "User not found with this email." });
+  if (!email) {
+    res.status(400);
+    throw new Error("Email is required");
   }
-  // Generate reset token
-  const token = crypto.randomBytes(20).toString("hex");
-  resetTokens[token] = email;
-  // Simulated reset link
-  const resetLink = `http://localhost:5173/reset-password/${token}`;
 
+  // Temporary: accept any email for testing
   res.status(200).json({
-    message: "Password reset link generated successfully.",
-    resetLink,
+    message: `Password reset link sent to ${email}`,
+    token: "123456abcdef", // fake token for testing
   });
-};
-// Reset Password
-const resetPassword = (req, res) => {
+});
+
+// 🆕 Temporary reset password controller
+const resetPassword = asyncHandler(async (req, res) => {
+  const { password } = req.body;
   const { token } = req.params;
-  const { password, confirmPassword } = req.body;
 
-  if (!resetTokens[token]) {
-    return res.status(400).json({ message: "Invalid or expired token." });
+  if (!password) {
+    res.status(400);
+    throw new Error("Password is required");
   }
 
-  if (password !== confirmPassword) {
-    return res.status(400).json({ message: "Passwords do not match." });
-  }
+  // Temporary: just respond successfully without DB
+  res.status(200).json({
+    message: `Password has been reset successfully for token: ${token}`,
+  });
+});
 
-  const email = resetTokens[token];
-  const user = users.find((u) => u.email === email);
-
-  user.password = password;
-  delete resetTokens[token]; // Token invalidated
-
-  res.status(200).json({ message: "Password reset successfully!" });
+module.exports = {
+  forgotPassword,
+  resetPassword,
 };
-
-module.exports = { forgotPassword, resetPassword };

@@ -11,6 +11,9 @@ import communityReducer from "../features/community/communitySlice";
 import dataStructureReducer from "../features/dataStructure/dataStructureSlice";
 import dataStructureProposalReducer from "../features/dataStructureProposal/dataStructureProposalSlice";
 
+// New slice for password reset
+import resetPasswordReducer from "../redux/slices/resetPasswordSlice";
+
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -24,6 +27,7 @@ const store = configureStore({
     community: communityReducer,
     dataStructure: dataStructureReducer,
     dataStructureProposal: dataStructureProposalReducer,
+    resetPassword: resetPasswordReducer, // ✅ Added password reset slice
   },
   devTools: import.meta.env.MODE !== "production",
 });
