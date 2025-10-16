@@ -1,24 +1,38 @@
----
-name: Question
-about: Ask a question about SDEverse
-title: '[QUESTION] '
-labels: ['question']
-assignees: ''
----
+name: "Question"
+description: "Ask a question about SDEverse"
+title: "[QUESTION] "
+labels: ["question"]
+assignees: []
 
-## Question
-What would you like to know?
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: "Question"
+      description: "What would you like to know?"
+    validations:
+      required: true
 
-## Context
-What are you trying to accomplish? What have you already tried?
+  - type: textarea
+    id: context
+    attributes:
+      label: "Context"
+      description: "What are you trying to accomplish? What have you already tried?"
 
-## Area
-Which part of SDEverse does this relate to?
-- [ ] Frontend (React, UI/UX)
-- [ ] Backend (Node.js, API) 
-- [ ] Setup/Development
-- [ ] General usage
-- [ ] Other
+  - type: dropdown
+    id: area
+    attributes:
+      label: "Area"
+      description: "Which part of SDEverse does this relate to?"
+      options:
+        - "Frontend (React, UI/UX)"
+        - "Backend (Node.js, API)"
+        - "Setup/Development"
+        - "General usage"
+        - "Other"
 
-## Additional Details
-Code snippets, error messages, or other relevant information.
+  - type: textarea
+    id: additional_details
+    attributes:
+      label: "Additional Details"
+      description: "Code snippets, error messages, or other relevant information."

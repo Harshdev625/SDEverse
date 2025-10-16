@@ -1,27 +1,73 @@
----
-name: Bug Report
-about: Create a report to help us improve SDEverse
-title: '[BUG] '
-labels: ['bug']
-assignees: ''
----
+name: "Bug Report"
+description: "Report a reproducible issue or error"
+title: "Bug: "
+labels: ["bug"]
+assignees: []
 
-## Bug Description
-Clear description of what the bug is.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please fill out all required sections clearly.
 
-## Steps to Reproduce
-1. Go to '...'
-2. Click on '...'
-3. See error
+  - type: textarea
+    id: description
+    attributes:
+      label: "Describe the bug"
+      description: "A clear and concise description of what the bug is."
+    validations:
+      required: true
 
-## Expected vs Actual Behavior
-- Expected: What should happen
-- Actual: What actually happened
+  - type: input
+    id: environment
+    attributes:
+      label: "Environment"
+      description: "Include OS, browser, Node/Vite version, etc."
+      placeholder: "OS: Windows 11 | Browser: Chrome 129 | Node: 20.11 | Vite: 5.0"
 
-## Environment
-- OS: [e.g. Windows 10, macOS, Ubuntu]
-- Browser: [e.g. Chrome, Firefox, Safari]  
-- Version: [e.g. 1.0.0]
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Steps to reproduce"
+      description: "List precise steps to trigger the bug."
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Observe '...'
+    validations:
+      required: true
 
-## Additional Context
-Screenshots, error logs, or other relevant information.
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected behavior"
+      description: "Describe what should have happened."
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Actual behavior"
+      description: "Describe what actually happened."
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Logs / Stack traces"
+      description: "Include console output or errors if available."
+      render: shell
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "Severity"
+      options:
+        - "Low"
+        - "Medium"
+        - "High"
+        - "Critical"
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "Additional context"
+      description: "Add any other relevant info or screenshots."
