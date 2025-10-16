@@ -5,6 +5,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import SDEverse from "../assets/sdeverse.png";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Register = () => {
   const dispatch = useDispatch();
@@ -26,9 +28,40 @@ const Register = () => {
     dispatch(registerUser(formData));
   };
 
-  useEffect(() => {
-    if (user) navigate("/");
-  }, [user, navigate]);
+  // useEffect(() => {
+  //   if (user) navigate("/");
+  // }, [user, navigate]);
+  
+ useEffect(() => {
+  if (user) {
+    toast.success("Registration successful! 🎉");
+    setTimeout(() => navigate("/"), 1000);
+  }
+
+  if (error) {
+    let msg = "Registration failed! ❌";
+
+   
+    const errStr = typeof error === "string" ? error : JSON.stringify(error);
+
+    
+    if (errStr.includes("E11000")) {
+      if (errStr.includes("username")) msg = "Username already exists! 🚫";
+      else if (errStr.includes("email")) msg = "Email already registered! 📧";
+      else msg = "Duplicate field value entered!";
+    } 
+    else if (errStr.toLowerCase().includes("validation")) {
+      msg = "Please fill all required fields correctly!";
+    } 
+    else if (errStr.toLowerCase().includes("network")) {
+      msg = "Network error — please check your connection!";
+    }
+
+    toast.error(msg);
+  }
+}, [user, error, navigate]);
+
+
 
   return (
     <motion.div
@@ -70,7 +103,7 @@ const Register = () => {
           <p className="text-gray-600">Start your coding journey today</p>
         </div>
 
-        {error && (
+        {/* {error && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -78,7 +111,7 @@ const Register = () => {
           >
             {error.message || error}
           </motion.div>
-        )}
+        )} */}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -204,6 +237,16 @@ const Register = () => {
             </a>
           </p>
         </div>
+                <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
       </motion.div>
     </motion.div>
   );
