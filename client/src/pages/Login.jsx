@@ -5,6 +5,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import SDEverse from "../assets/sdeverse.png";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -22,9 +26,40 @@ const Login = () => {
     dispatch(loginUser(formData));
   };
 
-  useEffect(() => {
-    if (user) navigate("/");
-  }, [user, navigate]);
+  // useEffect(() => {
+  //   if (user) navigate("/");
+  // }, [user, navigate]);
+useEffect(() => {
+  if (user) {
+    // Show login success toast
+    toast.success("Login successful! 🎉");
+
+    // Navigate after short delay so toast is visible
+    setTimeout(() => navigate("/"), 1000);
+  }
+
+  if (error) {
+    let msg = "Login failed! ❌";
+
+    const errStr = typeof error === "string" ? error : JSON.stringify(error);
+
+    if (errStr.includes("E11000")) {
+      if (errStr.includes("username")) msg = "Username already exists! 🚫";
+      else if (errStr.includes("email")) msg = "Email already registered! 📧";
+      else msg = "Duplicate field value entered!";
+    } 
+    else if (errStr.toLowerCase().includes("validation")) {
+      msg = "Please enter valid credentials!";
+    } 
+    else if (errStr.toLowerCase().includes("network")) {
+      msg = "Network error — please check your connection!";
+    }
+
+    toast.error(msg);
+  }
+}, [user, error, navigate]);
+
+
 
   return (
     <motion.div
@@ -175,6 +210,17 @@ const Login = () => {
             </a>
           </p>
         </div>
+
+        <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
       </motion.div>
     </motion.div>
   );

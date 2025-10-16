@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loginUserAPI, registerUserAPI, getMeAPI } from "./authAPI";
+import { toast } from "react-toastify";
 
 const tokenFromStorage = localStorage.getItem("token");
 
