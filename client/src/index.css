@@ -63,3 +63,13 @@
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+
+/* Default font for the whole site */
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Font for headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Sora', sans-serif;
+}
