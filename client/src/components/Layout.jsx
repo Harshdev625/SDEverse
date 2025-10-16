@@ -12,7 +12,8 @@ const Layout = () => {
     '/algorithms',
     '/data-structures',
     '/algorithm-details',
-    '/data-structure-detail'
+    '/data-structure-detail',
+    '/admin/analytics'
   ];
 
   const shouldShowScrollToTop = showScrollToTopRoutes.some(route =>
