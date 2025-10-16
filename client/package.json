@@ -41,7 +41,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
-    "@rollup/rollup-win32-x64-msvc": "^4.52.4",
     "@tailwindcss/vite": "^4.1.14",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
@@ -50,8 +49,6 @@
     "eslint-plugin-react-hooks": "^7.0.0",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.4.0",
-    "lightningcss": "^1.30.2",
-    "rollup": "^4.52.4",
     "vite": "^7.1.10"
   }
 }
