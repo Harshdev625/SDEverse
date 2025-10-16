@@ -1,15 +1,31 @@
-### Description
+## Description
+Brief description of what this PR accomplishes.
 
-<!-- A clear and concise description of what this pull request does. -->
+Fixes # (issue number)
 
-### Related Issue
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature  
+- [ ] Documentation update
+- [ ] Code refactoring
+- [ ] Other
 
-<!-- Link to the issue that this pull request addresses. -->
-<!-- e.g., "Closes #123" -->
+## Testing
+How has this been tested?
+- [ ] Manual testing
+- [ ] Added/updated tests
+- [ ] Tested on multiple browsers/devices
 
-### Checklist
+## Screenshots (if applicable)
+Add screenshots for UI changes.
 
-- [ ] I have read the [CONTRIBUTING.md](https://github.com/Harshdev625/SDEverse/blob/main/CONTRIBUTING.md) document.
-- [ ] My code follows the project's coding standards.
-- [ ] I have added tests to cover my changes.
-- [ ] All new and existing tests passed.
+## Checklist
+- [ ] Code follows project style guidelines
+- [ ] Self-reviewed my code  
+- [ ] Updated documentation if needed
+- [ ] No new warnings or errors
+- [ ] Tested changes locally
+
+## Hacktoberfest (if applicable)
+- [ ] This is a meaningful contribution (not spam/low-effort)
+- [ ] I have read the contribution guidelines
