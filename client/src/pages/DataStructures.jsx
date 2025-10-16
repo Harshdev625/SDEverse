@@ -31,6 +31,12 @@ const DataStructures = () => {
     dispatch(fetchAllDataStructuresForList());
   }, [dispatch]);
 
+  // Close all dropdowns when the toggle setting changes
+  useEffect(() => {
+    setExpandedCategories({});
+    setSelectedCategory(null);
+  }, [allowMultipleDropdowns]);
+
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -94,6 +100,31 @@ const DataStructures = () => {
         </div>
       </div>
 
+      {/* Top Control for Multiple Dropdowns Toggle with Info */}
+      <div className="mb-4 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto">
+        <div className="flex items-center justify-end space-x-3">
+          <button
+            onClick={() => setAllowMultipleDropdowns(!allowMultipleDropdowns)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+              allowMultipleDropdowns ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+            }`}
+            aria-label="Toggle multiple dropdowns"
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                allowMultipleDropdowns ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+          <div className="relative group">
+            <Info size={16} className="text-gray-500 dark:text-gray-400 cursor-help" />
+            <div className="absolute right-0 mt-2 px-3 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-lg border border-gray-700 dark:border-gray-200">
+              Toggle whether multiple categories can be expanded simultaneously.
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="mb-10 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
           Data Structure Explorer
@@ -105,38 +136,7 @@ const DataStructures = () => {
         </p>
       </div>
 
-      {/* Dropdown Toggle Control */}
-      <div className="mb-6 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto">
-        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Allow Multiple Dropdowns
-              </span>
-              <div className="relative group">
-                <Info size={16} className="text-gray-500 dark:text-gray-400 cursor-help" />
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                  When enabled, multiple categories can be expanded simultaneously. When disabled, only one category can be expanded at a time.
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center">
-            <button
-              onClick={() => setAllowMultipleDropdowns(!allowMultipleDropdowns)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                allowMultipleDropdowns ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  allowMultipleDropdowns ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-        </div>
-      </div>
+      
 
       <div className="mb-10">
         <div className="relative max-w-2xl mx-auto">
