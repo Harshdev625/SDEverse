@@ -1,18 +1,15 @@
 import React, { useState } from "react";
-import { Toaster, toast } from "react-hot-toast";
-
+import { toast} from "react-toastify";
+import { submitContact } from "../../features/contact/contactAPI";
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
     subject: "",
     message: "",
   });
-
-  const [status, setStatus] = useState({ type: "", message: "" });
 
   // Handle input changes
   const handleChange = (e) => {
@@ -22,51 +19,50 @@ const ContactForm = () => {
 
   // Email & phone validation
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
-  const validatePhone = (phone) => /^[0-9]{10,15}$/.test(phone);
 
   // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (
-      !formData.firstName ||
-      !formData.lastName ||
-      !formData.email ||
-      !formData.phone ||
-      !formData.subject ||
-      !formData.message
-    ) {
-      toast.error("Please fill in all required fields.")
-      return;
-    }
+  if (
+    !formData.firstName ||
+    !formData.lastName ||
+    !formData.email ||
+    !formData.subject ||
+    !formData.message
+  ) {
+    toast.error("Please fill in all required fields.");
+    return;
+  }
 
-    if (!validateEmail(formData.email)) {
+   if (!validateEmail(formData.email)) {
       toast.error("Please enter a valid email address." )
       return;
     }
 
-    if (!validatePhone(formData.phone)) {
-      toast.error("Please enter a valid phone number (digits only).")
-      return;
-    }
+  try {
+    await submitContact(formData);
+    toast.success("Your message has been sent successfully!",  {
+    autoClose: 3000, // closes after 3 seconds
+  });
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      subject: "",
+      message: "",
+    });
+  } catch (error) {
+    toast.error("Failed to send message. Please try again later.",  {
+    autoClose: 3000, // closes after 3 seconds
+  });
+  }
+};
 
-    // Simulate async form submission
-    setTimeout(() => {
-     toast.success("Your message has been sent successfully!")
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
-      });
-    }, 1200);
-  };
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <Toaster position="top-right" />
       {/* Row 1: First Name & Last Name */}
       <div className="grid md:grid-cols-2 gap-4">
         <div>
@@ -100,8 +96,6 @@ const ContactForm = () => {
         </div>
       </div>
 
-      {/* Row 2: Email & Phone */}
-      <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Email <span className="text-red-500">*</span>
@@ -117,23 +111,6 @@ const ContactForm = () => {
                        focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           />
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Phone Number <span className="text-red-500">*</span>
-          </label>
-          <input
-            name="phone"
-            type="tel"
-            value={formData.phone}
-            onChange={handleChange}
-            placeholder="9876543210"
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg 
-                       bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100
-                       focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          />
-        </div>
-      </div>
 
       {/* Subject */}
       <div>

@@ -37,6 +37,7 @@ import AdminDataStructureProposalReview from "./pages/AdminDataStructureProposal
 import { getMe } from "./features/auth/authSlice";
 import { toast } from "react-toastify";
 import Contact from "./pages/Contact";
+import AdminUsersContact from "./pages/AdminUsersContact";
 
 const router = createBrowserRouter([
   {
@@ -128,6 +129,14 @@ const router = createBrowserRouter([
         element: (
           <AdminRoute>
             <AdminDataStructures />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "admin/manage-users-contacts",
+        element: (
+          <AdminRoute>
+            <AdminUsersContact />
           </AdminRoute>
         ),
       },
