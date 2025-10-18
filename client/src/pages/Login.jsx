@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../features/auth/authSlice";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import SDEverse from "../assets/sdeverse.png";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -27,7 +28,7 @@ const Login = () => {
   }, [user, navigate]);
 
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -39,7 +40,7 @@ const Login = () => {
         <div className="absolute -bottom-1/4 left-1/4 w-[500px] h-[500px] bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
       </div>
 
-      <motion.div
+      <Motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
@@ -50,7 +51,7 @@ const Login = () => {
         </Link>
 
         <div className="text-center mb-8">
-          <motion.div
+          <Motion.div
             whileHover={{ scale: 1.05 }}
             className="mx-auto mb-4"
           >
@@ -59,7 +60,7 @@ const Login = () => {
             alt="SDEverse Logo"
             className="w-20 h-20 mx-auto object-contain"
           />
-          </motion.div>
+          </Motion.div>
           <h2 className="text-3xl font-bold text-indigo-700 mb-2">
             Welcome back to SDEverse
           </h2>
@@ -67,14 +68,22 @@ const Login = () => {
         </div>
 
         {error && (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 p-3 bg-red-50 text-red-700 rounded-lg text-sm"
           >
             {error.message || error}
-          </motion.div>
+          </Motion.div>
         )}
+
+        <GoogleSignInButton />
+
+        <div className="my-6 flex items-center">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="px-3 text-gray-500 text-sm">or continue with email</span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -146,7 +155,7 @@ const Login = () => {
             </div>
           </div>
 
-          <motion.button
+          <Motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
@@ -161,7 +170,7 @@ const Login = () => {
             ) : (
               "Login to your account"
             )}
-          </motion.button>
+          </Motion.button>
         </form>
 
         <div className="mt-8 text-center">
@@ -175,8 +184,8 @@ const Login = () => {
             </a>
           </p>
         </div>
-      </motion.div>
-    </motion.div>
+      </Motion.div>
+    </Motion.div>
   );
 };
 

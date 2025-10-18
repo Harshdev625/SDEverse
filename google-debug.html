@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google OAuth Debug</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <h1>Google OAuth Debug</h1>
+    <div id="google-signin-button"></div>
+    <div id="debug-info"></div>
+
+    <script>
+        window.onload = function() {
+            const clientId = "947667380675-dod8bg35kbg0s3ee6mcs0r6pa70j75lc.apps.googleusercontent.com";
+            const debugDiv = document.getElementById('debug-info');
+            
+            debugDiv.innerHTML = `
+                <p><strong>Client ID:</strong> ${clientId}</p>
+                <p><strong>Current Origin:</strong> ${window.location.origin}</p>
+                <p><strong>Google SDK Loaded:</strong> ${!!window.google}</p>
+                <p><strong>Current URL:</strong> ${window.location.href}</p>
+            `;
+
+            if (window.google) {
+                window.google.accounts.id.initialize({
+                    client_id: clientId,
+                    callback: (response) => {
+                        debugDiv.innerHTML += `<p><strong>Success!</strong> Received token: ${response.credential.substring(0, 50)}...</p>`;
+                        
+                        // Test sending to your server
+                        fetch('http://localhost:5000/api/auth/google', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ credential: response.credential })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            debugDiv.innerHTML += `<p><strong>Server Response:</strong> ${JSON.stringify(data, null, 2)}</p>`;
+                        })
+                        .catch(err => {
+                            debugDiv.innerHTML += `<p><strong>Server Error:</strong> ${err.message}</p>`;
+                        });
+                    }
+                });
+
+                window.google.accounts.id.renderButton(
+                    document.getElementById('google-signin-button'),
+                    { 
+                        theme: 'outline', 
+                        size: 'large',
+                        text: 'signin_with',
+                        width: 250
+                    }
+                );
+            } else {
+                debugDiv.innerHTML += '<p><strong>ERROR:</strong> Google SDK not loaded</p>';
+            }
+        };
+    </script>
+</body>
+</html>

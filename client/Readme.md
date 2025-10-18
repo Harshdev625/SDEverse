@@ -169,7 +169,8 @@ To get the SDEverse frontend running locally:
     Create a `.env` file in the `client/` directory based on a `.env.example` (if provided, otherwise create one) and configure necessary API endpoints or other environment-specific variables.
     ```
     # Example .env content
-    VITE_API_BASE_URL=http://localhost:5000/api
+    VITE_BACKEND_URL=http://localhost:5000/api
+    VITE_GOOGLE_CLIENT_ID=your-google-oauth-web-client-id.apps.googleusercontent.com
     ```
 4.  **Start the development server:**
     ```bash
