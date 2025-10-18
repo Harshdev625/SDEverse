@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { ChevronDown, Search, ArrowLeft, ArrowRight, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import AlgorithmFilters from "../components/ui/AlgorithmFilters";
 
 const Algorithm = () => {
   const dispatch = useDispatch();
@@ -25,6 +26,7 @@ const Algorithm = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [expandedCategories, setExpandedCategories] = useState({});
   const [allowMultipleDropdowns, setAllowMultipleDropdowns] = useState(true);
+  const [isFilterActive, setIsFilterActive] = useState(false);
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -49,7 +51,7 @@ const Algorithm = () => {
 
   const toggleCategory = (category) => {
     setSelectedCategory(selectedCategory === category ? null : category);
-    
+
     if (allowMultipleDropdowns) {
       // Allow multiple dropdowns to be open
       setExpandedCategories((prev) => ({
@@ -110,18 +112,23 @@ const Algorithm = () => {
           <button
             onClick={() => setAllowMultipleDropdowns(!allowMultipleDropdowns)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-              allowMultipleDropdowns ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+              allowMultipleDropdowns
+                ? "bg-blue-600"
+                : "bg-gray-300 dark:bg-gray-600"
             }`}
             aria-label="Toggle multiple dropdowns"
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                allowMultipleDropdowns ? 'translate-x-6' : 'translate-x-1'
+                allowMultipleDropdowns ? "translate-x-6" : "translate-x-1"
               }`}
             />
           </button>
           <div className="relative group">
-            <Info size={16} className="text-gray-500 dark:text-gray-400 cursor-help" />
+            <Info
+              size={16}
+              className="text-gray-500 dark:text-gray-400 cursor-help"
+            />
             <div className="absolute right-0 mt-2 px-3 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-lg border border-gray-700 dark:border-gray-200">
               Toggle whether multiple categories can be expanded simultaneously.
             </div>
@@ -140,8 +147,10 @@ const Algorithm = () => {
           computer programming and data science.
         </p>
       </div>
-
-      
+      {/* 🔹 Filters Section */}
+      <div className="mb-8 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto">
+        <AlgorithmFilters onFilterApplied={setIsFilterActive} />
+      </div>
 
       {/* Search Bar */}
       <div className="mb-10">
@@ -166,13 +175,12 @@ const Algorithm = () => {
         </div>
       ) : error ? (
         <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
-          {error}
+          {error?.message || String(error)}
         </div>
-      ) : isSearching ? (
+      ) : (isSearching || isFilterActive) ? (
         <div className="space-y-6">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Search Results{" "}
-            {algorithms.length > 0 && `(${algorithms.length})`}
+            Search Results {algorithms.length > 0 && `(${algorithms.length})`}
           </h2>
 
           {algorithms.length === 0 ? (

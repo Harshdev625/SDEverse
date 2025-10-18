@@ -23,6 +23,7 @@ export const getAlgorithmsForList = async (params) => {
   };
 };
 
+
 export const getAlgorithmBySlug = async (slug) => {
   const res = await api.get(`/algorithms/${slug}`);
   return res.data;
