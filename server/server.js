@@ -5,6 +5,7 @@ const connectDB = require("./config/db");
 const KeepAlive = require("./utils/keepAlive");
 const algorithmRoutes = require("./routes/algorithm.routes");
 const authRoutes = require("./routes/auth.routes");
+const sheetRoutes = require("./routes/sheet.routes");
 const userRoutes = require("./routes/user.routes");
 const proposalRoutes = require("./routes/proposal.routes");
 const commentRoutes = require("./routes/comment.routes");
@@ -13,9 +14,9 @@ const feedbackRoutes = require("./routes/feedback.routes");
 const communityRoutes = require("./routes/community.routes");
 const dataStructureRoutes = require("./routes/dataStructure.routes");
 const dataStructureProposalRoutes = require("./routes/dataStructureProposal.routes");
-
 const { notFound, errorHandler } = require("./middleware/error.middleware");
-
+const sheetProposalRoutes = require("./routes/sheetProposal.routes");
+const userProgressRoutes = require("./routes/userProgress.routes");
 dotenv.config();
 connectDB();
 
@@ -33,7 +34,9 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/community", communityRoutes);
 app.use("/api/data-structures", dataStructureRoutes);
 app.use("/api/data-structure-proposals", dataStructureProposalRoutes);
-
+app.use("/api/sheets", sheetRoutes);
+app.use("/api/sheet-proposals", sheetProposalRoutes);
+app.use("/api/user-progress", userProgressRoutes);
 // Health check endpoint for keep-alive
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
@@ -45,7 +48,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  
+
   // Initialize keep-alive
   const keepAlive = new KeepAlive();
   setTimeout(() => keepAlive.start(), 10000);
