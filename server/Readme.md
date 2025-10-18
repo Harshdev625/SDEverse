@@ -9,12 +9,12 @@ Welcome to the backend repository for **SDEverse**, a collaborative platform for
 The SDEverse backend is responsible for handling all data management, business logic, and API interactions. Its core features include:
 
 * **RESTful API Endpoints:** Comprehensive APIs for managing:
-    * **Algorithms & Data Structures:** CRUD operations for content, including operations and full implementations.
-    * **User Management:** User registration, authentication (JWT-based), and profile management.
-    * **Proposals:** System for users to propose new algorithms and data structures, with review workflows.
-    * **Comments & Community:** Functionality for users to comment on content and interact.
-    * **Notifications:** System for sending various user notifications.
-    * **Feedback:** Mechanisms for users to submit feedback.
+  * **Algorithms & Data Structures:** CRUD operations for content, including operations and full implementations.
+  * **User Management:** User registration, authentication (JWT-based), and profile management.
+  * **Proposals:** System for users to propose new algorithms and data structures, with review workflows.
+  * **Comments & Community:** Functionality for users to comment on content and interact.
+  * **Notifications:** System for sending various user notifications.
+  * **Feedback:** Mechanisms for users to submit feedback.
 * **Authentication & Authorization:** Secure user authentication using JWTs and role-based authorization for admin functionalities.
 * **Data Validation:** Robust input validation using `express-validator` to ensure data integrity and security.
 * **Database Integration:** Seamless integration with MongoDB using Mongoose for efficient data storage and retrieval.
@@ -108,38 +108,53 @@ server/
 
 To get the SDEverse backend up and running locally:
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/Harshdev625/SDEverse.git
-    cd SDEverse/server # Navigate to the server directory
-    ```
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-3.  **Set up environment variables:**
-    Create a `.env` file in the `server/` directory. This file will store sensitive information and configuration.
-    ```
-    # Example .env content
-    PORT=5000
-    MONGO_URI=mongodb://localhost:27017/sdeversedb # Your MongoDB connection string
-    JWT_SECRET=your_jwt_secret_key # A strong, random secret key for JWTs
-    JWT_EXPIRE=30d # JWT expiry time, e.g., 30 days
-    # Add any other environment variables needed for external API keys, etc.
-    ```
-    *Make sure to replace placeholder values with your actual credentials and connection strings.*
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Harshdev625/SDEverse.git
+   cd SDEverse/server # Navigate to the server directory
+   ```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+3. **Set up environment variables:**
+   Create a `.env` file in the `server/` directory. This file will store sensitive information and configuration.
+   ```
+   # Example .env content
+   PORT=5000
+   MONGO_URI=mongodb://localhost:27017/sdeversedb # Your MongoDB connection string
+   JWT_SECRET=your_jwt_secret_key # A strong, random secret key for JWTs
+   JWT_EXPIRE=30d # JWT expiry time, e.g., 30 days
+   CLIENT_URL=http://localhost:5173 # Frontend origin for CORS
+   GOOGLE_CLIENT_ID=your-google-oauth-web-client-id.apps.googleusercontent.com
+   ```
 
-4.  **Start the development server:**
-    ```bash
-    npm run dev
-    ```
-    This will start the server using Nodemon, which automatically restarts the server when changes are detected. The server will typically run on `http://localhost:5000` (or the `PORT` specified in your `.env` file).
+### 🔐 Google OAuth Setup (required for "Continue with Google")
 
-5.  **Start the production server:**
-    ```bash
-    npm start
-    ```
-    This command will run the server without Nodemon, suitable for production environments.
+1. Go to Google Cloud Console → APIs & Services → Credentials → Create Credentials → OAuth client ID.
+
+   - Application type: Web application
+   - Authorized JavaScript origins:
+     - http://localhost:5173 (and your production domain)
+   - Redirect URIs: Not required for Google Identity Services button/One Tap.
+2. Copy the Web client ID into `server/.env` as `GOOGLE_CLIENT_ID` and into `client/.env` as `VITE_GOOGLE_CLIENT_ID`.
+3. On the OAuth consent screen, add scopes: `openid`, `email`, `profile`, and add test users for development.
+
+   *Make sure to replace placeholder values with your actual credentials and connection strings.*
+4. **Start the development server:**
+
+   ```bash
+   npm run dev
+   ```
+
+   This will start the server using Nodemon, which automatically restarts the server when changes are detected. The server will typically run on `http://localhost:5000` (or the `PORT` specified in your `.env` file).
+5. **Start the production server:**
+
+   ```bash
+   npm start
+   ```
+
+   This command will run the server without Nodemon, suitable for production environments.
 
 ---
 

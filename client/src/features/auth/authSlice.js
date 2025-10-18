@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loginUserAPI, registerUserAPI, getMeAPI } from "./authAPI";
+import { exchangeGoogleCredential } from "../../utils/googleAuth";
 
 const tokenFromStorage = localStorage.getItem("token");
 
@@ -33,6 +34,20 @@ export const loginUser = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Login failed"
+      );
+    }
+  }
+);
+
+export const loginWithGoogle = createAsyncThunk(
+  "auth/loginWithGoogle",
+  async (credential, thunkAPI) => {
+    try {
+      const data = await exchangeGoogleCredential(credential);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Google login failed"
       );
     }
   }
@@ -98,6 +113,25 @@ const authSlice = createSlice({
         localStorage.setItem("token", action.payload.token);
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(loginWithGoogle.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginWithGoogle.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = {
+          _id: action.payload._id,
+          username: action.payload.username,
+          email: action.payload.email,
+          role: action.payload.role,
+        };
+        state.token = action.payload.token;
+        localStorage.setItem("token", action.payload.token);
+      })
+      .addCase(loginWithGoogle.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

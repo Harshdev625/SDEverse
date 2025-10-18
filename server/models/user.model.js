@@ -17,7 +17,8 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    password: { type: String, required: true },
+  // Password is required for local users, but optional when using Google auth
+  password: { type: String, required: function () { return !this.googleId; } },
     bio: { type: String, trim: true, default: "" },
 
     fullName: { type: String, trim: true, default: "" },
@@ -116,6 +117,10 @@ const userSchema = new mongoose.Schema(
     totalProposals: { type: Number, default: 0 },
     totalReviews: { type: Number, default: 0 },
     role: { type: String, enum: ["user", "admin"], default: "user" },
+
+    // OAuth fields
+    googleId: { type: String, index: true, default: null },
+    provider: { type: String, enum: ["local", "google"], default: "local" },
   },
   { timestamps: true }
 );
@@ -128,6 +133,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
+  if (!this.password) return false;
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
