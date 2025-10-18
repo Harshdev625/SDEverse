@@ -1,4 +1,4 @@
-import { NavLink, useLocation ,useNavigate} from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   Users,
@@ -20,6 +20,7 @@ import {
   Workflow,
   UserCircle,
   Database,
+  Contact
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleTheme } from "../features/theme/themeSlice";
@@ -121,6 +122,13 @@ const Sidebar = () => {
       active: "bg-gradient-to-r from-lime-500 to-green-600",
       border: "border-l-lime-500",
     },
+    manageUsersContact: {
+      bg: "bg-cyan-50/80 dark:bg-cyan-900/30",
+      hover: "hover:bg-cyan-100 dark:hover:bg-cyan-900/40",
+      active: "bg-gradient-to-r from-cyan-500 to-teal-600",
+      border: "border-l-cyan-500",
+    },
+
     reviewProposalsParent: {
       bg: "bg-orange-50/80 dark:bg-orange-900/30",
       hover: "hover:bg-orange-100 dark:hover:bg-orange-900/40",
@@ -223,12 +231,12 @@ const Sidebar = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-r border-gray-200 dark:border-gray-800 shadow-xl z-40 transform transition-all duration-300 ease-in-out
+        className={`fixed top-0 left-0 h-full w-70 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-r border-gray-200 dark:border-gray-800 shadow-xl z-40 transform transition-all duration-300 ease-in-out
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0 md:shadow-none`}
         aria-label="Sidebar Navigation"
       >
-        <div className="flex flex-col h-full p-5">
+        <div className="flex flex-col h-full p-5 overflow-hidden">
           {/* Header */}
           <div className="pb-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -248,7 +256,7 @@ const Sidebar = () => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 py-6 space-y-2 overflow-y-auto mobile-scroll">
+          <nav className="flex-1 overflow-y-auto py-6 space-y-2 scroll">
             {/* Always visible links */}
             <NavLink
               to="/"
@@ -337,6 +345,17 @@ const Sidebar = () => {
                 >
                   <Database size={20} className="min-w-[20px]" />
                   <span className="truncate">Manage Data Structures</span>
+                  <ChevronRight className="ml-auto opacity-70" size={16} />
+                </NavLink>
+                <NavLink
+                  to="/admin/manage-users-contacts"
+                  className={({ isActive }) =>
+                    getNavItemClass("manageUsersContact", isActive)
+                  }
+                  onClick={handleLinkClick}
+                >
+                  <Contact size={20} className="min-w-[20px]" />
+                  <span className="truncate">Manage User Contacts</span>
                   <ChevronRight className="ml-auto opacity-70" size={16} />
                 </NavLink>
 
@@ -514,7 +533,7 @@ const Sidebar = () => {
           </nav>
 
           {/* Footer */}
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-3 flex-shrink-0">
             <button
               onClick={() => dispatch(toggleTheme())}
               className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-colors backdrop-blur-sm"

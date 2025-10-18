@@ -13,6 +13,7 @@ const feedbackRoutes = require("./routes/feedback.routes");
 const communityRoutes = require("./routes/community.routes");
 const dataStructureRoutes = require("./routes/dataStructure.routes");
 const dataStructureProposalRoutes = require("./routes/dataStructureProposal.routes");
+const contactRoutes = require("./routes/contact.routes")
 
 const { notFound, errorHandler } = require("./middleware/error.middleware");
 
@@ -33,6 +34,8 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/community", communityRoutes);
 app.use("/api/data-structures", dataStructureRoutes);
 app.use("/api/data-structure-proposals", dataStructureProposalRoutes);
+app.use("/api/contact", contactRoutes);
+
 
 // Health check endpoint for keep-alive
 app.get("/health", (req, res) => {
