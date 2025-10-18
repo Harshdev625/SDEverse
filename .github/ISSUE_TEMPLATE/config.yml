@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "Discussions"
+    url: "https://github.com/Harshdev625/SDEverse/discussions"
+    about: "Please ask and answer questions here."
+  - name: "Join our Discord Community"
+    url: "https://discord.com/channels/707751027973161132/1426969903034007643"
+    about: "For live chat and community support."
