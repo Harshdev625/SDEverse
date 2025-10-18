@@ -27,6 +27,14 @@ const Algorithm = () => {
   const [expandedCategories, setExpandedCategories] = useState({});
   const [allowMultipleDropdowns, setAllowMultipleDropdowns] = useState(true);
   const [isFilterActive, setIsFilterActive] = useState(false);
+  const [selectedDifficulty, setSelectedDifficulty] = useState("");
+
+  const isSearching = searchQuery.trim().length > 0;
+
+  // ✅ Initialize global flag once (avoids undefined on reload)
+  useEffect(() => {
+    window.isSearchingActive = false;
+  }, []);
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -42,39 +50,66 @@ const Algorithm = () => {
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
+
     if (query.trim()) {
+      // ✅ Tell filters to pause fetching
+      window.isSearchingActive = true;
       dispatch(searchAllAlgorithms({ q: query }));
     } else {
+      // ✅ Search cleared, resume filters/list fetching
+      window.isSearchingActive = false;
       dispatch(fetchAlgorithmsForList());
     }
   };
 
-  const toggleCategory = (category) => {
-    setSelectedCategory(selectedCategory === category ? null : category);
+  useEffect(() => {
+    if (isFilterActive) {
+      if (selectedCategory) {
+        // Expand only the selected category
+        setExpandedCategories({ [selectedCategory]: true });
+      } else {
+        // Expand all categories that have matching results (for difficulty-only filter)
+        const expanded = {};
+        algorithms.forEach((algo) => {
+          if (algo.category && algo.category.length > 0) {
+            algo.category.forEach((cat) => {
+              expanded[cat] = true;
+            });
+          }
+        });
+        setExpandedCategories(expanded);
+      }
+    } else {
+      // Reset if no filter
+      setExpandedCategories({});
+    }
+  }, [isFilterActive, selectedCategory, algorithms]);
 
+  const toggleCategory = (category) => {
+    // If filters are active (like Easy or Sorting), allow manual toggling
+    if (isFilterActive) {
+      setExpandedCategories((prev) => ({
+        ...prev,
+        [category]: !prev[category],
+      }));
+      return;
+    }
+
+    // Normal Browse mode — handle multiple/single dropdowns
     if (allowMultipleDropdowns) {
-      // Allow multiple dropdowns to be open
       setExpandedCategories((prev) => ({
         ...prev,
         [category]: !prev[category],
       }));
     } else {
-      // Only allow one dropdown to be open at a time
-      const isCurrentlyOpen = expandedCategories[category];
-      if (isCurrentlyOpen) {
-        // Close the current category
-        setExpandedCategories((prev) => ({
-          ...prev,
-          [category]: false,
-        }));
-      } else {
-        // Close all other categories and open the selected one
-        setExpandedCategories({ [category]: true });
-      }
+      setExpandedCategories((prev) => {
+        const isCurrentlyOpen = !!prev[category];
+        const newState = {};
+        if (!isCurrentlyOpen) newState[category] = true;
+        return newState;
+      });
     }
   };
-
-  const isSearching = searchQuery.trim().length > 0;
 
   return (
     <motion.div
@@ -147,9 +182,14 @@ const Algorithm = () => {
           computer programming and data science.
         </p>
       </div>
+
       {/* 🔹 Filters Section */}
       <div className="mb-8 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto">
-        <AlgorithmFilters onFilterApplied={setIsFilterActive} />
+        <AlgorithmFilters
+          onFilterApplied={setIsFilterActive}
+          onCategoryChange={setSelectedCategory}
+          onDifficultyChange={setSelectedDifficulty}
+        />
       </div>
 
       {/* Search Bar */}
@@ -177,7 +217,8 @@ const Algorithm = () => {
         <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
           {error?.message || String(error)}
         </div>
-      ) : (isSearching || isFilterActive) ? (
+      ) : isSearching ? (
+        // ✅ Search results section
         <div className="space-y-6">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
             Search Results {algorithms.length > 0 && `(${algorithms.length})`}
@@ -238,80 +279,143 @@ const Algorithm = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {categories.map((category) => {
-                const categoryAlgorithms = algorithms.filter((algo) =>
-                  algo.category?.includes(category)
-                );
+              {[...categories]
+                .sort((a, b) => {
+                  if (
+                    isFilterActive &&
+                    selectedCategory &&
+                    a === selectedCategory
+                  )
+                    return -1;
+                  if (
+                    isFilterActive &&
+                    selectedCategory &&
+                    b === selectedCategory
+                  )
+                    return 1;
+                  return 0;
+                })
+                .map((category) => {
+                  const categoryAlgorithms = algorithms.filter((algo) => {
+                    const matchesCategory =
+                      algo.category?.includes(category) &&
+                      (!selectedCategory ||
+                        selectedCategory === "All Categories" ||
+                        algo.category?.includes(selectedCategory));
 
-                return (
-                  <div
-                    key={category}
-                    className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm"
-                  >
-                    <button
-                      onClick={() => toggleCategory(category)}
-                      className="w-full flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    const matchesDifficulty =
+                      !selectedDifficulty ||
+                      selectedDifficulty === "All Difficulty" ||
+                      (algo.difficulty &&
+                        algo.difficulty.toLowerCase() ===
+                          selectedDifficulty.toLowerCase());
+
+                    return matchesCategory && matchesDifficulty;
+                  });
+
+                  if (isFilterActive && categoryAlgorithms.length === 0)
+                    return null;
+
+                  return (
+                    <div
+                      key={category}
+                      className={`border rounded-xl overflow-hidden shadow-sm transition-all ${
+                        expandedCategories[category]
+                          ? "border-blue-400 dark:border-blue-600"
+                          : "border-gray-200 dark:border-gray-700"
+                      }`}
                     >
-                      <div className="flex items-center space-x-3">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {category}
-                        </h3>
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                          {categoryAlgorithms.length}
-                        </span>
-                      </div>
-                      <ChevronDown
-                        size={20}
-                        className={`transition-transform ${
-                          expandedCategories[category] ? "rotate-180" : ""
-                        } text-gray-500 dark:text-gray-400`}
-                      />
-                    </button>
+                      <button
+                        onClick={() => toggleCategory(category)}
+                        className="w-full flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            {category}
+                          </h3>
+                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                            {categoryAlgorithms.length}
+                          </span>
+                        </div>
+                        <ChevronDown
+                          size={20}
+                          className={`transition-transform ${
+                            expandedCategories[category] ? "rotate-180" : ""
+                          } text-gray-500 dark:text-gray-400`}
+                        />
+                      </button>
 
-                    <AnimatePresence>
-                      {expandedCategories[category] && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {categoryAlgorithms.length > 0 ? (
-                              categoryAlgorithms.map((algorithm) => (
-                                <motion.div
-                                  key={algorithm.slug}
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  transition={{ duration: 0.2 }}
-                                >
-                                  <Link
-                                    to={`/algorithms/${algorithm.slug}`}
-                                    className="block p-4 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-all"
+                      <AnimatePresence>
+                        {expandedCategories[category] && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {categoryAlgorithms.length > 0 ? (
+                                categoryAlgorithms.map((algorithm) => (
+                                  <motion.div
+                                    key={algorithm.slug}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.2 }}
                                   >
-                                    <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                                      {algorithm.title}
-                                    </h4>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                                      {algorithm.description ||
-                                        algorithm.intuition}
-                                    </p>
-                                  </Link>
-                                </motion.div>
-                              ))
-                            ) : (
-                              <p className="text-gray-500 dark:text-gray-400 col-span-full py-2">
-                                No algorithms in this category.
-                              </p>
-                            )}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
+                                    <Link
+                                      to={`/algorithms/${algorithm.slug}`}
+                                      className="block p-4 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-all"
+                                    >
+                                      <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                                        {algorithm.title}
+                                      </h4>
+
+                                      <div className="flex flex-wrap gap-2 mb-2">
+                                        {algorithm.category?.map((cat) => (
+                                          <span
+                                            key={cat}
+                                            className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                                          >
+                                            {cat}
+                                          </span>
+                                        ))}
+                                        {algorithm.difficulty && (
+                                          <span
+                                            className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                              algorithm.difficulty.toLowerCase() ===
+                                              "easy"
+                                                ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
+                                                : algorithm.difficulty.toLowerCase() ===
+                                                  "medium"
+                                                ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
+                                                : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
+                                            }`}
+                                          >
+                                            {algorithm.difficulty}
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                                        {algorithm.description ||
+                                          algorithm.intuition}
+                                      </p>
+                                    </Link>
+                                  </motion.div>
+                                ))
+                              ) : (
+                                <p className="text-gray-500 dark:text-gray-400 col-span-full py-2">
+                                  No algorithms in this category.
+                                </p>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
             </div>
           )}
         </div>
