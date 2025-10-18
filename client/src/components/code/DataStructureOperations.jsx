@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { Tooltip } from "react-tooltip";
 import { MarkdownRenderer } from "../../pages/CommentSection"; // Adjust path as needed
 import clsx from "clsx";
+import CodeDisplay from "./CodeDisplay";
 
 const DataStructureOperations = ({ dataStructure, isAdmin = false }) => {
   const [openOperationIndex, setOpenOperationIndex] = useState(null);
@@ -215,34 +216,35 @@ const DataStructureOperations = ({ dataStructure, isAdmin = false }) => {
     );
   };
 
-  const renderFullImplementation = (impl, index) => {
-    const isOpen = openFullImplIndex === index;
-    const implId = `full-impl-${index}`;
-    const [copied, setCopied] = useState(false);
+  const renderFullImplementations = () => {
+    const isOpen = openFullImplIndex === 0; // Single section for all implementations
+    const implId = "full-implementations";
 
-    const handleCopy = useCallback(() => {
-      setCopied(true);
-      copyCode(impl.code);
-      setTimeout(() => setCopied(false), 2000);
-    }, [copyCode, impl.code]);
+    // Adapt all implementations to match CodeDisplay expected format
+    const adaptedAlgorithm = {
+      codes: dataStructure.fullImplementations.map(impl => ({
+        language: impl.language?.trim() || "Unknown",
+        code: impl.code?.trim() || "No code available."
+      }))
+    };
 
     return (
       <motion.div
         key={implId}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, delay: index * 0.05 }}
+        transition={{ duration: 0.2 }}
         className="bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden"
       >
         <button
-          onClick={() => toggleFullImplementation(index)}
+          onClick={() => toggleFullImplementation(0)}
           className="w-full flex justify-between items-center px-4 py-3 sm:px-5 sm:py-4 text-left text-base sm:text-lg font-semibold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           data-tooltip-id={implId}
-          data-tooltip-content={`Toggle ${impl.language?.trim() || "implementation"} code`}
+          data-tooltip-content="Toggle full implementations"
           aria-expanded={isOpen}
-          aria-controls={`full-impl-content-${index}`}
+          aria-controls="full-impl-content"
         >
-          <span>Full Implementation: {impl.language?.trim() || "Unknown"}</span>
+          <span>Full Implementations ({dataStructure.fullImplementations.length} languages)</span>
           <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
             {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </motion.div>
@@ -255,63 +257,22 @@ const DataStructureOperations = ({ dataStructure, isAdmin = false }) => {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              id={`full-impl-content-${index}`}
+              id="full-impl-content"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
               className="px-4 py-4 sm:px-5 sm:py-5 space-y-4 overflow-hidden"
             >
-              <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="flex justify-between items-center px-4 py-3 sm:px-5 sm:py-4 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-                  <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-                    Code Example
-                  </h4>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleCopy}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-md text-base hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    aria-label="Copy code"
-                    data-tooltip-id={`copy-full-impl-${implId}`}
-                    data-tooltip-content={copied ? "Copied!" : "Copy code to clipboard"}
-                  >
-                    {copied ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
-                    <span>{copied ? "Copied!" : "Copy"}</span>
-                  </motion.button>
-                  <Tooltip
-                    id={`copy-full-impl-${implId}`}
-                    place="top"
-                    className="z-50 bg-gray-800 text-white text-sm rounded-md px-3 py-1.5"
-                  />
-                </div>
-                <div className="p-4 sm:p-5 bg-white dark:bg-gray-800">
-                  <SyntaxHighlighter
-                    language={impl.language?.toLowerCase().trim() || "text"}
-                    style={materialDark}
-                    wrapLongLines
-                    showLineNumbers
-                    customStyle={{
-                      padding: "1.25rem",
-                      borderRadius: "0.5rem",
-                      backgroundColor: "#1a1a1a",
-                      fontSize: "0.875rem",
-                      lineHeight: "1.5",
-                    }}
-                    codeTagProps={{ className: "font-mono" }}
-                  >
-                    {impl.code?.trim() || "No code available."}
-                  </SyntaxHighlighter>
-                </div>
-              </div>
+              <CodeDisplay algorithm={adaptedAlgorithm} />
               {isAdmin && (
                 <div>
                   <button
                     className="text-base text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1.5 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     onClick={() => toast.info("Edit implementation functionality coming soon!")}
-                    aria-label={`Edit implementation in ${impl.language?.trim() || "Unknown"}`}
+                    aria-label="Edit full implementations"
                   >
-                    Edit Implementation
+                    Edit Implementations
                   </button>
                 </div>
               )}
@@ -369,7 +330,7 @@ const DataStructureOperations = ({ dataStructure, isAdmin = false }) => {
               place="top"
               className="z-50 bg-gray-800 text-white text-sm rounded-md px-3 py-1.5"
             />
-            <div className="space-y-4">{dataStructure.fullImplementations.map(renderFullImplementation)}</div>
+            <div className="space-y-4">{renderFullImplementations()}</div>
           </section>
         )}
       </div>
