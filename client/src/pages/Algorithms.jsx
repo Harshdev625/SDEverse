@@ -10,7 +10,7 @@ import { ChevronDown, Search, ArrowLeft, ArrowRight, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
-const Algorithm = () => {
+const Algorithms = () => {
   const dispatch = useDispatch();
   const {
     categories = [],
@@ -166,7 +166,7 @@ const Algorithm = () => {
         </div>
       ) : error ? (
         <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
-          {error}
+          {typeof error === "string" ? error : error.message || "An error occurred."}
         </div>
       ) : isSearching ? (
         <div className="space-y-6">
@@ -312,4 +312,4 @@ const Algorithm = () => {
   );
 };
 
-export default Algorithm;
+export default Algorithms;

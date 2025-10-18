@@ -444,7 +444,7 @@ const Sidebar = () => {
                   <ChevronRight className="ml-auto opacity-70" size={16} />
                 </NavLink>
                 <NavLink
-                  to="/proposals/new"
+                  to="/algorithms/proposals/new"
                   className={({ isActive }) =>
                     getNavItemClass("submitAlgorithmProposal", isActive)
                   }
