@@ -10,7 +10,7 @@ Thank you for your interest in contributing to SDEverse! This document provides 
 
     ```bash
     # Clone your forked repository
-    git clone https://github.com/YOUR-USERNAME/SDEverse.git
+    git clone https://github.com/Harshdev625/SDEverse.git
 
     # Navigate into the project directory
     cd SDEverse
