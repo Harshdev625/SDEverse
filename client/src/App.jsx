@@ -34,6 +34,7 @@ import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminDataStructures from "./pages/AdminDataStructures";
 import AdminDataStructureProposalReview from "./pages/AdminDataStructureProposalReview";
+import BookmarksPage from "./pages/BookmarksPage";
 import { getMe } from "./features/auth/authSlice";
 import { toast } from "react-toastify";
 
@@ -105,6 +106,10 @@ const router = createBrowserRouter([
       {
         path: "proposals",
         element: <MyProposals />,
+      },
+      {
+        path: "bookmarks",
+        element: <BookmarksPage />,
       },
       {
         path: "community-guidelines",

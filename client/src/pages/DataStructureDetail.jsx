@@ -13,6 +13,7 @@ import { ArrowLeft, ArrowRight, ThumbsUp, ThumbsDown, Sparkles } from "lucide-re
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import clsx from "clsx";
+import BookmarkButton from "../components/ui/BookmarkButton";
 
 const DataStructureDetail = () => {
   const { slug } = useParams();
@@ -199,17 +200,23 @@ const DataStructureDetail = () => {
               </motion.button>
             </div>
 
-            {/* Contribute Button */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleContribute}
-              className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 text-white font-medium shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all"
-              aria-label="Contribute to data structure"
-            >
-              <Sparkles size={20} />
-              <span>Contribute</span>
-            </motion.button>
+            {/* Action Buttons */}
+            <div className="flex items-center gap-4">
+              <BookmarkButton
+                contentType="dataStructure"
+                contentId={dataStructure._id}
+              />
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleContribute}
+                className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 text-white font-medium shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all"
+                aria-label="Contribute to data structure"
+              >
+                <Sparkles size={20} />
+                <span>Contribute</span>
+              </motion.button>
+            </div>
           </div>
         </section>
 
