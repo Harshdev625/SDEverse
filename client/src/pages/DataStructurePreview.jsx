@@ -34,11 +34,11 @@ const DataStructurePreview = ({ dataStructure }) => {
       transition={{ duration: 0.3 }}
       className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 space-y-8"
     >
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8 space-y-6">
+
         <DataStructureInfo dataStructure={dataStructure} isAdmin={isAdmin} />
         <DataStructureMetadata dataStructure={dataStructure} isAdmin={isAdmin} />
         <DataStructureOperations dataStructure={dataStructure} isAdmin={isAdmin} />
-      </div>
+
     </motion.div>
   );
 };

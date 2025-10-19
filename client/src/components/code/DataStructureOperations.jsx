@@ -120,30 +120,6 @@ const DataStructureOperations = ({ dataStructure, isAdmin = false }) => {
                     <div className="p-4 sm:p-5 bg-white dark:bg-gray-800">
                       <div className="space-y-4">
                         <div>
-                          <h5 className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-1">
-                            Explanation
-                          </h5>
-                          <div className="prose prose-base dark:prose-invert max-w-none text-gray-600 dark:text-gray-300">
-                            <MarkdownRenderer>
-                              {operation.implementations[selectedLangIndex]?.explanation?.trim() ||
-                                "No explanation provided."}
-                            </MarkdownRenderer>
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 text-base text-gray-600 dark:text-gray-300">
-                          <p>
-                            <span className="font-medium">Time Complexity:</span>{" "}
-                            {operation.implementations[selectedLangIndex]?.complexity?.time?.trim() || "N/A"}
-                          </p>
-                          <p>
-                            <span className="font-medium">Space Complexity:</span>{" "}
-                            {operation.implementations[selectedLangIndex]?.complexity?.space?.trim() || "N/A"}
-                          </p>
-                        </div>
-                        <div>
-                          <h5 className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-1">
-                            Code
-                          </h5>
                           <div className="relative rounded-md overflow-hidden">
                             {operation.implementations[selectedLangIndex]?.codeDetails?.code?.trim() ? (
                               <>
