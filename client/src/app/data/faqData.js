@@ -4,7 +4,7 @@ export const faqData = [
     questions: [
       {
         q: "What is SDEverse?",
-        a: "SDEverse is an open-source collaborative platform designed to help Software Development Engineers master Data Structures and Algorithms (DSA) through an interactive learning environment, comprehensive resources, and community-driven content.",
+        a: "SDEverse is an open-source collaborative platform designed to help Software Development Engineers master Data Structures and Algorithms (DSA). It features an interactive learning environment, comprehensive resources, and community-driven content. Users can also create detailed profiles to track their progress, showcasing their contest ratings, contest performance, and links to their competitive programming profiles on platforms like LeetCode, CodeChef, Codeforces, and GitHub.",
       },
       {
         q: "Who is SDEverse for?",
@@ -26,6 +26,10 @@ export const faqData = [
       {
         q: "What kind of content can I find on SDEverse?",
         a: "You'll find a comprehensive library of algorithms (sorting, searching, graphs, etc.) and data structures (arrays, trees, heaps, etc.), complete with complexity analysis, real-world applications, and visual explanations.",
+      },
+      {
+        q: "Can I save algorithms for later?",
+        a: "Yes, you can bookmark any algorithm or data structure. This allows you to create a personalized collection for quick access and focused study sessions.",
       },
     ],
   },
