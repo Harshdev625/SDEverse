@@ -32,7 +32,7 @@ const Layout = () => {
     >
       <Sidebar />
       <div
-        className="flex flex-col flex-1 md:ml-64 max-md:mt-6"
+        className="flex flex-col flex-1 md:ml-64 "
         style={{ overflowX: "hidden" }}
       >
         <main className="flex-1 p-4 md:p-6 lg:p-8">

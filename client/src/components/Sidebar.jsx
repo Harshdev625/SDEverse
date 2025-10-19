@@ -1,4 +1,4 @@
-import { NavLink, useLocation ,useNavigate} from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   Users,
@@ -185,13 +185,11 @@ const Sidebar = () => {
 
   const getNavItemClass = (section, isActive, isSubItem = false) => {
     const scheme = colorSchemes[section] || colorSchemes.home;
-    return `flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${
-      isSubItem ? "ml-4" : ""
-    } ${
-      isActive
+    return `flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${isSubItem ? "ml-4" : ""
+      } ${isActive
         ? `${scheme.active} text-white shadow-lg`
         : `text-gray-700 dark:text-gray-300 ${scheme.bg} ${scheme.hover} ${scheme.border} border-l-4`
-    }`;
+      }`;
   };
 
   const isProposalsReviewParentActive =
@@ -203,23 +201,19 @@ const Sidebar = () => {
       {/* Toggle Button */}
       <button
         onClick={handleSidebarToggle}
-        className="fixed z-40 p-3 ml-4 mt-4 rounded-full bg-white dark:bg-gray-800 shadow-lg md:hidden transition-all hover:scale-105 backdrop-blur-sm"
+        className={`fixed z-50 p-3 bottom-6 right-3 rounded-full shadow-2xl 
+    bg-gradient-to-r from-indigo-500 to-blue-600 
+    text-white hover:scale-110 active:scale-95 
+    transition-all duration-300 ease-in-out md:hidden`}
         aria-label="Toggle Sidebar"
       >
         {isSidebarOpen ? (
-          <X className="text-indigo-600 dark:text-indigo-300" size={24} />
+          <X size={22} />
         ) : (
-          <Menu className="text-indigo-600 dark:text-indigo-300" size={24} />
+          <Menu size={22} />
         )}
       </button>
 
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30 md:hidden animate-fadeIn"
-          onClick={handleOverlayClick}
-          aria-hidden="true"
-        />
-      )}
 
       {/* Sidebar */}
       <aside
@@ -344,11 +338,10 @@ const Sidebar = () => {
                 <div
                   className={`
                     rounded-xl transition-all duration-300
-                    ${
-                      isProposalsReviewParentActive
-                        ? colorSchemes.reviewProposalsParent.active +
-                          " text-white shadow-lg"
-                        : `text-gray-700 dark:text-gray-300 ${colorSchemes.reviewProposalsParent.bg} ${colorSchemes.reviewProposalsParent.hover} border-l-4 ${colorSchemes.reviewProposalsParent.border}`
+                    ${isProposalsReviewParentActive
+                      ? colorSchemes.reviewProposalsParent.active +
+                      " text-white shadow-lg"
+                      : `text-gray-700 dark:text-gray-300 ${colorSchemes.reviewProposalsParent.bg} ${colorSchemes.reviewProposalsParent.hover} border-l-4 ${colorSchemes.reviewProposalsParent.border}`
                     }
                   `}
                 >
