@@ -36,6 +36,7 @@ import AdminDataStructures from "./pages/AdminDataStructures";
 import AdminDataStructureProposalReview from "./pages/AdminDataStructureProposalReview";
 import { getMe } from "./features/auth/authSlice";
 import { toast } from "react-toastify";
+import FaqPage from './pages/FaqPage';
 
 const router = createBrowserRouter([
   {
@@ -157,6 +158,10 @@ const router = createBrowserRouter([
             <AdminAnalytics />
           </AdminRoute>
         ),
+      },
+      {
+        path: "faq",
+        element: <FaqPage />,
       },
     ],
   },
