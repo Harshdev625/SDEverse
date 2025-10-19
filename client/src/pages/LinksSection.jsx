@@ -17,6 +17,7 @@ export default function LinksSection({
   refreshing,
   onRefresh,
   lastUpdated,
+  urlErrors = {},
 }) {
   const platforms = Object.keys(links);
   const navigate = useNavigate();
@@ -113,22 +114,54 @@ export default function LinksSection({
                     )}
                   </div>
 
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name={`${
-                        title === "Competitive Links"
-                          ? "competitiveProfiles"
-                          : "socialLinks"
-                      }.${platform}`}
-                      value={link || ""}
-                      onChange={handleChange}
-                      placeholder={`Enter ${platform} link`}
-                      className="flex-grow w-full px-3 py-1.5 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-sm focus:ring-2 focus:ring-gray-300 dark:focus:ring-blue-500 focus:border-gray-400 dark:focus:border-blue-500 outline-none transition-all duration-200"
-                    />
-                  ) : (
-                      !link && <p className="text-gray-600 dark:text-gray-500 italic text-sm">Link not set</p>
-                  )}
+              {isEditing ? (
+  <>
+    <input
+      type="text"
+      name={`${
+        title === "Competitive Links"
+          ? "competitiveProfiles"
+          : "socialLinks"
+      }.${platform}`}
+      value={link || ""}
+      onChange={handleChange}
+      placeholder={`Enter ${platform} link`}
+      className={`flex-grow w-full px-3 py-1.5 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border text-sm placeholder-gray-500 focus:ring-2 outline-none transition-all duration-200 ${
+        urlErrors?.[
+          `${
+            title === "Competitive Links"
+              ? "competitiveProfiles"
+              : "socialLinks"
+          }.${platform}`
+        ]
+          ? "border-red-500 focus:ring-red-400"
+          : "border-gray-300 dark:border-gray-600 focus:ring-gray-300 dark:focus:ring-blue-500"
+      }`}
+    />
+    {urlErrors?.[
+      `${
+        title === "Competitive Links"
+          ? "competitiveProfiles"
+          : "socialLinks"
+      }.${platform}`
+    ] && (
+      <p className="text-red-500 text-sm mt-1">
+        {
+          urlErrors[
+            `${
+              title === "Competitive Links"
+                ? "competitiveProfiles"
+                : "socialLinks"
+            }.${platform}`
+          ]
+        }
+      </p>
+    )}
+  </>
+) : (
+  !link && <p className="text-gray-600 dark:text-gray-500 italic text-sm">Link not set</p>
+)}
+
 
                   {!isEditing && link && !readonly && (
                     <button
@@ -181,4 +214,4 @@ function formatKey(key) {
     .replace(/([A-Z])/g, " $1")
     .replace(/^./, (s) => s.toUpperCase())
     .replace(/_/g, " ");
-}
+} 
