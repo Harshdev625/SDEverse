@@ -108,16 +108,6 @@ const Algorithm = () => {
             <ArrowLeft size={20} className="text-gray-700 dark:text-gray-300" />
           </button>
           
-          {/* Bookmark Navigation Button */}
-          <button
-            onClick={() => navigate('/bookmarks')}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 transition-all shadow-sm"
-            aria-label="View bookmarks"
-          >
-            <Bookmark size={18} />
-            <span className="hidden sm:inline font-medium">My Bookmarks</span>
-          </button>
-          
           <button
             onClick={() => navigate(1)}
             className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all shadow-sm"
@@ -249,9 +239,20 @@ const Algorithm = () => {
         </div>
       ) : (
         <div className="space-y-8">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Browse by Category
-          </h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              Browse by Category
+            </h2>
+            
+            <button
+              onClick={() => navigate('/bookmarks')}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 transition-all shadow-sm"
+              aria-label="View bookmarks"
+            >
+              <Bookmark size={18} />
+              <span className="hidden sm:inline font-medium">My Bookmarks</span>
+            </button>
+          </div>
 
           {categories.length === 0 ? (
             <div className="text-center py-10">

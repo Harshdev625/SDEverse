@@ -20,7 +20,6 @@ import {
   Workflow,
   UserCircle,
   Database,
-  Bookmark,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleTheme } from "../features/theme/themeSlice";
@@ -286,33 +285,19 @@ const Sidebar = () => {
               <ChevronRight className="ml-auto opacity-70" size={16} />
             </NavLink>
 
-            {/* User Links */}
+            {/* Profile Link - Always at the top */}
             {token && (
-              <>
-                <NavLink
-                  to={`/profile/${user.username}`}
-                  className={({ isActive }) =>
-                    getNavItemClass("profile", isActive)
-                  }
-                  onClick={handleLinkClick}
-                >
-                  <UserCircle size={20} className="min-w-[20px]" />
-                  <span className="truncate">My Profile</span>
-                  <ChevronRight className="ml-auto opacity-70" size={16} />
-                </NavLink>
-
-                <NavLink
-                  to="/bookmarks"
-                  className={({ isActive }) =>
-                    getNavItemClass("bookmarks", isActive)
-                  }
-                  onClick={handleLinkClick}
-                >
-                  <Bookmark size={20} className="min-w-[20px]" />
-                  <span className="truncate">My Bookmarks</span>
-                  <ChevronRight className="ml-auto opacity-70" size={16} />
-                </NavLink>
-              </>
+              <NavLink
+                to={`/profile/${user.username}`}
+                className={({ isActive }) =>
+                  getNavItemClass("profile", isActive)
+                }
+                onClick={handleLinkClick}
+              >
+                <UserCircle size={20} className="min-w-[20px]" />
+                <span className="truncate">My Profile</span>
+                <ChevronRight className="ml-auto opacity-70" size={16} />
+              </NavLink>
             )}
 
             {/* Admin Section */}

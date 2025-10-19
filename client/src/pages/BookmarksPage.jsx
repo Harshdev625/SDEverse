@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Bookmark, Filter, Search, Calendar, Tag } from "lucide-react";
 import { getUserBookmarks } from "../features/bookmark/bookmarkSlice";
-import BookmarkButton from "../components/ui/BookmarkButton";
 
 const BookmarksPage = () => {
   const dispatch = useDispatch();
@@ -179,11 +178,12 @@ const BookmarksPage = () => {
                           )}
                         </div>
                       </div>
-                      <BookmarkButton
-                        contentType={bookmark.contentType}
-                        contentId={content._id}
-                        className="ml-2"
-                      />
+                      <div className="ml-2 p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <Bookmark 
+                          className="w-5 h-5 text-blue-600 dark:text-blue-400 fill-current" 
+                          title="Bookmarked"
+                        />
+                      </div>
                     </div>
 
                     {/* Categories/Tags */}
