@@ -236,19 +236,8 @@ const DataStructureOperations = ({ dataStructure, isAdmin = false }) => {
         transition={{ duration: 0.2 }}
         className="bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden"
       >
-        <button
-          onClick={() => toggleFullImplementation(0)}
-          className="w-full flex justify-between items-center px-4 py-3 sm:px-5 sm:py-4 text-left text-base sm:text-lg font-semibold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          data-tooltip-id={implId}
-          data-tooltip-content="Toggle full implementations"
-          aria-expanded={isOpen}
-          aria-controls="full-impl-content"
-        >
-          <span>Full Implementations ({dataStructure.fullImplementations.length} languages)</span>
-          <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-            {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          </motion.div>
-        </button>
+        <CodeDisplay algorithm={adaptedAlgorithm} />
+        
         <Tooltip
           id={implId}
           place="top"
@@ -264,7 +253,7 @@ const DataStructureOperations = ({ dataStructure, isAdmin = false }) => {
               transition={{ duration: 0.3 }}
               className="px-4 py-4 sm:px-5 sm:py-5 space-y-4 overflow-hidden"
             >
-              <CodeDisplay algorithm={adaptedAlgorithm} />
+              
               {isAdmin && (
                 <div>
                   <button
