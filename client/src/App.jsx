@@ -172,6 +172,10 @@ const router = createBrowserRouter([
           </AdminRoute>
         ),
       },
+      {
+        path: "faq",
+        element: <FaqPage />,
+      },
     ],
   },
 ]);
