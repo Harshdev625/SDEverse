@@ -11,17 +11,36 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import AlgorithmFilters from "../components/ui/AlgorithmFilters";
 
+// ✅ Custom Hook — defined OUTSIDE the component
+const usePreserveScroll = () => {
+  const [savedScroll, setSavedScroll] = useState(0);
+
+  useEffect(() => {
+    const handleBeforeUpdate = () => setSavedScroll(window.scrollY);
+    window.addEventListener("beforeunload", handleBeforeUpdate);
+    return () => window.removeEventListener("beforeunload", handleBeforeUpdate);
+  }, []);
+
+  useEffect(() => {
+    if (savedScroll) {
+      requestAnimationFrame(() => window.scrollTo(0, savedScroll));
+    }
+  });
+};
+
 const Algorithm = () => {
   const dispatch = useDispatch();
   const {
     categories = [],
     algorithms = [],
-    total,
     loading,
     error,
   } = useSelector((state) => state.algorithm);
 
   const navigate = useNavigate();
+
+  usePreserveScroll(); // ✅ called here
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [expandedCategories, setExpandedCategories] = useState({});
@@ -45,7 +64,14 @@ const Algorithm = () => {
   useEffect(() => {
     setExpandedCategories({});
     setSelectedCategory(null);
-  }, [allowMultipleDropdowns]);
+  }, [allowMultipleDropdowns, selectedDifficulty, isFilterActive]);
+
+  useEffect(() => {
+    window.history.scrollRestoration = "manual";
+    return () => {
+      window.history.scrollRestoration = "auto";
+    };
+  }, []);
 
   const handleSearchChange = (e) => {
     const query = e.target.value;
@@ -66,18 +92,22 @@ const Algorithm = () => {
     setSelectedCategory(selectedCategory === category ? null : category);
 
     if (allowMultipleDropdowns) {
+      // Allow multiple dropdowns to be open
       setExpandedCategories((prev) => ({
         ...prev,
         [category]: !prev[category],
       }));
     } else {
+      // Only allow one dropdown to be open at a time
       const isCurrentlyOpen = expandedCategories[category];
       if (isCurrentlyOpen) {
+        // Close the current category
         setExpandedCategories((prev) => ({
           ...prev,
           [category]: false,
         }));
       } else {
+        // Close all other categories and open the selected one
         setExpandedCategories({ [category]: true });
       }
     }
@@ -253,20 +283,11 @@ const Algorithm = () => {
             <div className="space-y-4">
               {[...categories]
                 .sort((a, b) => {
-                  if (
-                    isFilterActive &&
-                    selectedCategory &&
-                    a === selectedCategory
-                  )
-                    return -1;
-                  if (
-                    isFilterActive &&
-                    selectedCategory &&
-                    b === selectedCategory
-                  )
-                    return 1;
+                  if (isFilterActive && selectedDifficulty)
+                    return a.localeCompare(b);
                   return 0;
                 })
+
                 .map((category) => {
                   const categoryAlgorithms = algorithms.filter((algo) => {
                     const matchesCategory = algo.category?.includes(category);
