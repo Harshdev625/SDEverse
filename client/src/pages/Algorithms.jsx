@@ -5,8 +5,9 @@ import {
   fetchAlgorithmsForList,
   searchAllAlgorithms,
 } from "../features/algorithm/algorithmSlice";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ChevronDown, Search, ArrowLeft, ArrowRight, Info } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import AlgorithmFilters from "../components/ui/AlgorithmFilters";
 
@@ -30,71 +31,56 @@ const Algorithm = () => {
 
   const isSearching = searchQuery.trim().length > 0;
 
-  // Ensure flag exists
+  // ✅ Initialize global flag once (avoids undefined on reload)
   useEffect(() => {
     window.isSearchingActive = false;
   }, []);
 
-  // Fetch categories and algorithms initially
   useEffect(() => {
     dispatch(fetchCategories());
     dispatch(fetchAlgorithmsForList());
   }, [dispatch]);
 
-  // 🧩 When switching to single mode, collapse all categories
+  // Close all dropdowns when the toggle setting changes
   useEffect(() => {
-    if (!allowMultipleDropdowns) {
-      setExpandedCategories({});
-      setSelectedCategory(null);
-    }
+    setExpandedCategories({});
+    setSelectedCategory(null);
   }, [allowMultipleDropdowns]);
 
-  // Handle search logic
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
 
     if (query.trim()) {
+      // ✅ Tell filters to pause fetching
       window.isSearchingActive = true;
       dispatch(searchAllAlgorithms({ q: query }));
     } else {
+      // ✅ Search cleared, resume filters/list fetching
       window.isSearchingActive = false;
       dispatch(fetchAlgorithmsForList());
     }
   };
 
-  // Handle filter logic
-  useEffect(() => {
-    if (!isFilterActive) {
-      // Reset when no filters are active
-      setExpandedCategories({});
-    }
-    // 🚫 Do NOT auto-expand categories for any filter
-  }, [isFilterActive]);
-
   const toggleCategory = (category) => {
     setSelectedCategory(selectedCategory === category ? null : category);
 
-    setExpandedCategories((prev) => {
-      const isCurrentlyOpen = !!prev[category];
-
-      if (allowMultipleDropdowns) {
-        // ✅ Allow multiple open
-        return {
+    if (allowMultipleDropdowns) {
+      setExpandedCategories((prev) => ({
+        ...prev,
+        [category]: !prev[category],
+      }));
+    } else {
+      const isCurrentlyOpen = expandedCategories[category];
+      if (isCurrentlyOpen) {
+        setExpandedCategories((prev) => ({
           ...prev,
-          [category]: !isCurrentlyOpen,
-        };
+          [category]: false,
+        }));
       } else {
-        // ❌ Only one open at a time
-        if (isCurrentlyOpen) {
-          // Collapse if the same one is clicked again
-          return {};
-        } else {
-          // Close all others and open this one
-          return { [category]: true };
-        }
+        setExpandedCategories({ [category]: true });
       }
-    });
+    }
   };
 
   return (
@@ -127,7 +113,7 @@ const Algorithm = () => {
         </div>
       </div>
 
-      {/* Toggle Control */}
+      {/* Top Control for Multiple Dropdowns Toggle with Info */}
       <div className="mb-4 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto">
         <div className="flex items-center justify-end space-x-3">
           <button
@@ -157,7 +143,7 @@ const Algorithm = () => {
         </div>
       </div>
 
-      {/* Hero */}
+      {/* Hero Section */}
       <div className="mb-10 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
           Algorithm Explorer
@@ -169,7 +155,7 @@ const Algorithm = () => {
         </p>
       </div>
 
-      {/* Filters */}
+      {/* 🔹 Filters Section */}
       <div className="mb-8 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto">
         <AlgorithmFilters
           onFilterApplied={setIsFilterActive}
@@ -194,7 +180,7 @@ const Algorithm = () => {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Content Area */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -204,10 +190,12 @@ const Algorithm = () => {
           {error?.message || String(error)}
         </div>
       ) : isSearching ? (
+        // ✅ Search results section
         <div className="space-y-6">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
             Search Results {algorithms.length > 0 && `(${algorithms.length})`}
           </h2>
+
           {algorithms.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-gray-500 dark:text-gray-400 text-lg">
@@ -263,100 +251,139 @@ const Algorithm = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {categories.map((category) => {
-                const categoryAlgorithms = algorithms.filter((algo) => {
-                  const matchesCategory =
-                    algo.category?.includes(category) &&
-                    (!selectedCategory ||
-                      selectedCategory === "All Categories" ||
-                      algo.category?.includes(selectedCategory));
+              {[...categories]
+                .sort((a, b) => {
+                  if (
+                    isFilterActive &&
+                    selectedCategory &&
+                    a === selectedCategory
+                  )
+                    return -1;
+                  if (
+                    isFilterActive &&
+                    selectedCategory &&
+                    b === selectedCategory
+                  )
+                    return 1;
+                  return 0;
+                })
+                .map((category) => {
+                  const categoryAlgorithms = algorithms.filter((algo) => {
+                    const matchesCategory = algo.category?.includes(category);
 
-                  const matchesDifficulty =
-                    !selectedDifficulty ||
-                    selectedDifficulty === "All Difficulty" ||
-                    (algo.difficulty &&
-                      algo.difficulty.toLowerCase() ===
-                        selectedDifficulty.toLowerCase());
+                    const matchesDifficulty =
+                      !selectedDifficulty ||
+                      selectedDifficulty === "All Difficulty" ||
+                      (algo.difficulty &&
+                        algo.difficulty.toLowerCase() ===
+                          selectedDifficulty.toLowerCase());
 
-                  return matchesCategory && matchesDifficulty;
-                });
+                    return matchesCategory && matchesDifficulty;
+                  });
 
-                if (isFilterActive && categoryAlgorithms.length === 0)
-                  return null;
+                  if (isFilterActive && categoryAlgorithms.length === 0)
+                    return null;
 
-                return (
-                  <div
-                    key={category}
-                    className={`border rounded-xl overflow-hidden shadow-sm transition-all ${
-                      expandedCategories[category]
-                        ? "border-blue-400 dark:border-blue-600"
-                        : "border-gray-200 dark:border-gray-700"
-                    }`}
-                  >
-                    <button
-                      onClick={() => toggleCategory(category)}
-                      className="w-full flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  return (
+                    <div
+                      key={category}
+                      className={`border rounded-xl overflow-hidden shadow-sm transition-all ${
+                        expandedCategories[category]
+                          ? "border-blue-400 dark:border-blue-600"
+                          : "border-gray-200 dark:border-gray-700"
+                      }`}
                     >
-                      <div className="flex items-center space-x-3">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {category}
-                        </h3>
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                          {categoryAlgorithms.length}
-                        </span>
-                      </div>
-                      <ChevronDown
-                        size={20}
-                        className={`transition-transform ${
-                          expandedCategories[category] ? "rotate-180" : ""
-                        } text-gray-500 dark:text-gray-400`}
-                      />
-                    </button>
+                      <button
+                        onClick={() => toggleCategory(category)}
+                        className="w-full flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            {category}
+                          </h3>
+                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                            {categoryAlgorithms.length}
+                          </span>
+                        </div>
+                        <ChevronDown
+                          size={20}
+                          className={`transition-transform ${
+                            expandedCategories[category] ? "rotate-180" : ""
+                          } text-gray-500 dark:text-gray-400`}
+                        />
+                      </button>
 
-                    <AnimatePresence>
-                      {expandedCategories[category] && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {categoryAlgorithms.length > 0 ? (
-                              categoryAlgorithms.map((algorithm) => (
-                                <motion.div
-                                  key={algorithm.slug}
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  transition={{ duration: 0.2 }}
-                                >
-                                  <Link
-                                    to={`/algorithms/${algorithm.slug}`}
-                                    className="block p-4 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-all"
+                      <AnimatePresence>
+                        {expandedCategories[category] && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {categoryAlgorithms.length > 0 ? (
+                                categoryAlgorithms.map((algorithm) => (
+                                  <motion.div
+                                    key={algorithm.slug}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.2 }}
                                   >
-                                    <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-                                      {algorithm.title}
-                                    </h4>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                                      {algorithm.description ||
-                                        algorithm.intuition}
-                                    </p>
-                                  </Link>
-                                </motion.div>
-                              ))
-                            ) : (
-                              <p className="text-gray-500 dark:text-gray-400 col-span-full py-2">
-                                No algorithms in this category.
-                              </p>
-                            )}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
+                                    <Link
+                                      to={`/algorithms/${algorithm.slug}`}
+                                      className="block p-4 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-all"
+                                    >
+                                      <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                                        {algorithm.title}
+                                      </h4>
+
+                                      <div className="flex flex-wrap gap-2 mb-2">
+                                        {algorithm.category?.map((cat) => (
+                                          <span
+                                            key={cat}
+                                            className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                                          >
+                                            {cat}
+                                          </span>
+                                        ))}
+                                        {algorithm.difficulty && (
+                                          <span
+                                            className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                              algorithm.difficulty.toLowerCase() ===
+                                              "easy"
+                                                ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
+                                                : algorithm.difficulty.toLowerCase() ===
+                                                  "medium"
+                                                ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
+                                                : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
+                                            }`}
+                                          >
+                                            {algorithm.difficulty}
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                                        {algorithm.description ||
+                                          algorithm.intuition}
+                                      </p>
+                                    </Link>
+                                  </motion.div>
+                                ))
+                              ) : (
+                                <p className="text-gray-500 dark:text-gray-400 col-span-full py-2">
+                                  No algorithms in this category.
+                                </p>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
             </div>
           )}
         </div>
