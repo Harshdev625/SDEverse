@@ -9,6 +9,7 @@ export default function ProfileSection({ isEditing, formData, handleChange, urlE
         <label htmlFor={name} className="block font-medium text-gray-600 dark:text-gray-400 text-sm mb-1">
           {label}
         </label>
+
         {isEditing ? (
           <>
             <input
@@ -17,10 +18,10 @@ export default function ProfileSection({ isEditing, formData, handleChange, urlE
               name={name}
               value={value}
               onChange={handleChange}
+              placeholder={`Enter your ${label.toLowerCase()}`}
               className={`w-full px-4 py-2 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border ${
                 errorMsg ? "border-red-500 focus:ring-red-400" : "border-gray-300 dark:border-gray-600 focus:ring-gray-300 dark:focus:ring-blue-500"
               } placeholder-gray-500 focus:ring-2 outline-none transition-all duration-200`}
-              placeholder={`Enter your ${label.toLowerCase()}`}
             />
             {errorMsg && <p className="text-red-500 text-sm mt-1">{errorMsg}</p>}
           </>
@@ -31,16 +32,13 @@ export default function ProfileSection({ isEditing, formData, handleChange, urlE
               target="_blank"
               rel="noopener noreferrer"
               className={`break-all text-lg pt-1 pb-1 inline-block w-full ${
-                errorMsg
-                  ? "text-red-500"
-                  : "text-emerald-400 hover:text-emerald-300 hover:underline"
+                errorMsg ? "text-red-500" : "text-emerald-400 hover:text-emerald-300 hover:underline"
               }`}
             >
               {value}
             </a>
             {errorMsg && <p className="text-red-500 text-sm mt-1">{errorMsg}</p>}
           </>
-
         ) : (
           <p className="text-gray-900 dark:text-white text-lg pt-1 pb-1 min-h-[44px] flex items-center">
             {value || <span className="italic text-gray-500 dark:text-gray-400">Not set</span>}
@@ -57,6 +55,7 @@ export default function ProfileSection({ isEditing, formData, handleChange, urlE
       </h3>
 
       <div className="space-y-8">
+        {/* Avatar Section */}
         <div className="flex flex-col items-center gap-6">
           {formData.avatarUrl ? (
             <img
@@ -81,11 +80,13 @@ export default function ProfileSection({ isEditing, formData, handleChange, urlE
           )}
         </div>
 
+        {/* Name & Location */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {renderField("Full Name", "fullName", formData.fullName, isEditing, handleChange)}
           {renderField("Location", "location", formData.location, isEditing, handleChange)}
         </div>
 
+        {/* Bio */}
         <div>
           <label htmlFor="bio" className="block font-medium text-gray-600 dark:text-gray-400 text-sm mb-1">
             Bio
@@ -97,8 +98,8 @@ export default function ProfileSection({ isEditing, formData, handleChange, urlE
               rows={4}
               value={formData.bio}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-gray-300 dark:focus:ring-blue-500 outline-none transition-all duration-200 resize-y"
               placeholder="Write something about yourself"
+              className="w-full px-4 py-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-gray-300 dark:focus:ring-blue-500 outline-none transition-all duration-200 resize-y"
             ></textarea>
           ) : (
             <p className="text-gray-900 dark:text-white text-lg pt-1 pb-1 min-h-[100px] whitespace-pre-wrap">
@@ -107,6 +108,7 @@ export default function ProfileSection({ isEditing, formData, handleChange, urlE
           )}
         </div>
 
+        {/* Website */}
         <div>
           {renderField("Website", "website", formData.website, isEditing, handleChange, true)}
         </div>
@@ -114,4 +116,3 @@ export default function ProfileSection({ isEditing, formData, handleChange, urlE
     </div>
   );
 }
-    
