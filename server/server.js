@@ -1,6 +1,5 @@
 const express = require("express");
 const dotenv = require("dotenv");
-dotenv.config({ path: __dirname + "/.env" });
 const cors = require("cors");
 const connectDB = require("./config/db");
 const KeepAlive = require("./utils/keepAlive");
@@ -17,6 +16,7 @@ const dataStructureProposalRoutes = require("./routes/dataStructureProposal.rout
 
 const { notFound, errorHandler } = require("./middleware/error.middleware");
 
+dotenv.config();
 connectDB();
 
 const app = express();
