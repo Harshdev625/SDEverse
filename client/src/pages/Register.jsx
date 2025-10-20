@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../features/auth/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Loader2, Eye, EyeOff, ArrowLeft, Check, X } from "lucide-react";
 import SDEverse from "../assets/sdeverse.png";
 
 const Register = () => {
@@ -17,13 +17,100 @@ const Register = () => {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  // Added: State for client-side validation errors
+  const [validationErrors, setValidationErrors] = useState({});
+  // Added: State for password strength criteria
+  const [passwordCriteria, setPasswordCriteria] = useState({
+    minLength: false,
+    hasLetter: false,
+    hasNumber: false,
+  });
 
-  const handleChange = (e) =>
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    
+    // Added: Check password criteria in real-time
+    if (e.target.name === "password") {
+      const pwd = e.target.value;
+      setPasswordCriteria({
+        minLength: pwd.length >= 6,
+        hasLetter: /[a-zA-Z]/.test(pwd),
+        hasNumber: /[0-9]/.test(pwd),
+      });
+    }
+    
+    // Added: Clear validation error for the field being edited
+    if (validationErrors[e.target.name]) {
+      setValidationErrors({ ...validationErrors, [e.target.name]: "" });
+    }
+  };
+
+  // Added: Client-side validation function
+  const validateForm = () => {
+    const errors = {};
+    
+    // Username validation: 3-20 characters, alphanumeric and underscore only
+    if (formData.username.length < 3) {
+      errors.username = "Username must be at least 3 characters long";
+    } else if (formData.username.length > 20) {
+      errors.username = "Username must be less than 20 characters";
+    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+      errors.username = "Username can only contain letters, numbers, and underscores";
+    }
+
+    // Email validation: Basic email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      errors.email = "Please enter a valid email address";
+    }
+
+    // Password validation: Minimum 6 characters, at least one letter and one number
+    if (formData.password.length < 6) {
+      errors.password = "Password must be at least 6 characters long";
+    } else if (!/(?=.*[a-zA-Z])(?=.*[0-9])/.test(formData.password)) {
+      errors.password = "Password must contain at least one letter and one number";
+    }
+
+    return errors;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Added: Validate form before submission
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    setValidationErrors({});
     dispatch(registerUser(formData));
+  };
+
+  // Added: Parse and format server error messages
+  const formatErrorMessage = (error) => {
+    if (!error) return "";
+    
+    const errorString = error.message || error.toString();
+    
+    // Handle duplicate username error
+    if (errorString.includes("E11000") && errorString.includes("username")) {
+      return "This username is already taken. Please choose another one.";
+    }
+    
+    // Handle duplicate email error
+    if (errorString.includes("E11000") && errorString.includes("email")) {
+      return "This email is already registered. Please use another email or login.";
+    }
+    
+    // Handle other validation errors
+    if (errorString.includes("validation")) {
+      return "Please check your input and try again.";
+    }
+    
+    // Default error message
+    return errorString;
   };
 
   useEffect(() => {
@@ -70,13 +157,15 @@ const Register = () => {
           <p className="text-gray-600">Start your coding journey today</p>
         </div>
 
+        {/* Added: Display server error message above the form */}
         {error && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-3 bg-red-50 text-red-700 rounded-lg text-sm"
+            className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-start gap-2"
           >
-            {error.message || error}
+            <X className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <span>{formatErrorMessage(error)}</span>
           </motion.div>
         )}
 
@@ -92,7 +181,9 @@ const Register = () => {
                 value={formData.username}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition"
+                className={`w-full px-4 py-3 bg-white rounded-lg border ${
+                  validationErrors.username ? "border-red-500" : "border-gray-300"
+                } focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition`}
                 placeholder="Enter your username"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3">
@@ -112,6 +203,12 @@ const Register = () => {
                 </svg>
               </div>
             </div>
+            {/* Added: Display validation error for username */}
+            {validationErrors.username && (
+              <p className="mt-1 text-sm text-red-600">{validationErrors.username}</p>
+            )}
+            {/* Added: Helper text for username requirements */}
+            <p className="mt-1 text-xs text-gray-500">3-20 characters, letters, numbers, and underscores only</p>
           </div>
 
           <div>
@@ -125,7 +222,9 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition"
+                className={`w-full px-4 py-3 bg-white rounded-lg border ${
+                  validationErrors.email ? "border-red-500" : "border-gray-300"
+                } focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition`}
                 placeholder="your.email@example.com"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3">
@@ -145,6 +244,10 @@ const Register = () => {
                 </svg>
               </div>
             </div>
+            {/* Added: Display validation error for email */}
+            {validationErrors.email && (
+              <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+            )}
           </div>
 
           <div>
@@ -158,7 +261,9 @@ const Register = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition"
+                className={`w-full px-4 py-3 bg-white rounded-lg border ${
+                  validationErrors.password ? "border-red-500" : "border-gray-300"
+                } focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition`}
                 placeholder="••••••••"
               />
               <button
@@ -173,6 +278,58 @@ const Register = () => {
                 )}
               </button>
             </div>
+            
+            {/* Added: Password strength indicator - shows when user starts typing */}
+            {formData.password && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-3 p-3 bg-gray-50 rounded-lg space-y-2"
+              >
+                <p className="text-xs font-medium text-gray-700 mb-2">Password requirements:</p>
+                
+                {/* Minimum length criteria */}
+                <div className="flex items-center gap-2">
+                  {passwordCriteria.minLength ? (
+                    <Check className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <X className="w-4 h-4 text-gray-400" />
+                  )}
+                  <span className={`text-xs ${passwordCriteria.minLength ? "text-green-600 font-medium" : "text-gray-600"}`}>
+                    At least 6 characters
+                  </span>
+                </div>
+                
+                {/* Has letter criteria */}
+                <div className="flex items-center gap-2">
+                  {passwordCriteria.hasLetter ? (
+                    <Check className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <X className="w-4 h-4 text-gray-400" />
+                  )}
+                  <span className={`text-xs ${passwordCriteria.hasLetter ? "text-green-600 font-medium" : "text-gray-600"}`}>
+                    Contains at least one letter
+                  </span>
+                </div>
+                
+                {/* Has number criteria */}
+                <div className="flex items-center gap-2">
+                  {passwordCriteria.hasNumber ? (
+                    <Check className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <X className="w-4 h-4 text-gray-400" />
+                  )}
+                  <span className={`text-xs ${passwordCriteria.hasNumber ? "text-green-600 font-medium" : "text-gray-600"}`}>
+                    Contains at least one number
+                  </span>
+                </div>
+              </motion.div>
+            )}
+            
+            {/* Added: Display validation error for password */}
+            {validationErrors.password && (
+              <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
+            )}
           </div>
 
           <motion.button
@@ -180,7 +337,7 @@ const Register = () => {
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-medium shadow-lg hover:shadow-indigo-200/50 transition-all duration-300 flex items-center justify-center"
+            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-medium shadow-lg hover:shadow-indigo-200/50 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>
