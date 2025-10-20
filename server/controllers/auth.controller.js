@@ -145,8 +145,46 @@ const getMe = asyncHandler(async (req, res) => {
   res.status(200).json(user);
 });
 
+const forgetPassword = asyncHandler(async (req, res) => {
+  const { email, password, newPassword} = req.body;
+
+  if (!email || !password || !newPassword) {
+    res.status(400);
+    throw new Error("Please provide email, current password, and new password");
+  }
+
+  const sanitizedEmail = sanitizeInput(email);
+
+  if (!validateEmail(sanitizedEmail)) {
+    res.status(400);
+    throw new Error("Please provide a valid email address");
+  }
+
+  if (!validatePassword(newPassword)) {
+    res.status(400);
+    throw new Error("New password must be at least 6 characters and contain at least one letter and one number");
+  }
+
+  if (password === newPassword) {
+    res.status(400);
+    throw new Error("New password must be different from the current password");
+  }
+
+  const user = await User.findOne({ email: sanitizedEmail.toLowerCase() });
+
+  if (user && (await user.matchPassword(password))) {
+    user.password = newPassword;
+    await user.save();
+    res.status(200).json({ message: "Password updated successfully" });
+  } else {
+    res.status(401);
+    throw new Error("Invalid email or current password");
+  }
+});
+
 module.exports = {
   registerUser,
   loginUser,
   getMe,
+  forgetPassword,
 };
