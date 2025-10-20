@@ -18,3 +18,8 @@ export const getMeAPI = async (token) => {
   });
   return response.data;
 };
+
+export const resetPasswordAPI = async (resetData) => {
+  const response = await api.post("/auth/reset-password", resetData);
+  return response.data;
+};

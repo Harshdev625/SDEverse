@@ -145,46 +145,57 @@ const getMe = asyncHandler(async (req, res) => {
   res.status(200).json(user);
 });
 
-const forgetPassword = asyncHandler(async (req, res) => {
-  const { email, password, newPassword} = req.body;
+const resetPassword = asyncHandler(async (req, res) => {
+  const { email, newPassword, confirmPassword } = req.body;
 
-  if (!email || !password || !newPassword) {
+  // Validate all fields are provided
+  if (!email || !newPassword || !confirmPassword) {
     res.status(400);
-    throw new Error("Please provide email, current password, and new password");
+    throw new Error("Please provide email, new password, and confirm password");
   }
 
+  // Sanitize email
   const sanitizedEmail = sanitizeInput(email);
 
+  // Validate email format
   if (!validateEmail(sanitizedEmail)) {
     res.status(400);
     throw new Error("Please provide a valid email address");
   }
 
+  // Check if passwords match
+  if (newPassword !== confirmPassword) {
+    res.status(400);
+    throw new Error("Passwords do not match");
+  }
+
+  // Validate new password strength
   if (!validatePassword(newPassword)) {
     res.status(400);
     throw new Error("New password must be at least 6 characters and contain at least one letter and one number");
   }
 
-  if (password === newPassword) {
-    res.status(400);
-    throw new Error("New password must be different from the current password");
-  }
-
+  // Find user by email
   const user = await User.findOne({ email: sanitizedEmail.toLowerCase() });
 
-  if (user && (await user.matchPassword(password))) {
-    user.password = newPassword;
-    await user.save();
-    res.status(200).json({ message: "Password updated successfully" });
-  } else {
-    res.status(401);
-    throw new Error("Invalid email or current password");
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found with this email");
   }
+
+  // Update password (will be hashed by the pre-save hook in user model)
+  user.password = newPassword;
+  await user.save();
+
+  res.status(200).json({ 
+    message: "Password reset successfully",
+    success: true 
+  });
 });
 
 module.exports = {
   registerUser,
   loginUser,
   getMe,
-  forgetPassword,
+  resetPassword,
 };

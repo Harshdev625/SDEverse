@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { loginUserAPI, registerUserAPI, getMeAPI } from "./authAPI";
+import { loginUserAPI, registerUserAPI, getMeAPI, resetPasswordAPI} from "./authAPI";
 
 const tokenFromStorage = localStorage.getItem("token");
 
@@ -48,6 +48,20 @@ export const getMe = createAsyncThunk("auth/getMe", async (token, thunkAPI) => {
     );
   }
 });
+
+export const resetPassword = createAsyncThunk(
+  "auth/resetPassword",
+  async (resetData, thunkAPI) => {
+    try {
+      const data = await resetPasswordAPI(resetData);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Password reset failed"
+      );
+    }
+  }
+);  
 
 const authSlice = createSlice({
   name: "auth",

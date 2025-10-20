@@ -13,6 +13,7 @@ import Algorithms from "./pages/Algorithms";
 import AlgorithmDetail from "./pages/AlgorithmDetails";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 import MoreInfoPage from "./pages/MoreInfoPage";
 import Profile from "./pages/Profile";
 import Feedback from "./pages/Feedback";
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: <Register />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
   },
   {
     path: "/",
