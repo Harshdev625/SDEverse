@@ -17,9 +17,8 @@ const Register = () => {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  // Added: State for client-side validation errors
+  // Added: State for client-side validation errors and for password strength criteria
   const [validationErrors, setValidationErrors] = useState({});
-  // Added: State for password strength criteria
   const [passwordCriteria, setPasswordCriteria] = useState({
     minLength: false,
     hasLetter: false,
@@ -29,7 +28,7 @@ const Register = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     
-    // Added: Check password criteria in real-time
+    
     if (e.target.name === "password") {
       const pwd = e.target.value;
       setPasswordCriteria({
@@ -39,7 +38,7 @@ const Register = () => {
       });
     }
     
-    // Added: Clear validation error for the field being edited
+   
     if (validationErrors[e.target.name]) {
       setValidationErrors({ ...validationErrors, [e.target.name]: "" });
     }
@@ -77,7 +76,6 @@ const Register = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Added: Validate form before submission
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -88,7 +86,6 @@ const Register = () => {
     dispatch(registerUser(formData));
   };
 
-  // Added: Parse and format server error messages
   const formatErrorMessage = (error) => {
     if (!error) return "";
     
@@ -104,12 +101,10 @@ const Register = () => {
       return "This email is already registered. Please use another email or login.";
     }
     
-    // Handle other validation errors
     if (errorString.includes("validation")) {
       return "Please check your input and try again.";
     }
     
-    // Default error message
     return errorString;
   };
 
@@ -157,7 +152,6 @@ const Register = () => {
           <p className="text-gray-600">Start your coding journey today</p>
         </div>
 
-        {/* Added: Display server error message above the form */}
         {error && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -203,11 +197,9 @@ const Register = () => {
                 </svg>
               </div>
             </div>
-            {/* Added: Display validation error for username */}
             {validationErrors.username && (
               <p className="mt-1 text-sm text-red-600">{validationErrors.username}</p>
             )}
-            {/* Added: Helper text for username requirements */}
             <p className="mt-1 text-xs text-gray-500">3-20 characters, letters, numbers, and underscores only</p>
           </div>
 
@@ -244,7 +236,6 @@ const Register = () => {
                 </svg>
               </div>
             </div>
-            {/* Added: Display validation error for email */}
             {validationErrors.email && (
               <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
             )}
@@ -279,7 +270,6 @@ const Register = () => {
               </button>
             </div>
             
-            {/* Added: Password strength indicator - shows when user starts typing */}
             {formData.password && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -288,7 +278,6 @@ const Register = () => {
               >
                 <p className="text-xs font-medium text-gray-700 mb-2">Password requirements:</p>
                 
-                {/* Minimum length criteria */}
                 <div className="flex items-center gap-2">
                   {passwordCriteria.minLength ? (
                     <Check className="w-4 h-4 text-green-600" />
@@ -300,7 +289,6 @@ const Register = () => {
                   </span>
                 </div>
                 
-                {/* Has letter criteria */}
                 <div className="flex items-center gap-2">
                   {passwordCriteria.hasLetter ? (
                     <Check className="w-4 h-4 text-green-600" />
@@ -312,7 +300,6 @@ const Register = () => {
                   </span>
                 </div>
                 
-                {/* Has number criteria */}
                 <div className="flex items-center gap-2">
                   {passwordCriteria.hasNumber ? (
                     <Check className="w-4 h-4 text-green-600" />
@@ -326,7 +313,6 @@ const Register = () => {
               </motion.div>
             )}
             
-            {/* Added: Display validation error for password */}
             {validationErrors.password && (
               <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
             )}

@@ -33,7 +33,6 @@ const sanitizeInput = (input) => {
 const registerUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
 
-  // Added: Input validation - check if all required fields are present
   if (!username || !email || !password) {
     res.status(400);
     throw new Error("Please provide all required fields: username, email, and password");
@@ -55,7 +54,6 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error("Please provide a valid email address");
   }
 
-  // Added: Validate password strength
   if (!validatePassword(password)) {
     res.status(400);
     throw new Error("Password must be at least 6 characters and contain at least one letter and one number");
@@ -77,7 +75,6 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error("Username already taken");
   }
 
-  // Added: Create user with sanitized and validated data
   const user = await User.create({
     username: sanitizedUsername,
     email: sanitizedEmail.toLowerCase(), 
@@ -101,7 +98,6 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  // Added: Input validation - check if all required fields are present
   if (!email || !password) {
     res.status(400);
     throw new Error("Please provide email and password");
@@ -113,10 +109,8 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new Error("Invalid input format");
   }
 
-  // Added: Sanitize email input
   const sanitizedEmail = sanitizeInput(email);
 
-  // Added: Basic email format validation
   if (!validateEmail(sanitizedEmail)) {
     res.status(400);
     throw new Error("Please provide a valid email address");
