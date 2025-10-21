@@ -33,6 +33,7 @@ const initialState = {
   contributorsLoading: false,
 
   error: null,
+  isSearchingActive: false,
 };
 
 const getUserRole = (getState) => getState().auth?.user?.role;
@@ -192,6 +193,16 @@ const dataStructureSlice = createSlice({
     clearDataStructure: (state) => {
       state.dataStructure = null;
     },
+    clearFilters: (state) => {
+      state.isSearchingActive = false;
+      state.dataStructures = [];
+      state.total = 0;
+      state.pages = 0;
+      state.currentPage = 1;
+    },
+    setIsSearchingActive: (state, action) => {
+      state.isSearchingActive = action.payload;
+    },
     updateDataStructureInState: (state, action) => {
       const updatedDs = action.payload;
       const index = state.dataStructures.findIndex(
@@ -336,10 +347,10 @@ const dataStructureSlice = createSlice({
       })
       .addCase(searchAllDataStructures.fulfilled, (state, action) => {
         state.allDataStructuresLoading = false;
-        state.dataStructures = action.payload.dataStructures;
-        state.total = action.payload.total;
-        state.pages = action.payload.pages;
-        state.currentPage = action.payload.currentPage;
+        state.dataStructures = action.payload.results || [];
+        state.total = action.payload.total || 0;
+        state.pages = action.payload.pages || 1;
+        state.currentPage = action.payload.currentPage || 1;
       })
       .addCase(searchAllDataStructures.rejected, (state, action) => {
         state.allDataStructuresLoading = false;
@@ -385,5 +396,7 @@ export const {
   resetDataStructureState,
   clearDataStructure,
   updateDataStructureInState,
+  setIsSearchingActive,
+  clearFilters
 } = dataStructureSlice.actions;
 export default dataStructureSlice.reducer;

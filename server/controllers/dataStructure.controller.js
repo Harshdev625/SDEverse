@@ -390,6 +390,7 @@ const getAllDataStructures = asyncHandler(async (req, res) => {
     search = "",
     category = "",
     type = "",
+    difficulty = "",
   } = req.query;
 
   const pageNumber = parseInt(page) || 1;
@@ -405,6 +406,12 @@ const getAllDataStructures = asyncHandler(async (req, res) => {
   }
 
   if (type) filters.type = type;
+
+  // ✅ Optional difficulty filtering (matches Algorithm model)
+  if (difficulty) {
+    filters.difficulty = { $regex: new RegExp(`^${difficulty}$`, "i") };
+  }
+
   if (search) filters.$text = { $search: search };
 
   if (req.user?.role !== "admin") {
@@ -417,6 +424,7 @@ const getAllDataStructures = asyncHandler(async (req, res) => {
       filters,
       search ? { score: { $meta: "textScore" } } : {}
     )
+      .select("title slug category definition difficulty tags")
       .skip((pageNumber - 1) * limitNumber)
       .limit(limitNumber)
       .sort(search ? { score: { $meta: "textScore" } } : { title: 1 })
@@ -429,7 +437,7 @@ const getAllDataStructures = asyncHandler(async (req, res) => {
       currentPage: pageNumber,
     });
   } catch (error) {
-    console.error("Error in getAllDataStructures:", error);
+    console.error("❌ Error in getAllDataStructures:", error);
     res.status(500).json({
       message: "Failed to fetch data structures.",
       error: error.message,
@@ -438,9 +446,9 @@ const getAllDataStructures = asyncHandler(async (req, res) => {
 });
 
 const getAllDataStructuresForList = asyncHandler(async (req, res) => {
-  const { search = "", category = "", type = "" } = req.query;
+  const { search = "", category = "", type = "", difficulty = "" } = req.query;
 
-  const filters = { isDeleted: false };
+  const filters = {};
 
   if (category) {
     const categoriesArray = Array.isArray(category)
@@ -450,10 +458,15 @@ const getAllDataStructuresForList = asyncHandler(async (req, res) => {
   }
 
   if (type) filters.type = type;
+
+  if (difficulty) {
+    filters.difficulty = { $regex: new RegExp(`^${difficulty}$`, "i") };
+  }
+
   if (search) filters.$text = { $search: search };
 
-  if (req.user?.role !== "admin") {
-    filters.isPublished = true;
+  if (!req.user || req.user.role !== "admin") {
+    filters.$or = [{ isPublished: true }, { isPublished: { $exists: false } }];
   }
 
   try {
@@ -461,7 +474,7 @@ const getAllDataStructuresForList = asyncHandler(async (req, res) => {
       filters,
       search ? { score: { $meta: "textScore" } } : {}
     )
-      .select("title slug category definition")
+      .select("title slug category definition difficulty tags")
       .sort(search ? { score: { $meta: "textScore" } } : { title: 1 })
       .lean();
 
@@ -470,7 +483,7 @@ const getAllDataStructuresForList = asyncHandler(async (req, res) => {
       total: dataStructures.length,
     });
   } catch (error) {
-    console.error("Error in getAllDataStructuresForList:", error);
+    console.error("❌ Error in getAllDataStructuresForList:", error);
     res.status(500).json({
       message: "Failed to fetch data structures for list.",
       error: error.message,
@@ -667,6 +680,7 @@ const searchDataStructures = asyncHandler(async (req, res) => {
     category = "",
     q = "",
     type = "",
+    difficulty = "",
     tags = "",
     page = 1,
     limit = 10,
@@ -682,20 +696,17 @@ const searchDataStructures = asyncHandler(async (req, res) => {
     ? category.split(",").map((c) => c.trim())
     : [];
 
-  if (categories.length) {
-    filters.category = { $in: categories };
-  }
+  if (categories.length) filters.category = { $in: categories };
 
   if (type) filters.type = type;
+  if (difficulty) filters.difficulty = difficulty;
 
   if (tags) {
     const tagList = tags.split(",").map((tag) => tag.trim());
     filters.tags = { $in: tagList };
   }
 
-  if (req.user?.role !== "admin") {
-    filters.isPublished = true;
-  }
+  if (req.user?.role !== "admin") filters.isPublished = true;
 
   const pageNumber = parseInt(page) || 1;
   const limitNumber = parseInt(limit) || 10;
@@ -706,7 +717,7 @@ const searchDataStructures = asyncHandler(async (req, res) => {
     filters,
     q ? { score: { $meta: "textScore" } } : {}
   )
-    .select("title slug category definition")
+    .select("title slug category definition difficulty tags")
     .sort(q ? { score: { $meta: "textScore" } } : { createdAt: -1 })
     .skip((pageNumber - 1) * limitNumber)
     .limit(limitNumber)
