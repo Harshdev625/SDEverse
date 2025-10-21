@@ -39,7 +39,7 @@ const ForgotPassword = () => {
     if (resetSuccess) {
       timer = setTimeout(() => {
         navigate("/login");
-      }, 3000);
+      }, 2500);
     }
     return () => {
       if (timer) clearTimeout(timer);
