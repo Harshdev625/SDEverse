@@ -23,7 +23,6 @@ export default function LinksSection({
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Helper to format numerical values (round off and add commas)
   const formatStatValue = (value) => {
     if (typeof value === 'number') {
       if (Number.isInteger(value)) {
@@ -36,8 +35,6 @@ export default function LinksSection({
   };
 
   const getPlatformIcon = (platform) => {
-    // You can add specific icons here based on platform name (e.g., GitHub, LinkedIn, etc.)
-    // Example: if (platform.toLowerCase() === 'github') return <Github size={20} className="text-gray-300" />;
     return null;
   };
 
@@ -85,7 +82,7 @@ export default function LinksSection({
 
             if (!hasData && !isEditing) return null;
 
-            // Theme-aware card background
+            
             const itemBgClass = 'bg-white dark:bg-gray-900';
 
             return (

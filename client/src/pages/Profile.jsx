@@ -9,7 +9,6 @@ import {
 import { Facebook, Instagram, Loader2 } from "lucide-react";
 import ProfileForm from "./ProfileForm";
 
-// Utility to format keys for display in error messages (copied from LinksSection)
 function formatKey(key) {
   return key
     .replace(/([A-Z])/g, " $1")
@@ -17,15 +16,13 @@ function formatKey(key) {
     .replace(/_/g, " ");
 }
 
-// Map of known platform keys to their required domain for platform validation
 const PLATFORM_DOMAINS = {
-  // Social Links
   github: "github.com",
   linkedin: "linkedin.com",
   twitter: "twitter.com",
   facebook: "facebook.com",
   instagram: "instagram.com",
-  // Competitive Profiles
+
   leetcode: "leetcode.com",
   codechef: "codechef.com",
   codeforces: "codeforces.com",
@@ -33,15 +30,13 @@ const PLATFORM_DOMAINS = {
   spoj: "spoj.com",
 };
 
-// New Utility function to ensure a URL has a protocol for the backend
 const ensureProtocol = (url) => {
   if (!url) return "";
   const trimmed = url.trim();
-  // Only prepend if it doesn't already start with a protocol
+ 
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
     return trimmed;
   }
-  // Assume https:// is intended and prepend it
   return `https://${trimmed}`;
 };
 
@@ -59,8 +54,6 @@ export default function Profile() {
     social: null,
   });
 
-  // central url error map, keys match input "name" attributes used in form:
-  // e.g. "website", "avatarUrl", "socialLinks.github", "competitiveProfiles.leetcode"
   const [urlErrors, setUrlErrors] = useState({});
 
   useEffect(() => {
@@ -89,17 +82,14 @@ export default function Profile() {
     }
   }, [myProfile]);
 
-  // Utility to check valid URL structure (more robust than regex alone)
   const isValidUrl = (val) => {
     if (!val) return true;
     const trimmedVal = val.trim();
 
     try {
-      // Validation check: Prepend https:// internally if no protocol is present for the URL constructor to work
       const url = new URL(
         trimmedVal.startsWith("http") ? trimmedVal : `https://${trimmedVal}`
       );
-      // Ensure the hostname is present and not just 'localhost' or an IP if we want public URLs
       return !!url.hostname && url.hostname.includes(".");
     } catch (e) {
       return false;
@@ -109,15 +99,11 @@ export default function Profile() {
   const validateAndSetError = (name, value) => {
     let errorMsg = null;
     const trimmedValue = value ? value.trim() : "";
-
-    // 1. General URL structure check
-    // NOTE: This check works because isValidUrl handles the missing protocol internally.
     if (trimmedValue && !isValidUrl(trimmedValue)) {
       errorMsg =
         "Please enter a valid URL structure (e.g., https://example.com or example.com).";
     }
 
-    // 2. Platform-specific domain check for social/competitive links
     if (
       !errorMsg &&
       trimmedValue &&
@@ -131,27 +117,23 @@ export default function Profile() {
 
         if (requiredDomain) {
           try {
-            // Again, use the protocol-fix logic for internal validation
             const url = new URL(
               trimmedValue.startsWith("http")
                 ? trimmedValue
                 : `https://${trimmedValue}`
             );
-            // Check if the hostname ends with the required domain (to handle subdomains like www.leetcode.com)
             if (!url.hostname.endsWith(requiredDomain)) {
               errorMsg = `This link must be a valid ${formatKey(
                 platform
               )} profile URL (must contain ${requiredDomain}).`;
             }
           } catch (e) {
-            // Should be caught by isValidUrl, but catch just in case.
             errorMsg = "Invalid URL structure.";
           }
         }
       }
     }
 
-    // update urlErrors entry for `name`
     setUrlErrors((prev) => {
       const next = { ...prev };
       if (errorMsg) next[name] = errorMsg;
@@ -160,7 +142,6 @@ export default function Profile() {
     });
   };
 
-  // handleChange supports nested names like "socialLinks.github"
   const handleChange = (e) => {
     const { name, value } = e.target;
     setHasChanges(true);
@@ -171,7 +152,6 @@ export default function Profile() {
       name.startsWith("socialLinks.") ||
       name.startsWith("competitiveProfiles.");
 
-    // FIX: Store the raw user input value. DO NOT prepend https:// here.
     const newValue = value;
 
     if (name.includes(".")) {
@@ -180,34 +160,30 @@ export default function Profile() {
         ...prev,
         [section]: {
           ...prev[section],
-          [key]: newValue, // Store the raw value
+          [key]: newValue, 
         },
       }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: newValue })); // Store the raw value
+      setFormData((prev) => ({ ...prev, [name]: newValue })); 
     }
 
-    // run validation only if this is a URL field (Validation still works with raw value)
     if (isUrlField) {
       validateAndSetError(name, newValue);
     }
   };
 
-  // final validation for all URL fields before submit
   const validateAllUrlsBeforeSubmit = (data) => {
     const errors = {};
     const check = (k, v) => {
       const trimmedValue = v ? v.trim() : "";
       if (!trimmedValue) return;
 
-      // 1. General validation
       if (!isValidUrl(trimmedValue)) {
         errors[k] =
           "Please enter a valid URL structure (e.g., https://example.com).";
         return;
       }
 
-      // 2. Platform-specific validation
       if (
         k.startsWith("socialLinks.") ||
         k.startsWith("competitiveProfiles.")
@@ -228,14 +204,11 @@ export default function Profile() {
               )} profile URL (must contain ${requiredDomain}).`;
             }
           } catch (e) {
-            // Should not happen if isValidUrl passed, but good to be safe.
             errors[k] = "Invalid URL format.";
           }
         }
       }
     };
-
-    // Use the raw data from formData for validation
     check("avatarUrl", data.avatarUrl);
     check("website", data.website);
 
@@ -256,22 +229,17 @@ export default function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 1. Final validation - block submit if errors
     const validationErrors = validateAllUrlsBeforeSubmit(formData);
     if (Object.keys(validationErrors).length > 0) {
       setUrlErrors(validationErrors);
-      // Optionally notify user
       return;
     }
 
-    // 2. FIX: Create a protocol-fixed payload for the backend
     const dataToSubmit = { ...formData };
 
-    // Apply protocol fix to top-level URL fields
     dataToSubmit.avatarUrl = ensureProtocol(dataToSubmit.avatarUrl);
     dataToSubmit.website = ensureProtocol(dataToSubmit.website);
 
-    // Apply protocol fix to nested URL fields
     if (dataToSubmit.socialLinks) {
       dataToSubmit.socialLinks = Object.fromEntries(
         Object.entries(dataToSubmit.socialLinks).map(([key, val]) => [
@@ -288,14 +256,10 @@ export default function Profile() {
         ])
       );
     }
-    // End FIX
-
-    // 3. Dispatch the action with the fully qualified URL data
+  
     await dispatch(patchMyProfile(dataToSubmit));
-    await dispatch(getMyProfile()); // Refresh profile to get updated data and timestamps
+    await dispatch(getMyProfile()); 
 
-    // The form data state will be automatically reset from the useEffect on myProfile change,
-    // which will pull the protocol-fixed URLs from the API.
     setIsEditing(false);
     setHasChanges(false);
     setUrlErrors({});
@@ -328,7 +292,7 @@ export default function Profile() {
       } else {
         await dispatch(refreshSocialStats());
       }
-      // Re-fetch profile to get the latest stats and refresh timestamps
+      
       await dispatch(getMyProfile());
     } finally {
       setRefreshing({ type: null });
@@ -364,7 +328,7 @@ export default function Profile() {
         hasChanges={hasChanges}
         refreshing={refreshing}
         lastRefreshed={lastRefreshed}
-        urlErrors={urlErrors} // pass url errors down for inline display
+        urlErrors={urlErrors}
         onChange={handleChange}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
