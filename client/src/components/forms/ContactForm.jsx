@@ -1,8 +1,15 @@
-import React, { useState } from "react";
-import { toast} from "react-toastify";
-import { submitContact } from "../../features/contact/contactAPI";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import {
+  sendContact,
+  clearContactStatus,
+} from "../../features/contact/contactSlice";
 
 const ContactForm = () => {
+  const dispatch = useDispatch();
+  const { loading, success, error } = useSelector((state) => state.contact);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -17,49 +24,57 @@ const ContactForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Email & phone validation
+  // Email validation
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
   // Handle form submission
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  if (
-    !formData.firstName ||
-    !formData.lastName ||
-    !formData.email ||
-    !formData.subject ||
-    !formData.message
-  ) {
-    toast.error("Please fill in all required fields.");
-    return;
-  }
-
-   if (!validateEmail(formData.email)) {
-      toast.error("Please enter a valid email address." )
+    if (
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.email ||
+      !formData.subject ||
+      !formData.message
+    ) {
+      toast.error("Please fill in all required fields.", { autoClose: 3000 });
       return;
     }
 
-  try {
-    await submitContact(formData);
-    toast.success("Your message has been sent successfully!",  {
-    autoClose: 3000, // closes after 3 seconds
-  });
-    setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      subject: "",
-      message: "",
-    });
-  } catch (error) {
-    toast.error("Failed to send message. Please try again later.",  {
-    autoClose: 3000, // closes after 3 seconds
-  });
-  }
-};
+    if (!validateEmail(formData.email)) {
+      toast.error("Please enter a valid email address.", { autoClose: 3000 });
+      return;
+    }
 
+    // Dispatch Redux action
+     dispatch(clearContactStatus());
+    dispatch(sendContact(formData));
+  };
 
+  // Watch for status updates
+  useEffect(() => {
+    if (success) {
+      toast.success("Your message has been sent successfully!", {
+        autoClose: 3000,
+      });
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+      dispatch(clearContactStatus());
+    }
+
+    if (error) {
+      toast.error("Failed to send message. Please try again later.", {
+        autoClose: 3000,
+      });
+      dispatch(clearContactStatus());
+    }
+  }, [success, error, dispatch]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -96,21 +111,22 @@ const handleSubmit = async (e) => {
         </div>
       </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Email <span className="text-red-500">*</span>
-          </label>
-          <input
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="example@email.com"
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg 
-                       bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100
-                       focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          />
-        </div>
+      {/* Email */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Email <span className="text-red-500">*</span>
+        </label>
+        <input
+          name="email"
+          type="email"
+          value={formData.email}
+          onChange={handleChange}
+          placeholder="example@email.com"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg 
+                     bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100
+                     focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+        />
+      </div>
 
       {/* Subject */}
       <div>
@@ -145,29 +161,14 @@ const handleSubmit = async (e) => {
         />
       </div>
 
-      {/* Status Message */}
-      {status.message && (
-        <p
-          className={`text-sm font-medium ${
-            status.type === "success"
-              ? "text-green-600 dark:text-green-400"
-              : status.type === "error"
-              ? "text-red-600 dark:text-red-400"
-              : "text-indigo-600 dark:text-indigo-400"
-          }`}
-        >
-          {status.message}
-        </p>
-      )}
-
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={status.type === "loading"}
+        disabled={loading}
         className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg 
                    transition duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        {status.type === "loading" ? "Sending..." : "Send Message"}
+        {loading ? "Sending..." : "Send Message"}
       </button>
     </form>
   );

@@ -1,63 +1,57 @@
 import React, { useEffect, useState, Fragment } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getContactList, removeContact } from "../features/contact/contactSlice";
 import { FaEye, FaTrash } from "react-icons/fa";
-import {
-  fetchAllContacts,
-  deleteContact,
-} from "../features/contact/contactAPI"; // 👈 your contact API
+import { toast } from "react-toastify";
 import Pagination from "./Pagination";
 
-const AdminUsersContact = ({ themeMode }) => {
-  const [contacts, setContacts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+const AdminUsersContact = () => {
+  const dispatch = useDispatch();
+  const { contactList = [], totalPages = 1, loading, error } = useSelector(
+    (state) => state.contact
+  );
+  const themeMode = useSelector((state) => state.theme.mode);
+
   const [input, setInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [expandedContactId, setExpandedContactId] = useState(null);
   const [selectedContact, setSelectedContact] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(6);
 
-  // Fetch all contacts from backend
+  // 🔹 Fetch contacts when search or page changes
   useEffect(() => {
-    const getContacts = async () => {
-      try {
-        const data = await fetchAllContacts();
-        setContacts(data);
-      } catch (error) {
-        console.error("Error fetching contacts:", error);
-      }
-    };
-    getContacts();
-  }, []);
+    dispatch(
+      getContactList({
+        search: searchQuery || undefined,
+        page: currentPage,
+        limit: 5, // You can adjust as needed
+      })
+    );
+  }, [dispatch, currentPage]);
 
-  const handleDelete = async (id) => {
-    try {
-      await deleteContact(id);
-      setContacts((prev) => prev.filter((contact) => contact._id !== id));
-      toast.success("Contact deleted successfully!");
-    } catch (error) {
-      toast.error("Failed to delete contact.");
-    } finally {
-      setIsModalOpen(false);
-      setSelectedContact(null);
-    }
-  };
-
-  // Filter contacts by search query
-  const filteredContacts = contacts.filter((contact) =>
+   const filteredContacts = contactList.filter((contact) =>
     [contact.firstName, contact.lastName, contact.email, contact.subject]
       .join(" ")
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredContacts.length / itemsPerPage);
-  const paginatedContacts = filteredContacts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
-  // Toggle expanded row
+  // 🔹 Delete contact
+  const handleDelete = async (id) => {
+    try {
+      await dispatch(removeContact(id)).unwrap();
+      toast.success("Contact deleted successfully!");
+    } catch (err) {
+      toast.error(`Failed to delete contact: ${err.message || err}`);
+    } finally {
+      setIsModalOpen(false);
+      setSelectedContact(null);
+    }
+  };
+
+  // 🔹 Toggle expanded message
   const handleExpand = (id) => {
     setExpandedContactId((prev) => (prev === id ? null : id));
   };
@@ -68,11 +62,15 @@ const AdminUsersContact = ({ themeMode }) => {
         themeMode === "dark" ? "text-white" : "text-gray-900"
       }`}
     >
-      <h1 className="text-4xl font-bold text-center mb-8 text-gray-900 dark:text-white transition-colors duration-300">
+      <h1
+        className={`text-4xl font-bold text-center mb-8 ${
+          themeMode === "dark" ? "text-white" : "text-gray-900"
+        }`}
+      >
         Manage Users Contacts
       </h1>
 
-      {/* Search Bar */}
+      {/* 🔹 Search Bar */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -85,7 +83,7 @@ const AdminUsersContact = ({ themeMode }) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Search by name, email, or subject"
-          className={`flex-1 min-w-[200px] px-4 py-2 rounded-md border focus:ring-2 focus:border-gray-400 focus:ring-gray-300 ${
+          className={`flex-1 min-w-[200px] px-4 py-2 rounded border focus:ring-2 focus:border-gray-400 focus:ring-gray-300 ${
             themeMode === "dark"
               ? "bg-gray-800 border-gray-600 text-white focus:ring-gray-500"
               : "bg-white border-gray-300 text-gray-900"
@@ -93,66 +91,48 @@ const AdminUsersContact = ({ themeMode }) => {
         />
         <button
           type="submit"
-          className="bg-indigo-600 px-6 py-2 rounded-md font-semibold text-white hover:bg-indigo-700"
+          className="bg-indigo-600 px-6 py-2 rounded font-semibold text-white hover:bg-indigo-700"
         >
           Search
         </button>
       </form>
 
-      {/* Contact Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead
-            className={themeMode === "dark" ? "bg-gray-800" : "bg-gray-100"}
-          >
-            <tr>
-              <th
-                className={`px-4 py-3 ${
-                  themeMode === "dark" ? "text-white" : "text-gray-900"
-                }`}
-              >
-                Name
-              </th>
-              <th
-                className={`px-4 py-3 ${
-                  themeMode === "dark" ? "text-white" : "text-gray-900"
-                }`}
-              >
-                Email
-              </th>
-              <th
-                className={`px-4 py-3 ${
-                  themeMode === "dark" ? "text-white" : "text-gray-900"
-                }`}
-              >
-                Subject
-              </th>
-              <th
-                className={`px-4 py-3 ${
-                  themeMode === "dark" ? "text-white" : "text-gray-900"
-                }`}
-              >
-                Message
-              </th>
-              <th
-                className={`px-4 py-3 ${
-                  themeMode === "dark" ? "text-white" : "text-gray-900"
-                }`}
-              >
-                View
-              </th>
-              <th
-                className={`px-4 py-3 ${
-                  themeMode === "dark" ? "text-white" : "text-gray-900"
-                }`}
-              >
-                Delete
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedContacts.length > 0 ? (
-              paginatedContacts.map((contact) => {
+      {/* 🔹 Loading & Error States */}
+      {loading && (
+        <p className="text-center text-gray-500 dark:text-gray-400">
+          Loading contacts...
+        </p>
+      )}
+      {error && (
+        <p className="text-center text-red-500 dark:text-red-400">{error}</p>
+      )}
+
+      {/* 🔹 Contacts Table */}
+      {!loading && filteredContacts.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead
+              className={themeMode === "dark" ? "bg-gray-800" : "bg-gray-100"}
+            >
+              <tr>
+                {["Name", "Email", "Subject", "Message", "View", "Delete"].map(
+                  (head) => (
+                    <th
+                      key={head}
+                      className={`px-4 py-3 ${
+                        themeMode === "dark"
+                          ? "text-white"
+                          : "text-gray-900"
+                      }`}
+                    >
+                      {head}
+                    </th>
+                  )
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredContacts.map((contact) => {
                 const isExpanded = expandedContactId === contact._id;
                 const fullName = `${contact.firstName} ${contact.lastName}`;
 
@@ -165,34 +145,10 @@ const AdminUsersContact = ({ themeMode }) => {
                           : "bg-white border-gray-200"
                       }`}
                     >
-                      <td
-                        className={`px-4 py-3 font-medium ${
-                          themeMode === "dark" ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {fullName}
-                      </td>
-                      <td
-                        className={`px-4 py-3 ${
-                          themeMode === "dark" ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {contact.email}
-                      </td>
-                      <td
-                        className={`px-4 py-3 ${
-                          themeMode === "dark" ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {contact.subject}
-                      </td>
-                      <td
-                        className={`px-4 py-3 truncate max-w-[250px] ${
-                          themeMode === "dark"
-                            ? "text-gray-300"
-                            : "text-gray-800"
-                        }`}
-                      >
+                      <td className="px-4 py-3 font-medium">{fullName}</td>
+                      <td className="px-4 py-3">{contact.email}</td>
+                      <td className="px-4 py-3">{contact.subject}</td>
+                      <td className="px-4 py-3 truncate max-w-[250px]">
                         {contact.message}
                       </td>
                       <td className="px-4 py-3">
@@ -246,34 +202,32 @@ const AdminUsersContact = ({ themeMode }) => {
                     )}
                   </Fragment>
                 );
-              })
-            ) : (
-              <tr>
-                <td colSpan="5" className="text-center py-6">
-                  No contact submissions found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        !loading && (
+          <p className="text-center text-gray-500 dark:text-gray-400 mt-6">
+            No contact submissions found.
+          </p>
+        )
+      )}
 
-      {/* Delete Confirmation Modal */}
+      {/* 🔹 Delete Confirmation Modal */}
       {isModalOpen && selectedContact && (
         <div
-          className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm animate-fadeIn"
-          onClick={() => setIsModalOpen(false)} // Close when clicking outside
+          className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm"
+          onClick={() => setIsModalOpen(false)}
         >
           <div
-            onClick={(e) => e.stopPropagation()} // Prevent click inside modal from closing
-            className={`relative w-[90%] max-w-sm p-6 rounded-2xl shadow-2xl transform transition-all duration-300 scale-100
-        ${
-          themeMode === "dark"
-            ? "bg-gray-800 text-white"
-            : "bg-white text-gray-900"
-        }`}
+            onClick={(e) => e.stopPropagation()}
+            className={`relative w-[90%] max-w-sm p-6 rounded-2xl shadow-2xl ${
+              themeMode === "dark"
+                ? "bg-gray-800 text-white"
+                : "bg-white text-gray-900"
+            }`}
           >
-            {/* Close button (X) */}
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-200"
@@ -298,12 +252,11 @@ const AdminUsersContact = ({ themeMode }) => {
               <div className="flex justify-center gap-4">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className={`px-5 py-2 rounded-lg font-medium transition
-              ${
-                themeMode === "dark"
-                  ? "bg-gray-700 text-white hover:bg-gray-600"
-                  : "bg-gray-200 text-gray-900 hover:bg-gray-300"
-              }`}
+                  className={`px-5 py-2 rounded-lg font-medium transition ${
+                    themeMode === "dark"
+                      ? "bg-gray-700 hover:bg-gray-600"
+                      : "bg-gray-200 hover:bg-gray-300"
+                  }`}
                 >
                   Cancel
                 </button>
@@ -320,7 +273,7 @@ const AdminUsersContact = ({ themeMode }) => {
         </div>
       )}
 
-      {/* Pagination */}
+      {/* 🔹 Pagination */}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
