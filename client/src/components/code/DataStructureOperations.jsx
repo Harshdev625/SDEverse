@@ -11,14 +11,9 @@ import CodeDisplay from "./CodeDisplay";
 
 const DataStructureOperations = ({ dataStructure, isAdmin = false }) => {
   const [openOperationIndex, setOpenOperationIndex] = useState(null);
-  const [openFullImplIndex, setOpenFullImplIndex] = useState(null);
 
   const toggleOperation = useCallback((index) => {
     setOpenOperationIndex((prev) => (prev === index ? null : index));
-  }, []);
-
-  const toggleFullImplementation = useCallback((index) => {
-    setOpenFullImplIndex((prev) => (prev === index ? null : index));
   }, []);
 
   const copyCode = useCallback(async (code) => {
@@ -192,61 +187,6 @@ const DataStructureOperations = ({ dataStructure, isAdmin = false }) => {
     );
   };
 
-  const renderFullImplementations = () => {
-    const isOpen = openFullImplIndex === 0; // Single section for all implementations
-    const implId = "full-implementations";
-
-    // Adapt all implementations to match CodeDisplay expected format
-    const adaptedAlgorithm = {
-      codes: dataStructure.fullImplementations.map(impl => ({
-        language: impl.language?.trim() || "Unknown",
-        code: impl.code?.trim() || "No code available."
-      }))
-    };
-
-    return (
-      <motion.div
-        key={implId}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className="bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden"
-      >
-        <CodeDisplay algorithm={adaptedAlgorithm} />
-        
-        <Tooltip
-          id={implId}
-          place="top"
-          className="z-50 bg-gray-800 text-white text-sm rounded-md px-3 py-1.5"
-        />
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              id="full-impl-content"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="px-4 py-4 sm:px-5 sm:py-5 space-y-4 overflow-hidden"
-            >
-              
-              {isAdmin && (
-                <div>
-                  <button
-                    className="text-base text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1.5 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    onClick={() => toast.info("Edit implementation functionality coming soon!")}
-                    aria-label="Edit full implementations"
-                  >
-                    Edit Implementations
-                  </button>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    );
-  };
 
   return (
     <motion.div
@@ -279,25 +219,6 @@ const DataStructureOperations = ({ dataStructure, isAdmin = false }) => {
           </section>
         )}
 
-        {/* Full Implementations */}
-        {Array.isArray(dataStructure.fullImplementations) && dataStructure.fullImplementations.length > 0 && (
-          <section aria-labelledby="full-implementations-heading">
-            <h3
-              id="full-implementations-heading"
-              className="flex items-center gap-2 text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-4"
-              data-tooltip-id="full-implementations-tooltip"
-              data-tooltip-content="Complete implementations of the data structure"
-            >
-              <Code2 size={20} className="text-blue-500" /> Full Implementations
-            </h3>
-            <Tooltip
-              id="full-implementations-tooltip"
-              place="top"
-              className="z-50 bg-gray-800 text-white text-sm rounded-md px-3 py-1.5"
-            />
-            <div className="space-y-4">{renderFullImplementations()}</div>
-          </section>
-        )}
       </div>
     </motion.div>
   );
