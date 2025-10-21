@@ -183,11 +183,6 @@ const resetPassword = asyncHandler(async (req, res) => {
     throw new Error("User not found with this email");
   }
 
-  if (user.matchPassword(newPassword)) {
-    res.status(400);
-    throw new Error("New password must be different from the old password");
-  }
-  
   // Update password (will be hashed by the pre-save hook in user model)
   user.password = newPassword;
   await user.save();

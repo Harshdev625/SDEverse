@@ -78,6 +78,7 @@ const authSlice = createSlice({
     },
     clearResetSuccess: (state) => {
       state.resetSuccess = false;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {

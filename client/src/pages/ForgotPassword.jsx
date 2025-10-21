@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { resetPassword, clearResetSuccess } from "../features/auth/authSlice";
 import { Link, useNavigate } from "react-router-dom";
@@ -18,35 +18,42 @@ const ForgotPassword = () => {
   });
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [validationError, setValidationError] = useState("");
 
-  const handleChange = (e) =>
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-
+    if (validationError) setValidationError("");
+  };
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validate passwords match or add any other validation
     if (formData.newPassword !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+      setValidationError("Passwords do not match!");
       return;
     }
     
     dispatch(resetPassword(formData));
   };
 
+  // Redirect after successful reset
   useEffect(() => {
     let timer;
     if (resetSuccess) {
+      console.log("Reset successful, redirecting in 3 seconds...");
       timer = setTimeout(() => {
+        console.log("Navigating to login...");
         navigate("/login");
-      }, 2500);
+      }, 3000);
     }
     return () => {
       if (timer) clearTimeout(timer);
     };
   }, [resetSuccess, navigate]);
 
+  // Clear errors on mount and unmount
   useEffect(() => {
+    dispatch(clearResetSuccess());
     return () => {
       dispatch(clearResetSuccess());
     };
@@ -95,23 +102,37 @@ const ForgotPassword = () => {
           <p className="text-gray-600">Enter your email and new password</p>
         </div>
 
+        {/* Backend error message */}
         {error && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-3 bg-red-50 text-red-700 rounded-lg text-sm"
+            className="mb-6 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm"
           >
             {error.message || error}
           </motion.div>
         )}
 
+        {/* Validation error message */}
+        {validationError && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm"
+          >
+            {validationError}
+          </motion.div>
+        )}
+
+        {/* Success message */}
         {resetSuccess && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-3 bg-green-50 text-green-700 rounded-lg text-sm"
+            transition={{ duration: 0.3 }}
+            className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm font-medium"
           >
-            Password reset successful! Redirecting to login...
+            ✅ Password reset successful! Redirecting to login page...
           </motion.div>
         )}
 
@@ -127,12 +148,10 @@ const ForgotPassword = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition"
+                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
                 placeholder="your.email@example.com"
               />
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                <Mail className="h-5 w-5 text-gray-400" />
-              </div>
+              <Mail className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
             </div>
           </div>
 
@@ -148,13 +167,13 @@ const ForgotPassword = () => {
                 onChange={handleChange}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition"
+                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
                 placeholder="Enter new password"
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3"
+                className="absolute right-3 top-3"
               >
                 {showNewPassword ? (
                   <EyeOff className="h-5 w-5 text-gray-400" />
@@ -177,13 +196,13 @@ const ForgotPassword = () => {
                 onChange={handleChange}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition"
+                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
                 placeholder="Confirm new password"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3"
+                className="absolute right-3 top-3"
               >
                 {showConfirmPassword ? (
                   <EyeOff className="h-5 w-5 text-gray-400" />
@@ -201,7 +220,7 @@ const ForgotPassword = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
-            disabled={loading}
+            disabled={loading || resetSuccess}
             className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-medium shadow-lg hover:shadow-indigo-200/50 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
