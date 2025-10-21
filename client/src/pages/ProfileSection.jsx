@@ -16,21 +16,21 @@ export default function ProfileSection({
     bannerPreview,
     setBannerPreview,
     uploadedBannerBase64,
-    setUploadedBannerBase64
+    setUploadedBannerBase64,
   } = imageData;
 
-  console.log(formData,"formdata")
-  
+  console.log(formData, "formdata");
+
   const fileInputRef = useRef(null);
   const bannerInputRef = useRef(null);
   const editorRef = useRef(null);
   const bannerEditorRef = useRef(null);
-  
+
   const [errorMsgImage, setErrorMsgImage] = useState("");
   const [errorMsgBanner, setErrorMsgBanner] = useState("");
   const [showAvatarHover, setShowAvatarHover] = useState(false);
   const [showBannerHover, setShowBannerHover] = useState(false);
-  
+
   const MAX_SIZE_MB = 7;
 
   const [avatarEditorConfig, setAvatarEditorConfig] = useState({
@@ -40,7 +40,7 @@ export default function ProfileSection({
     width: 200,
     height: 200,
   });
-  
+
   const [bannerEditorConfig, setBannerEditorConfig] = useState({
     image: null,
     scale: 1,
@@ -48,7 +48,7 @@ export default function ProfileSection({
     width: 600,
     height: 200,
   });
-  
+
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [showBannerModal, setShowBannerModal] = useState(false);
 
@@ -128,12 +128,12 @@ export default function ProfileSection({
     if (editorRef.current) {
       const canvas = editorRef.current.getImageScaledToCanvas();
       const editedImageBase64 = canvas.toDataURL();
-      
+
       setImagePreview(editedImageBase64);
       setUploadedImageBase64(editedImageBase64);
       handleChange({ target: { name: "avatarUrl", value: "" } });
       setShowAvatarModal(false);
-      
+
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -144,12 +144,12 @@ export default function ProfileSection({
     if (bannerEditorRef.current) {
       const canvas = bannerEditorRef.current.getImageScaledToCanvas();
       const editedBannerBase64 = canvas.toDataURL();
-      
+
       setBannerPreview(editedBannerBase64);
       setUploadedBannerBase64(editedBannerBase64);
       handleChange({ target: { name: "bannerUrl", value: "" } });
       setShowBannerModal(false);
-      
+
       if (bannerInputRef.current) {
         bannerInputRef.current.value = "";
       }
@@ -190,7 +190,14 @@ export default function ProfileSection({
     }
   };
 
-  const renderField = (label, name, value, isEditing, handleChange, isUrl = false) => {
+  const renderField = (
+    label,
+    name,
+    value,
+    isEditing,
+    handleChange,
+    isUrl = false
+  ) => {
     const errorMsg = urlErrors[name];
 
     return (
@@ -253,91 +260,113 @@ export default function ProfileSection({
 
   return (
     <div className="rounded-2xl shadow-lg border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 overflow-hidden">
-   <div className="relative">
-  <div
-    className="relative h-48 group cursor-pointer"
-    onMouseEnter={() => isEditing && setShowBannerHover(true)}
-    onMouseLeave={() => setShowBannerHover(false)}
-    onClick={() => isEditing && bannerInputRef.current?.click()}
-  >
-    <img
-      src={
-        bannerPreview ||
-        formData.bannerUrl ||
-        "https://via.placeholder.com/1200x300?text=Default+Banner"
-      }
-      alt="Banner"
-      className="w-full h-full object-cover"
-    />
-
-    {isEditing && showBannerHover && (
-      <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center transition-all">
-        <svg
-          className="w-12 h-12 text-white mb-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+      <div className="relative">
+        <div
+          className="relative h-48 group cursor-pointer"
+          onMouseEnter={() => isEditing && setShowBannerHover(true)}
+          onMouseLeave={() => setShowBannerHover(false)}
+          onClick={() => isEditing && bannerInputRef.current?.click()}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+          <img
+            src={
+              bannerPreview ||
+              formData.bannerUrl ||
+              "https://png.pngtree.com/thumb_back/fh260/background/20210906/pngtree-promotional-float-triangle-purple-e-commerce-banner-image_805506.jpg"
+            }
+            alt="Banner"
+            className="w-full h-full object-cover"
           />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-        </svg>
-        <span className="text-white font-medium">Click to change banner</span>
-        {bannerPreview && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleReopenBannerEditor();
-            }}
-            className="mt-2 px-4 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600"
-          >
-            Edit Current Banner
-          </button>
-        )}
-      </div>
-    )}
-  </div>
+
+          {isEditing && showBannerHover && (
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center transition-all">
+              <svg
+                className="w-12 h-12 text-white mb-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              <span className="text-white font-medium">
+                Click to change banner
+              </span>
+              {bannerPreview && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleReopenBannerEditor();
+                  }}
+                  className="mt-2 px-4 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600"
+                >
+                  Edit Current Banner
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
         <div className="absolute -bottom-16 left-4 sm:left-8">
-          <div 
+          <div
             className="relative group cursor-pointer"
             onMouseEnter={() => isEditing && setShowAvatarHover(true)}
             onMouseLeave={() => setShowAvatarHover(false)}
             onClick={() => isEditing && fileInputRef.current?.click()}
           >
             <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white dark:border-gray-800 overflow-hidden bg-gray-200 dark:bg-gray-600 shadow-xl">
-              {imagePreview || formData.avatarUrl ? (
-                <img
-                  src={imagePreview || formData.avatarUrl}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "https://placehold.co/256x256/2d3748/cbd5e0?text=No+Image";
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-500 dark:text-gray-300">
-                  <span className="text-xs sm:text-sm">No Image</span>
-                </div>
-              )}
+              <img
+                src={
+                  imagePreview ||
+                  formData.avatarUrl ||
+                  "https://thvnext.bing.com/th/id/OIP.1waDZ8Q2eWBkenMscI08qAHaHa?w=181&h=181&c=7&r=0&o=7&cb=12&dpr=1.1&pid=1.7&rm=3"
+                }
+                alt="Profile"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src =
+                    "https://placehold.co/256x256/2d3748/cbd5e0?text=No+Image";
+                }}
+              />
+
+              <div className="w-full h-full flex items-center justify-center text-gray-500 dark:text-gray-300">
+                <span className="text-xs sm:text-sm">No Image</span>
+              </div>
             </div>
             {isEditing && showAvatarHover && (
               <div className="absolute inset-0 rounded-full bg-black bg-opacity-50 flex flex-col items-center justify-center transition-all">
-                <svg className="w-8 h-8 text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                <svg
+                  className="w-8 h-8 text-white mb-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
                 </svg>
-                <span className="text-white text-xs font-medium text-center px-2">Change</span>
+                <span className="text-white text-xs font-medium text-center px-2">
+                  Change
+                </span>
                 {imagePreview && (
                   <button
                     onClick={(e) => {
@@ -466,7 +495,11 @@ export default function ProfileSection({
                     Website
                   </h3>
                   <a
-                    href={formData.website.startsWith("http") ? formData.website : `https://${formData.website}`}
+                    href={
+                      formData.website.startsWith("http")
+                        ? formData.website
+                        : `https://${formData.website}`
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-emerald-400 hover:text-emerald-300 hover:underline"
@@ -487,7 +520,7 @@ export default function ProfileSection({
               <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
                 Edit Profile Picture
               </h3>
-              
+
               <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
                 <div className="flex-1 flex justify-center items-center">
                   <div className="bg-gray-100 dark:bg-gray-700 p-4 sm:p-8 rounded-lg">
@@ -504,7 +537,10 @@ export default function ProfileSection({
                         rotate={avatarEditorConfig.rotate}
                         className="border-2 border-gray-300 dark:border-gray-600"
                       />
-                      <div className="absolute inset-0 rounded-full border-2 border-blue-500 pointer-events-none" style={{margin: '20px'}}></div>
+                      <div
+                        className="absolute inset-0 rounded-full border-2 border-blue-500 pointer-events-none"
+                        style={{ margin: "20px" }}
+                      ></div>
                     </div>
                   </div>
                 </div>
@@ -556,7 +592,8 @@ export default function ProfileSection({
 
                   <div className="pt-2 sm:pt-4">
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      The circular area shows what will be visible in your profile picture
+                      The circular area shows what will be visible in your
+                      profile picture
                     </p>
                   </div>
                 </div>
@@ -588,7 +625,7 @@ export default function ProfileSection({
               <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
                 Edit Banner
               </h3>
-              
+
               <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
                 <div className="flex-1 flex justify-center items-center overflow-x-auto">
                   <div className="bg-gray-100 dark:bg-gray-700 p-4 sm:p-6 rounded-lg">
@@ -605,7 +642,10 @@ export default function ProfileSection({
                         rotate={bannerEditorConfig.rotate}
                         className="border-2 border-gray-300 dark:border-gray-600"
                       />
-                      <div className="absolute inset-0 border-2 border-blue-500 pointer-events-none" style={{margin: '20px'}}></div>
+                      <div
+                        className="absolute inset-0 border-2 border-blue-500 pointer-events-none"
+                        style={{ margin: "20px" }}
+                      ></div>
                     </div>
                   </div>
                 </div>
@@ -657,7 +697,8 @@ export default function ProfileSection({
 
                   <div className="pt-2 sm:pt-4">
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      The rectangular area shows what will be visible as your banner
+                      The rectangular area shows what will be visible as your
+                      banner
                     </p>
                   </div>
                 </div>
