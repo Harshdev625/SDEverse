@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { Bookmark, Filter, Search, Calendar, Tag } from "lucide-react";
-import { getUserBookmarks } from "../features/bookmark/bookmarkSlice";
+import { Bookmark, Filter, Search, Calendar, Tag, X } from "lucide-react";
+import { getUserBookmarks, removeBookmark } from "../features/bookmark/bookmarkSlice";
+import { toast } from "react-toastify";
 
 const BookmarksPage = () => {
   const dispatch = useDispatch();
@@ -29,6 +30,16 @@ const BookmarksPage = () => {
       [key]: value,
       page: key !== "page" ? 1 : value,
     }));
+  };
+
+  const handleRemoveBookmark = async (contentId, contentType) => {
+    try {
+      await dispatch(removeBookmark({ contentId, contentType })).unwrap();
+      toast.success("Bookmark removed");
+      dispatch(getUserBookmarks(filters));
+    } catch (error) {
+      toast.error(error || "Failed to remove bookmark");
+    }
   };
 
   const formatDate = (dateString) => {
@@ -171,12 +182,13 @@ const BookmarksPage = () => {
                           )}
                         </div>
                       </div>
-                      <div className="ml-2 p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                        <Bookmark 
-                          className="w-5 h-5 text-blue-600 dark:text-blue-400 fill-current" 
-                          title="Bookmarked"
-                        />
-                      </div>
+                      <button
+                        onClick={() => handleRemoveBookmark(content._id, bookmark.contentType)}
+                        className="ml-2 p-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 rounded-lg transition-colors duration-200"
+                        title="Remove bookmark"
+                      >
+                        <X className="w-4 h-4 text-red-600 dark:text-red-400" />
+                      </button>
                     </div>
 
                     {content.category && content.category.length > 0 && (
