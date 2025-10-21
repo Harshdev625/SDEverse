@@ -3,9 +3,11 @@ updates:
   - package-ecosystem: "npm"
     directory: "/client"
     schedule:
-      interval: "daily"
+      interval: "cron"
+      cronjob: "0 0 1,15 * *"
 
   - package-ecosystem: "npm"
     directory: "/server"
     schedule:
-      interval: "daily"
+      interval: "cron"
+      cronjob: "0 0 1,15 * *"
