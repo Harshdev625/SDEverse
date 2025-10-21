@@ -12,6 +12,7 @@ export default function ProfileForm({
   onSubmit,
   onCancel,
   onEditToggle,
+  urlErrors,
   onRefresh,
   readonly = false,
 }) {
@@ -31,7 +32,7 @@ export default function ProfileForm({
             >
               <Pencil size={22} />
               Edit Profile
-            </button>
+            </button> 
           ) : (
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               <button
@@ -42,7 +43,7 @@ export default function ProfileForm({
               </button>
               <button
                 onClick={onSubmit}
-                disabled={!hasChanges}
+                disabled={!hasChanges || (urlErrors && Object.keys(urlErrors).length > 0)}
                 className={`px-7 py-3 font-semibold rounded-full transition-all duration-300 ease-in-out shadow-md text-lg ${
                   hasChanges
                     ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-lg transform hover:scale-105"
@@ -62,6 +63,7 @@ export default function ProfileForm({
           isEditing={isEditing && !readonly}
           formData={formData}
           handleChange={onChange}
+          urlErrors={urlErrors} 
         />
       </section>
 
@@ -74,6 +76,7 @@ export default function ProfileForm({
           isEditing={isEditing && !readonly}
           readonly={readonly}
           handleChange={onChange}
+          urlErrors={urlErrors}
           refreshing={refreshing.type === "competitive"}
           onRefresh={() => onRefresh("competitive")}
           lastUpdated={lastRefreshed.competitive}
@@ -89,6 +92,7 @@ export default function ProfileForm({
           isEditing={isEditing && !readonly}
           readonly={readonly}
           handleChange={onChange}
+          urlErrors={urlErrors} 
           refreshing={refreshing.type === "social"}
           onRefresh={() => onRefresh("social")}
           lastUpdated={lastRefreshed.social}
