@@ -48,33 +48,6 @@ const ScrollableDropdown = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Inject dark scrollbar styles (light theme stays default)
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.innerHTML = `
-      /* Dark theme custom scrollbar */
-      .dark .scrollbar-dark::-webkit-scrollbar {
-        width: 8px;
-      }
-      .dark .scrollbar-dark::-webkit-scrollbar-track {
-        background: #1e293b;
-      }
-      .dark .scrollbar-dark::-webkit-scrollbar-thumb {
-        background-color: #475569;
-        border-radius: 10px;
-      }
-      .dark .scrollbar-dark::-webkit-scrollbar-thumb:hover {
-        background-color: #64748b;
-      }
-      .dark .scrollbar-dark {
-        scrollbar-width: thin;
-        scrollbar-color: #475569 #1e293b;
-      }
-    `;
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
-  }, []);
-
   return (
     <div className="relative w-48" ref={dropdownRef}>
       <button

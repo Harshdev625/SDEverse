@@ -320,6 +320,6 @@ const algorithmSlice = createSlice({
   },
 });
 
-export const { resetAlgorithmState, clearAlgorithm, setFilters, clearFilters, setIsSearchingActive} =
+export const { resetAlgorithmState, clearAlgorithm, setFilters, clearFilters, setIsSearchingActive } =
   algorithmSlice.actions;
 export default algorithmSlice.reducer;
