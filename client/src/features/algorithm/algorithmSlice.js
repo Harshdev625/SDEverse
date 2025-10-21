@@ -25,6 +25,7 @@ const initialState = {
     difficulty: "",
     category: "",
   },
+  isSearchingActive: false,
 };
 
 const getUser = (getState) => getState().auth?.user;
@@ -175,6 +176,9 @@ const algorithmSlice = createSlice({
     clearFilters: (state) => {
       state.filters = { difficulty: "", category: "" };
     },
+    setIsSearchingActive: (state, action) => {
+      state.isSearchingActive = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -316,6 +320,6 @@ const algorithmSlice = createSlice({
   },
 });
 
-export const { resetAlgorithmState, clearAlgorithm, setFilters, clearFilters } =
+export const { resetAlgorithmState, clearAlgorithm, setFilters, clearFilters, setIsSearchingActive} =
   algorithmSlice.actions;
 export default algorithmSlice.reducer;

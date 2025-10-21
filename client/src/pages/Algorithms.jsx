@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCategories,
   fetchAlgorithmsForList,
   searchAllAlgorithms,
+  setIsSearchingActive,
 } from "../features/algorithm/algorithmSlice";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ChevronDown, Search, ArrowLeft, ArrowRight, Info } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import AlgorithmFilters from "../components/ui/AlgorithmFilters";
 
 // ✅ Custom Hook — defined OUTSIDE the component
 const usePreserveScroll = () => {
@@ -28,6 +27,194 @@ const usePreserveScroll = () => {
   });
 };
 
+// ✅ ScrollableDropdown Component
+const ScrollableDropdown = ({
+  label,
+  options = [],
+  selectedValue,
+  onSelect,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // ✅ Close dropdown if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // ✅ Inject dark scrollbar styles (light theme stays default)
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      /* Dark theme custom scrollbar */
+      .dark .scrollbar-dark::-webkit-scrollbar {
+        width: 8px;
+      }
+      .dark .scrollbar-dark::-webkit-scrollbar-track {
+        background: #1e293b;
+      }
+      .dark .scrollbar-dark::-webkit-scrollbar-thumb {
+        background-color: #475569;
+        border-radius: 10px;
+      }
+      .dark .scrollbar-dark::-webkit-scrollbar-thumb:hover {
+        background-color: #64748b;
+      }
+      .dark .scrollbar-dark {
+        scrollbar-width: thin;
+        scrollbar-color: #475569 #1e293b;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
+  return (
+    <div className="relative w-48" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="border border-gray-300 dark:border-gray-600 
+                   bg-white dark:bg-gray-800 text-gray-900 dark:text-white 
+                   rounded-md px-3 py-2 shadow-sm w-full 
+                   flex justify-between items-center focus:ring-2 focus:ring-blue-500 
+                   focus:outline-none transition appearance-none"
+      >
+        <span className="truncate">{selectedValue || label}</span>
+        <svg
+          className={`w-4 h-4 ml-2 text-gray-500 dark:text-gray-400 transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div
+          className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto rounded-md 
+                     border border-gray-300 dark:border-gray-700 
+                     bg-white dark:bg-gray-800 
+                     shadow-lg scrollbar-dark"
+        >
+          {options.map((option) => (
+            <div
+              key={option}
+              onClick={() => {
+                onSelect(option);
+                setIsOpen(false);
+              }}
+              className={`px-3 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 
+                          ${
+                            option === selectedValue
+                              ? "bg-blue-50 dark:bg-gray-700"
+                              : ""
+                          }`}
+            >
+              {option}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ✅ AlgorithmFilters Component
+const AlgorithmFilters = ({
+  onFilterApplied,
+  onCategoryChange,
+  onDifficultyChange,
+}) => {
+  const dispatch = useDispatch();
+  const { categories = [], isSearchingActive } = useSelector(
+    (state) => state.algorithm
+  );
+
+  const [selectedDifficulty, setSelectedDifficulty] =
+    useState("All Difficulty");
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
+
+  useEffect(() => {
+    const params = {};
+    if (selectedDifficulty && selectedDifficulty !== "All Difficulty") {
+      params.difficulty = selectedDifficulty.toLowerCase();
+    }
+    if (selectedCategory && selectedCategory !== "All Categories") {
+      params.category = selectedCategory;
+    }
+
+    console.log("Sending filters:", params);
+    dispatch(fetchAlgorithmsForList(params));
+
+    const hasFilters =
+      (selectedDifficulty && selectedDifficulty !== "All Difficulty") ||
+      (selectedCategory && selectedCategory !== "All Categories");
+
+    if (onFilterApplied) onFilterApplied(hasFilters);
+    if (onCategoryChange) onCategoryChange(selectedCategory);
+    if (onDifficultyChange) onDifficultyChange(selectedDifficulty);
+  }, [selectedDifficulty, selectedCategory, dispatch]);
+
+  const handleClearFilters = () => {
+    setSelectedDifficulty("All Difficulty");
+    setSelectedCategory("All Categories");
+
+    if (!isSearchingActive) {
+      dispatch(fetchAlgorithmsForList());
+    }
+
+    if (onFilterApplied) onFilterApplied(false);
+  };
+
+  return (
+    <div className="flex flex-wrap gap-4 items-center justify-center mb-6">
+      <select
+        value={selectedDifficulty}
+        onChange={(e) => setSelectedDifficulty(e.target.value)}
+        className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-md px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+      >
+        <option>All Difficulty</option>
+        <option>Easy</option>
+        <option>Medium</option>
+        <option>Hard</option>
+      </select>
+
+      <ScrollableDropdown
+        label="All Categories"
+        options={["All Categories", ...categories]}
+        selectedValue={selectedCategory}
+        onSelect={(value) => setSelectedCategory(value)}
+      />
+
+      <button
+        onClick={handleClearFilters}
+        className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-all shadow-sm"
+      >
+        Clear Filters
+      </button>
+    </div>
+  );
+};
+
+// ✅ Main Algorithm Component
 const Algorithm = () => {
   const dispatch = useDispatch();
   const {
@@ -39,7 +226,7 @@ const Algorithm = () => {
 
   const navigate = useNavigate();
 
-  usePreserveScroll(); // ✅ called here
+  usePreserveScroll();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -50,17 +237,11 @@ const Algorithm = () => {
 
   const isSearching = searchQuery.trim().length > 0;
 
-  // ✅ Initialize global flag once (avoids undefined on reload)
-  useEffect(() => {
-    window.isSearchingActive = false;
-  }, []);
-
   useEffect(() => {
     dispatch(fetchCategories());
     dispatch(fetchAlgorithmsForList());
   }, [dispatch]);
 
-  // Close all dropdowns when the toggle setting changes
   useEffect(() => {
     setExpandedCategories({});
     setSelectedCategory(null);
@@ -78,12 +259,10 @@ const Algorithm = () => {
     setSearchQuery(query);
 
     if (query.trim()) {
-      // ✅ Tell filters to pause fetching
-      window.isSearchingActive = true;
+      dispatch(setIsSearchingActive(true));
       dispatch(searchAllAlgorithms({ q: query }));
     } else {
-      // ✅ Search cleared, resume filters/list fetching
-      window.isSearchingActive = false;
+      dispatch(setIsSearchingActive(false));
       dispatch(fetchAlgorithmsForList());
     }
   };
@@ -92,22 +271,18 @@ const Algorithm = () => {
     setSelectedCategory(selectedCategory === category ? null : category);
 
     if (allowMultipleDropdowns) {
-      // Allow multiple dropdowns to be open
       setExpandedCategories((prev) => ({
         ...prev,
         [category]: !prev[category],
       }));
     } else {
-      // Only allow one dropdown to be open at a time
       const isCurrentlyOpen = expandedCategories[category];
       if (isCurrentlyOpen) {
-        // Close the current category
         setExpandedCategories((prev) => ({
           ...prev,
           [category]: false,
         }));
       } else {
-        // Close all other categories and open the selected one
         setExpandedCategories({ [category]: true });
       }
     }
@@ -143,7 +318,7 @@ const Algorithm = () => {
         </div>
       </div>
 
-      {/* Top Control for Multiple Dropdowns Toggle with Info */}
+      {/* Toggle + Info */}
       <div className="mb-4 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto">
         <div className="flex items-center justify-end space-x-3">
           <button
@@ -210,7 +385,7 @@ const Algorithm = () => {
         </div>
       </div>
 
-      {/* Content Area */}
+      {/* Main Content */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -220,7 +395,6 @@ const Algorithm = () => {
           {error?.message || String(error)}
         </div>
       ) : isSearching ? (
-        // ✅ Search results section
         <div className="space-y-6">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
             Search Results {algorithms.length > 0 && `(${algorithms.length})`}
@@ -287,11 +461,9 @@ const Algorithm = () => {
                     return a.localeCompare(b);
                   return 0;
                 })
-
                 .map((category) => {
                   const categoryAlgorithms = algorithms.filter((algo) => {
                     const matchesCategory = algo.category?.includes(category);
-
                     const matchesDifficulty =
                       !selectedDifficulty ||
                       selectedDifficulty === "All Difficulty" ||
