@@ -8,6 +8,7 @@ const initialState = {
   token: tokenFromStorage || null,
   loading: false,
   error: null,
+  resetSuccess: false,
 };
 
 export const registerUser = createAsyncThunk(
@@ -72,7 +73,11 @@ const authSlice = createSlice({
       state.token = null;
       state.loading = false;
       state.error = null;
+      state.resetSuccess = false;
       localStorage.removeItem("token");
+    },
+    clearResetSuccess: (state) => {
+      state.resetSuccess = false;
     },
   },
   extraReducers: (builder) => {
@@ -133,10 +138,25 @@ const authSlice = createSlice({
           email: action.payload.email,
           role: action.payload.role,
         };
+      })
+      .addCase(resetPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.resetSuccess = false;
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+        state.resetSuccess = true;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.resetSuccess = false;
       });
   },
 });
 export const selectCurrentUser = (state) => state.auth.user;
 
-export const { logout } = authSlice.actions;
+export const { logout, clearResetSuccess } = authSlice.actions;
 export default authSlice.reducer;
