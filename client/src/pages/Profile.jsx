@@ -6,8 +6,39 @@ import {
   refreshSocialStats,
   refreshCompetitiveStats,
 } from "../features/user/userSlice";
-import { Loader2 } from "lucide-react";
+import { Facebook, Instagram, Loader2 } from "lucide-react";
 import ProfileForm from "./ProfileForm";
+
+function formatKey(key) {
+  return key
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (s) => s.toUpperCase())
+    .replace(/_/g, " ");
+}
+
+const PLATFORM_DOMAINS = {
+ 
+  github: "github.com",
+  linkedin: "linkedin.com",
+  twitter: "twitter.com",
+  facebook: "facebook.com",
+  instagram: "instagram.com",
+
+  leetcode: "leetcode.com",
+  codechef: "codechef.com",
+  codeforces: "codeforces.com",
+  atcoder: "atcoder.jp",
+  spoj: "spoj.com",
+};
+
+const ensureProtocol = (url) => {
+  if (!url) return "";
+  const trimmed = url.trim();
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+};
 
 export default function Profile() {
   const dispatch = useDispatch();
@@ -22,6 +53,9 @@ export default function Profile() {
     competitive: null,
     social: null,
   });
+
+  
+  const [urlErrors, setUrlErrors] = useState({});
 
   useEffect(() => {
     dispatch(getMyProfile());
@@ -45,32 +79,202 @@ export default function Profile() {
         social: myProfile.lastSocialRefresh || null,
       });
       setHasChanges(false);
+      setUrlErrors({});
     }
   }, [myProfile]);
+
+  const isValidUrl = (val) => {
+    if (!val) return true;
+    const trimmedVal = val.trim();
+
+    try {
+      
+      const url = new URL(
+        trimmedVal.startsWith("http") ? trimmedVal : `https://${trimmedVal}`
+      );
+      return !!url.hostname && url.hostname.includes(".");
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const validateAndSetError = (name, value) => {
+    let errorMsg = null;
+    const trimmedValue = value ? value.trim() : "";
+
+    if (trimmedValue && !isValidUrl(trimmedValue)) {
+      errorMsg =
+        "Please enter a valid URL structure (e.g., https://example.com or example.com).";
+    }
+
+    if (
+      !errorMsg &&
+      trimmedValue &&
+      (name.startsWith("socialLinks.") ||
+        name.startsWith("competitiveProfiles."))
+    ) {
+      const parts = name.split(".");
+      if (parts.length === 2) {
+        const platform = parts[1];
+        const requiredDomain = PLATFORM_DOMAINS[platform];
+
+        if (requiredDomain) {
+          try {
+
+            const url = new URL(
+              trimmedValue.startsWith("http")
+                ? trimmedValue
+                : `https://${trimmedValue}`
+            );
+           
+            if (!url.hostname.endsWith(requiredDomain)) {
+              errorMsg = `This link must be a valid ${formatKey(
+                platform
+              )} profile URL (must contain ${requiredDomain}).`;
+            }
+          } catch (e) {
+            
+            errorMsg = "Invalid URL structure.";
+          }
+        }
+      }
+    }
+
+    setUrlErrors((prev) => {
+      const next = { ...prev };
+      if (errorMsg) next[name] = errorMsg;
+      else delete next[name];
+      return next;
+    });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setHasChanges(true);
+
+    const isUrlField =
+      name === "avatarUrl" ||
+      name === "website" ||
+      name.startsWith("socialLinks.") ||
+      name.startsWith("competitiveProfiles.");
+
+    const newValue = value;
+
     if (name.includes(".")) {
       const [section, key] = name.split(".");
       setFormData((prev) => ({
         ...prev,
         [section]: {
           ...prev[section],
-          [key]: value,
+          [key]: newValue, 
         },
       }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: newValue })); 
     }
+
+    if (isUrlField) {
+      validateAndSetError(name, newValue);
+    }
+  };
+
+ 
+  const validateAllUrlsBeforeSubmit = (data) => {
+    const errors = {};
+    const check = (k, v) => {
+      const trimmedValue = v ? v.trim() : "";
+      if (!trimmedValue) return;
+
+
+      if (!isValidUrl(trimmedValue)) {
+        errors[k] =
+          "Please enter a valid URL structure (e.g., https://example.com).";
+        return;
+      }
+
+      if (
+        k.startsWith("socialLinks.") ||
+        k.startsWith("competitiveProfiles.")
+      ) {
+        const platform = k.split(".")[1];
+        const requiredDomain = PLATFORM_DOMAINS[platform];
+
+        if (requiredDomain) {
+          try {
+            const url = new URL(
+              trimmedValue.startsWith("http")
+                ? trimmedValue
+                : `https://${trimmedValue}`
+            );
+            if (!url.hostname.endsWith(requiredDomain)) {
+              errors[k] = `The link must be a valid ${formatKey(
+                platform
+              )} profile URL (must contain ${requiredDomain}).`;
+            }
+          } catch (e) {
+            errors[k] = "Invalid URL format.";
+          }
+        }
+      }
+    };
+
+    check("avatarUrl", data.avatarUrl);
+    check("website", data.website);
+
+    if (data.socialLinks) {
+      Object.entries(data.socialLinks).forEach(([key, val]) =>
+        check(`socialLinks.${key}`, val)
+      );
+    }
+    if (data.competitiveProfiles) {
+      Object.entries(data.competitiveProfiles).forEach(([key, val]) =>
+        check(`competitiveProfiles.${key}`, val)
+      );
+    }
+
+    return errors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await dispatch(patchMyProfile(formData));
-    await dispatch(getMyProfile()); // Refresh profile to get updated data and timestamps
+
+ 
+    const validationErrors = validateAllUrlsBeforeSubmit(formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setUrlErrors(validationErrors);
+     
+      return;
+    }
+
+    const dataToSubmit = { ...formData };
+
+
+    dataToSubmit.avatarUrl = ensureProtocol(dataToSubmit.avatarUrl);
+    dataToSubmit.website = ensureProtocol(dataToSubmit.website);
+
+    if (dataToSubmit.socialLinks) {
+      dataToSubmit.socialLinks = Object.fromEntries(
+        Object.entries(dataToSubmit.socialLinks).map(([key, val]) => [
+          key,
+          ensureProtocol(val),
+        ])
+      );
+    }
+    if (dataToSubmit.competitiveProfiles) {
+      dataToSubmit.competitiveProfiles = Object.fromEntries(
+        Object.entries(dataToSubmit.competitiveProfiles).map(([key, val]) => [
+          key,
+          ensureProtocol(val),
+        ])
+      );
+    }
+   
+    await dispatch(patchMyProfile(dataToSubmit));
+    await dispatch(getMyProfile()); 
+
     setIsEditing(false);
     setHasChanges(false);
+    setUrlErrors({});
   };
 
   const handleCancel = () => {
@@ -89,6 +293,7 @@ export default function Profile() {
     }
     setIsEditing(false);
     setHasChanges(false);
+    setUrlErrors({});
   };
 
   const handleRefresh = async (type) => {
@@ -99,7 +304,7 @@ export default function Profile() {
       } else {
         await dispatch(refreshSocialStats());
       }
-      // Re-fetch profile to get the latest stats and refresh timestamps
+      
       await dispatch(getMyProfile());
     } finally {
       setRefreshing({ type: null });
@@ -108,7 +313,13 @@ export default function Profile() {
 
   if (status === "loading" || !formData) {
     return (
-      <div className={`flex items-center justify-center min-h-screen ${themeMode === 'dark' ? 'bg-gray-950 text-gray-200' : 'bg-gray-50 text-gray-800'}`}>
+      <div
+        className={`flex items-center justify-center min-h-screen ${
+          themeMode === "dark"
+            ? "bg-gray-950 text-gray-200"
+            : "bg-gray-50 text-gray-800"
+        }`}
+      >
         <Loader2 className="animate-spin text-blue-500 mr-3" size={48} />
         <p className="text-xl font-semibold">Loading Profile...</p>
       </div>
@@ -116,13 +327,20 @@ export default function Profile() {
   }
 
   return (
-    <div className={`min-h-screen py-8 px-4 sm:px-6 lg:px-8 ${themeMode === 'dark' ? 'bg-gray-950 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
+    <div
+      className={`min-h-screen py-8 px-4 sm:px-6 lg:px-8 ${
+        themeMode === "dark"
+          ? "bg-gray-950 text-gray-100"
+          : "bg-gray-50 text-gray-900"
+      }`}
+    >
       <ProfileForm
         formData={formData}
         isEditing={isEditing}
         hasChanges={hasChanges}
         refreshing={refreshing}
         lastRefreshed={lastRefreshed}
+        urlErrors={urlErrors} 
         onChange={handleChange}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
