@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import AvatarEditor from "react-avatar-editor";
 
 export default function ProfileSection({
   isEditing,
@@ -14,8 +15,17 @@ export default function ProfileSection({
     setUploadedImageBase64,
   } = imageData;
   const fileInputRef = useRef(null);
+  const editorRef = useRef(null);
   const [errorMsgImage, setErrorMsgImage] = useState("");
   const MAX_SIZE_MB = 7;
+
+  const [avatarEditorConfig, setAvatarEditorConfig] = useState({
+    image: null,
+    scale: 1,
+    rotate: 0,
+    borderRadius: 100,
+  });
+  const [showAvatarEditor, setShowAvatarEditor] = useState(false);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -41,11 +51,40 @@ export default function ProfileSection({
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImagePreview(reader.result); // Store base64 for preview
-      setUploadedImageBase64(reader.result); // Store base64 separately for backend
-      handleChange({ target: { name: "avatarUrl", value: "" } });
+      setAvatarEditorConfig({
+        image: reader.result,
+        scale: 1,
+        rotate: 0,
+        borderRadius: 100,
+      });
+      setShowAvatarEditor(true);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleSaveAvatar = () => {
+    if (editorRef.current) {
+      const canvas = editorRef.current.getImageScaledToCanvas();
+      const editedImageBase64 = canvas.toDataURL();
+      
+      setImagePreview(editedImageBase64);
+      setUploadedImageBase64(editedImageBase64);
+      handleChange({ target: { name: "avatarUrl", value: "" } });
+      setShowAvatarEditor(false);
+    }
+  };
+
+  const handleCancelAvatar = () => {
+    setShowAvatarEditor(false);
+    setAvatarEditorConfig({
+      image: null,
+      scale: 1,
+      rotate: 0,
+      borderRadius: 100,
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleUrlChange = (e) => {
@@ -134,27 +173,41 @@ export default function ProfileSection({
       </h3>
 
       <div className="space-y-8">
-        <div className="flex flex-col items-center gap-6">
-          {imagePreview || formData.avatarUrl ? (
-            <img
-              src={imagePreview || formData.avatarUrl}
-              alt="Profile"
-              className="w-40 h-40 object-cover rounded-full shadow-xl border-4 border-blue-500 transform hover:scale-105 transition-transform duration-300"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src =
-                  "https://placehold.co/160x160/2d3748/cbd5e0?text=No+Image";
-              }}
-            />
-          ) : (
-            <div className="w-40 h-40 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-300 shadow-xl border-4 border-gray-300 dark:border-gray-600">
-              <span className="text-sm">No Image</span>
-            </div>
-          )}
+        {/* MODIFIED: Avatar section with inline editor when editing */}
+        <div className="flex flex-col lg:flex-row items-start gap-6">
+          {/* Left Side: Profile Preview - How others see your profile */}
+          <div className="flex flex-col items-center gap-4 lg:w-1/2">
+            <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+              Profile Preview
+            </h4>
+            {imagePreview || formData.avatarUrl ? (
+              <img
+                src={imagePreview || formData.avatarUrl}
+                alt="Profile"
+                className="w-40 h-40 object-cover rounded-full shadow-xl border-4 border-blue-500 transform hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src =
+                    "https://placehold.co/160x160/2d3748/cbd5e0?text=No+Image";
+                }}
+              />
+            ) : (
+              <div className="w-40 h-40 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-300 shadow-xl border-4 border-gray-300 dark:border-gray-600">
+                <span className="text-sm">No Image</span>
+              </div>
+            )}
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+              This is how others see your profile avatar
+            </p>
+          </div>
 
           {isEditing && (
-            <div className="w-full max-w-lg space-y-4">
-              {/* ADDED: Image upload input */}
+            <div className="w-full lg:w-1/2 space-y-4">
+              <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                Edit Avatar
+              </h4>
+              
+              {/* Image upload input */}
               <div className="space-y-2">
                 <label className="block font-medium text-gray-600 dark:text-gray-400 text-sm mb-1">
                   Upload Image
@@ -178,6 +231,102 @@ export default function ProfileSection({
                   </p>
                 )}
               </div>
+
+              {showAvatarEditor && (
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-4">
+                  <div className="flex flex-col items-center gap-4">
+                    <AvatarEditor
+                      ref={editorRef}
+                      image={avatarEditorConfig.image}
+                      width={200}
+                      height={200}
+                      border={20}
+                      borderRadius={avatarEditorConfig.borderRadius}
+                      color={[0, 0, 0, 0.6]}
+                      scale={avatarEditorConfig.scale}
+                      rotate={avatarEditorConfig.rotate}
+                      className="border-2 border-gray-300 dark:border-gray-600"
+                    />
+
+                    <div className="w-full">
+                      <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                        Zoom: {avatarEditorConfig.scale.toFixed(1)}x
+                      </label>
+                      <input
+                        type="range"
+                        min="1"
+                        max="3"
+                        step="0.1"
+                        value={avatarEditorConfig.scale}
+                        onChange={(e) =>
+                          setAvatarEditorConfig({
+                            ...avatarEditorConfig,
+                            scale: parseFloat(e.target.value),
+                          })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div className="w-full">
+                      <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                        Rotate: {avatarEditorConfig.rotate}°
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="360"
+                        step="1"
+                        value={avatarEditorConfig.rotate}
+                        onChange={(e) =>
+                          setAvatarEditorConfig({
+                            ...avatarEditorConfig,
+                            rotate: parseInt(e.target.value),
+                          })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Border Radius Control */}
+                    <div className="w-full">
+                      <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                        Shape: {avatarEditorConfig.borderRadius === 100 ? "Circle" : "Square"}
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="50"
+                        value={avatarEditorConfig.borderRadius}
+                        onChange={(e) =>
+                          setAvatarEditorConfig({
+                            ...avatarEditorConfig,
+                            borderRadius: parseInt(e.target.value),
+                          })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 w-full">
+                      <button
+                        onClick={handleCancelAvatar}
+                        className="flex-1 px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSaveAvatar}
+                        className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                      >
+                        Apply Changes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
