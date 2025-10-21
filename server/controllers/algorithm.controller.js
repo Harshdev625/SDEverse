@@ -188,14 +188,21 @@ const getAllAlgorithms = asyncHandler(async (req, res) => {
 
   if (category) {
     if (Array.isArray(category)) {
-      filters.category = { $in: category };
+      filters.category = {
+        $in: category.map((cat) => new RegExp(`^${cat}$`, "i")),
+      };
     } else {
-      filters.category = category;
+      filters.category = { $in: [new RegExp(`^${category}$`, "i")] };
     }
   }
 
-  if (difficulty) filters.difficulty = difficulty;
-  if (search) filters.$text = { $search: search };
+  if (difficulty) {
+    filters.difficulty = { $regex: new RegExp(`^${difficulty}$`, "i") };
+  }
+
+  if (search) {
+    filters.$text = { $search: search };
+  }
 
   if (req.user?.role !== "admin") {
     filters.isPublished = true;
@@ -216,10 +223,11 @@ const getAllAlgorithms = asyncHandler(async (req, res) => {
       currentPage: pageNumber,
     });
   } catch (error) {
-    console.error("Error in getAllAlgorithms:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to fetch algorithms", error: error.message });
+    console.error("❌ Error in getAllAlgorithms:", error);
+    res.status(500).json({
+      message: "Failed to fetch algorithms",
+      error: error.message,
+    });
   }
 });
 
@@ -229,23 +237,25 @@ const getAlgorithmsForList = asyncHandler(async (req, res) => {
   const filters = {};
 
   if (category) {
-    if (Array.isArray(category)) {
-      filters.category = { $in: category };
-    } else {
-      filters.category = category;
-    }
+    filters.category = { $in: [new RegExp(`^${category}$`, "i")] }; // ✅ case-insensitive
   }
 
-  if (difficulty) filters.difficulty = difficulty;
-  if (search) filters.$text = { $search: search };
+  if (difficulty) {
+    filters.difficulty = { $regex: new RegExp(`^${difficulty}$`, "i") }; // ✅ case-insensitive
+  }
 
-  if (req.user?.role !== "admin") {
+  if (search) {
+    filters.$text = { $search: search };
+  }
+
+  // Only show published algorithms for non-admin users
+  if (!req.user || req.user.role !== "admin") {
     filters.isPublished = true;
   }
 
   try {
     const algorithms = await Algorithm.find(filters)
-      .select("title slug category intuition description")
+      .select("title slug category difficulty intuition description")
       .sort({ title: 1 })
       .lean();
 
@@ -254,13 +264,11 @@ const getAlgorithmsForList = asyncHandler(async (req, res) => {
       total: algorithms.length,
     });
   } catch (error) {
-    console.error("Error in getAlgorithmsForList:", error);
-    res
-      .status(500)
-      .json({
-        message: "Failed to fetch algorithms for list",
-        error: error.message,
-      });
+    console.error("❌ Error in getAlgorithmsForList:", error);
+    res.status(500).json({
+      message: "Failed to fetch algorithms for list",
+      error: error.message,
+    });
   }
 });
 
