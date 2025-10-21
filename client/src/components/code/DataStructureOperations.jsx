@@ -1,8 +1,9 @@
 import { useState, useCallback } from "react";
+import { useSelector } from "react-redux";
 import { ChevronDown, ChevronUp, Code2, Copy, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { materialDark, materialLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { toast } from "react-toastify";
 import { Tooltip } from "react-tooltip";
 import { MarkdownRenderer } from "../../pages/CommentSection"; // Adjust path as needed
@@ -11,6 +12,7 @@ import CodeDisplay from "./CodeDisplay";
 
 const DataStructureOperations = ({ dataStructure, isAdmin = false }) => {
   const [openOperationIndex, setOpenOperationIndex] = useState(null);
+  const themeMode = useSelector((state) => state.theme.mode);
 
   const toggleOperation = useCallback((index) => {
     setOpenOperationIndex((prev) => (prev === index ? null : index));
@@ -124,13 +126,13 @@ const DataStructureOperations = ({ dataStructure, isAdmin = false }) => {
                                       ?.toLowerCase()
                                       .trim() || "javascript"
                                   }
-                                  style={materialDark}
+                                  style={themeMode === "dark" ? materialDark : materialLight}
                                   showLineNumbers
                                   wrapLongLines
                                   customStyle={{
                                     padding: "1.25rem",
                                     borderRadius: "0.5rem",
-                                    backgroundColor: "#1a1a1a",
+                                    backgroundColor: themeMode === "dark" ? "#1a1a1a" : "#f8f9fa",
                                     fontSize: "0.875rem",
                                     lineHeight: "1.5",
                                   }}
@@ -158,7 +160,7 @@ const DataStructureOperations = ({ dataStructure, isAdmin = false }) => {
                                 />
                               </>
                             ) : (
-                              <pre className="p-4 bg-gray-900 text-white text-sm rounded-md overflow-x-auto">
+                              <pre className="p-4 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white text-sm rounded-md overflow-x-auto">
                                 <code>No code available.</code>
                               </pre>
                             )}
