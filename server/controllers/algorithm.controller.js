@@ -52,7 +52,7 @@ const createAlgorithm = asyncHandler(async (req, res) => {
     links,
     codes,
     createdBy: req.user._id,
-    isPublished: true,
+    isPublished: true, // Assuming new algorithms are published by default
     contributors: [
       {
         user: req.user._id,
@@ -239,22 +239,30 @@ const getAlgorithmsForList = asyncHandler(async (req, res) => {
   if (difficulty) filters.difficulty = difficulty;
   if (search) filters.$text = { $search: search };
 
+  // This filter might be the issue if algorithms aren't published or if you're not admin
   if (req.user?.role !== "admin") {
     filters.isPublished = true;
   }
 
   try {
     const algorithms = await Algorithm.find(filters)
-      .select("title slug category intuition description")
+      .select("title slug category intuition description") // Ensure fields match what frontend expects
       .sort({ title: 1 })
       .lean();
+
+    // --- DEBUG LOGS ADDED ---
+    console.log("--- DEBUG: Fetching algorithm list FOR EXPLORER ---");
+    console.log("Query Filters Used:", filters); // See what filters are being applied
+    console.log("Algorithms Found in DB:", algorithms); // See the actual data found
+    console.log("Total Count from DB:", algorithms.length); // Count how many were found
+    // --- END OF DEBUG LOGS ---
 
     res.json({
       algorithms,
       total: algorithms.length,
     });
   } catch (error) {
-    console.error("Error in getAlgorithmsForList:", error);
+    console.error("Error in getAlgorithmsForList:", error); // Log any errors
     res
       .status(500)
       .json({
@@ -263,6 +271,7 @@ const getAlgorithmsForList = asyncHandler(async (req, res) => {
       });
   }
 });
+
 
 const getAlgorithmBySlug = asyncHandler(async (req, res) => {
   const algorithm = await Algorithm.findOne({ slug: req.params.slug }).populate(
@@ -275,20 +284,29 @@ const getAlgorithmBySlug = asyncHandler(async (req, res) => {
     throw new Error("Algorithm not found");
   }
 
+  // Handle potential undefined req.user (if route isn't protected or user not logged in)
   const user = req.user;
-  if (user) {
-    const alreadyViewedToday = algorithm.viewedBy?.some(
+  if (user && algorithm.viewedBy) { // Check if viewedBy exists
+    const alreadyViewedToday = algorithm.viewedBy.some(
       (entry) =>
-        entry.userId.toString() === user._id.toString() &&
+        entry.userId?.toString() === user._id.toString() && // Add optional chaining
         new Date(entry.viewedAt).toDateString() === new Date().toDateString()
     );
 
     if (!alreadyViewedToday) {
-      algorithm.views += 1;
+      algorithm.views = (algorithm.views || 0) + 1; // Initialize views if undefined
+      if (!algorithm.viewedBy) { // Initialize viewedBy if undefined
+        algorithm.viewedBy = [];
+      }
       algorithm.viewedBy.push({ userId: user._id, viewedAt: new Date() });
       await algorithm.save();
     }
+  } else if (user && !algorithm.viewedBy) { // If user logged in but viewedBy doesn't exist yet
+     algorithm.views = 1;
+     algorithm.viewedBy = [{ userId: user._id, viewedAt: new Date() }];
+     await algorithm.save();
   }
+
 
   res.json(algorithm);
 });
@@ -335,8 +353,12 @@ const voteAlgorithm = asyncHandler(async (req, res) => {
     throw new Error("Algorithm not found");
   }
 
-  const alreadyUpvoted = algorithm.upvotedBy.includes(userId);
-  const alreadyDownvoted = algorithm.downvotedBy.includes(userId);
+  // Ensure vote arrays exist before checking includes
+  const upvotedBy = algorithm.upvotedBy || [];
+  const downvotedBy = algorithm.downvotedBy || [];
+
+  const alreadyUpvoted = upvotedBy.includes(userId);
+  const alreadyDownvoted = downvotedBy.includes(userId);
 
   const update = {};
   let message = "";
@@ -352,7 +374,9 @@ const voteAlgorithm = asyncHandler(async (req, res) => {
       message = "Upvoted";
 
       if (alreadyDownvoted) {
-        update.$pull = { ...update.$pull, downvotedBy: userId };
+        if (!update.$pull) update.$pull = {}; // Initialize if not already
+        update.$pull.downvotedBy = userId;
+        if (!update.$inc) update.$inc = {}; // Initialize if not already
         update.$inc.downvotes = -1;
       }
     }
@@ -367,14 +391,17 @@ const voteAlgorithm = asyncHandler(async (req, res) => {
       message = "Downvoted";
 
       if (alreadyUpvoted) {
-        update.$pull = { ...update.$pull, upvotedBy: userId };
+        if (!update.$pull) update.$pull = {}; // Initialize if not already
+        update.$pull.upvotedBy = userId;
+        if (!update.$inc) update.$inc = {}; // Initialize if not already
         update.$inc.upvotes = -1;
       }
     }
   }
 
-  if (!update.$inc && !update.$addToSet && !update.$pull) {
-    return res.json({ message: "No changes made", algorithm });
+  // Ensure update object is not empty before updating
+  if (Object.keys(update).length === 0) {
+      return res.json({ message: "No changes made", algorithm });
   }
 
   const updatedAlgorithm = await Algorithm.findOneAndUpdate(
@@ -388,6 +415,7 @@ const voteAlgorithm = asyncHandler(async (req, res) => {
     algorithm: updatedAlgorithm,
   });
 });
+
 
 const getAllCategories = (req, res) => {
   try {
@@ -436,6 +464,11 @@ const searchAlgorithms = asyncHandler(async (req, res) => {
     filters.tags = { $in: tagList };
   }
 
+  // Add isPublished filter if user is not admin
+  if (req.user?.role !== 'admin') {
+      filters.isPublished = true;
+  }
+
   const total = await Algorithm.countDocuments(filters);
 
   const algorithms = await Algorithm.find(
@@ -454,6 +487,7 @@ const searchAlgorithms = asyncHandler(async (req, res) => {
     currentPage: parseInt(page),
   });
 });
+
 
 const getContributors = asyncHandler(async (req, res) => {
   const item = await Algorithm.findOne({ slug: req.params.slug })
