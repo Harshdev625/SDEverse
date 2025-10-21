@@ -5,10 +5,12 @@ import {
   fetchAllDataStructuresForList,
   searchAllDataStructures,
 } from "../features/dataStructure/dataStructureSlice";
+import { checkBookmark } from "../features/bookmark/bookmarkSlice";
 import { Link } from "react-router-dom";
-import { ChevronDown, Search, ArrowLeft, ArrowRight, Info } from "lucide-react";
+import { ChevronDown, Search, ArrowLeft, ArrowRight, Info, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import BookmarkIndicator from "../components/ui/BookmarkIndicator";
 
 const DataStructures = () => {
   const dispatch = useDispatch();
@@ -19,6 +21,9 @@ const DataStructures = () => {
     error,
     total,
   } = useSelector((state) => state.dataStructure);
+  
+  const { bookmarkStatus } = useSelector((state) => state.bookmark);
+  const { token } = useSelector((state) => state.auth);
 
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,6 +35,17 @@ const DataStructures = () => {
     dispatch(fetchDataStructureCategories());
     dispatch(fetchAllDataStructuresForList());
   }, [dispatch]);
+
+  // Check bookmark status for loaded data structures
+  useEffect(() => {
+    if (token && dataStructures.length > 0) {
+      dataStructures.forEach(dataStructure => {
+        if (bookmarkStatus[dataStructure._id] === undefined) {
+          dispatch(checkBookmark(dataStructure._id));
+        }
+      });
+    }
+  }, [dispatch, token, dataStructures, bookmarkStatus]);
 
   // Close all dropdowns when the toggle setting changes
   useEffect(() => {
@@ -90,6 +106,7 @@ const DataStructures = () => {
           >
             <ArrowLeft size={20} className="text-gray-700 dark:text-gray-300" />
           </button>
+          
           <button
             onClick={() => navigate(1)}
             className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all shadow-sm"
@@ -181,7 +198,11 @@ const DataStructures = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
+                  className="relative"
                 >
+                  <BookmarkIndicator 
+                    isBookmarked={bookmarkStatus[dataStructure._id]} 
+                  />
                   <Link
                     to={`/data-structures/${dataStructure.slug}`}
                     className="block h-full p-6 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-all shadow-sm hover:shadow-md"
@@ -210,9 +231,20 @@ const DataStructures = () => {
         </div>
       ) : (
         <div className="space-y-8">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Browse by Category
-          </h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              Browse by Category
+            </h2>
+            
+            <button
+              onClick={() => navigate('/bookmarks')}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 transition-all shadow-sm"
+              aria-label="View bookmarks"
+            >
+              <Bookmark size={18} />
+              <span className="hidden sm:inline font-medium">My Bookmarks</span>
+            </button>
+          </div>
 
           {categories.length === 0 ? (
             <div className="text-center py-10">
@@ -269,7 +301,11 @@ const DataStructures = () => {
                                   initial={{ opacity: 0 }}
                                   animate={{ opacity: 1 }}
                                   transition={{ duration: 0.2 }}
+                                  className="relative"
                                 >
+                                  <BookmarkIndicator 
+                                    isBookmarked={bookmarkStatus[dataStructure._id]} 
+                                  />
                                   <Link
                                     to={`/data-structures/${dataStructure.slug}`}
                                     className="block p-4 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-all"

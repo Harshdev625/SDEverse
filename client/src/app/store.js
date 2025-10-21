@@ -10,6 +10,7 @@ import feedbackReducer from "../features/feedback/feedbackSlice";
 import communityReducer from "../features/community/communitySlice";
 import dataStructureReducer from "../features/dataStructure/dataStructureSlice";
 import dataStructureProposalReducer from "../features/dataStructureProposal/dataStructureProposalSlice";
+import bookmarkReducer from "../features/bookmark/bookmarkSlice";
 
 const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ const store = configureStore({
     community: communityReducer,
     dataStructure: dataStructureReducer,
     dataStructureProposal: dataStructureProposalReducer,
+    bookmark: bookmarkReducer,
   },
   devTools: import.meta.env.MODE !== "production",
 });
