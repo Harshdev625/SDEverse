@@ -8,7 +8,7 @@ import {
 
 const initialState = {
   bookmarks: [],
-  bookmarkStatus: {}, // Track bookmark status for individual items
+  bookmarkStatus: {},
   total: 0,
   currentPage: 1,
   totalPages: 1,
@@ -26,7 +26,6 @@ const initialState = {
   },
 };
 
-// Add bookmark
 export const addBookmark = createAsyncThunk(
   "bookmark/add",
   async ({ contentType, contentId }, thunkAPI) => {
@@ -42,7 +41,6 @@ export const addBookmark = createAsyncThunk(
   }
 );
 
-// Remove bookmark
 export const removeBookmark = createAsyncThunk(
   "bookmark/remove",
   async ({ contentId, contentType }, thunkAPI) => {
@@ -58,7 +56,6 @@ export const removeBookmark = createAsyncThunk(
   }
 );
 
-// Get user bookmarks
 export const getUserBookmarks = createAsyncThunk(
   "bookmark/getUserBookmarks",
   async (params = {}, thunkAPI) => {
@@ -73,7 +70,6 @@ export const getUserBookmarks = createAsyncThunk(
   }
 );
 
-// Check bookmark status
 export const checkBookmark = createAsyncThunk(
   "bookmark/check",
   async (contentId, thunkAPI) => {
@@ -107,7 +103,6 @@ const bookmarkSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Add bookmark
       .addCase(addBookmark.pending, (state) => {
         state.status.addBookmark = "loading";
         state.error.addBookmark = null;
@@ -122,7 +117,6 @@ const bookmarkSlice = createSlice({
         state.error.addBookmark = action.payload;
       })
 
-      // Remove bookmark
       .addCase(removeBookmark.pending, (state) => {
         state.status.removeBookmark = "loading";
         state.error.removeBookmark = null;
@@ -131,7 +125,7 @@ const bookmarkSlice = createSlice({
         state.status.removeBookmark = "succeeded";
         const { contentId } = action.payload;
         state.bookmarkStatus[contentId] = false;
-        // Remove from bookmarks list if present
+
         state.bookmarks = state.bookmarks.filter(
           (bookmark) => bookmark.contentId._id !== contentId
         );
@@ -141,7 +135,6 @@ const bookmarkSlice = createSlice({
         state.error.removeBookmark = action.payload;
       })
 
-      // Get user bookmarks
       .addCase(getUserBookmarks.pending, (state) => {
         state.status.fetchBookmarks = "loading";
         state.error.fetchBookmarks = null;
@@ -153,7 +146,7 @@ const bookmarkSlice = createSlice({
         state.currentPage = action.payload.page;
         state.totalPages = action.payload.totalPages;
         
-        // Update bookmark status for fetched items
+
         action.payload.bookmarks.forEach((bookmark) => {
           state.bookmarkStatus[bookmark.contentId._id] = true;
         });
@@ -163,7 +156,6 @@ const bookmarkSlice = createSlice({
         state.error.fetchBookmarks = action.payload;
       })
 
-      // Check bookmark
       .addCase(checkBookmark.pending, (state) => {
         state.status.checkBookmark = "loading";
         state.error.checkBookmark = null;

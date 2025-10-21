@@ -6,7 +6,7 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// Add bookmark
+
 export const addBookmark = async (contentType, contentId, token) => {
   const config = {
     headers: {
@@ -18,7 +18,7 @@ export const addBookmark = async (contentType, contentId, token) => {
   return response.data;
 };
 
-// Remove bookmark
+
 export const removeBookmark = async (contentId, token, contentType = null) => {
   const config = {
     headers: {
@@ -31,7 +31,7 @@ export const removeBookmark = async (contentId, token, contentType = null) => {
   return response.data;
 };
 
-// Get user bookmarks
+
 export const getUserBookmarks = async (token, params = {}) => {
   const config = {
     headers: {
@@ -44,7 +44,7 @@ export const getUserBookmarks = async (token, params = {}) => {
   return response.data;
 };
 
-// Check if content is bookmarked
+
 export const checkBookmark = async (contentId, token) => {
   const config = {
     headers: {

@@ -1,24 +1,18 @@
 const express = require("express");
 const router = express.Router();
+
 const {
   addBookmark,
   removeBookmark,
   getUserBookmarks,
   checkBookmark,
 } = require("../controllers/bookmark.controller");
+
 const { protect } = require("../middleware/auth.middleware");
 
-// All bookmark routes require authentication
-router.use(protect);
-
-router.route("/")
-  .get(getUserBookmarks)
-  .post(addBookmark);
-
-router.route("/check/:contentId")
-  .get(checkBookmark);
-
-router.route("/:contentId")
-  .delete(removeBookmark);
+router.get("/", protect, getUserBookmarks);
+router.post("/", protect, addBookmark);
+router.get("/check/:contentId", protect, checkBookmark);
+router.delete("/:contentId", protect, removeBookmark);
 
 module.exports = router;

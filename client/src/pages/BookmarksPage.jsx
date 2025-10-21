@@ -27,7 +27,7 @@ const BookmarksPage = () => {
     setFilters((prev) => ({
       ...prev,
       [key]: value,
-      page: key !== "page" ? 1 : value, // Reset to page 1 when changing filters
+      page: key !== "page" ? 1 : value,
     }));
   };
 
@@ -71,7 +71,6 @@ const BookmarksPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <Bookmark className="w-8 h-8 text-blue-600" />
@@ -84,10 +83,8 @@ const BookmarksPage = () => {
           </p>
         </div>
 
-        {/* Filters */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
-            {/* Content Type Filter */}
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-gray-500" />
               <select
@@ -101,7 +98,6 @@ const BookmarksPage = () => {
               </select>
             </div>
 
-            {/* Search */}
             <div className="flex-1 relative">
               <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
               <input
@@ -115,7 +111,6 @@ const BookmarksPage = () => {
           </div>
         </div>
 
-        {/* Content */}
         {status.fetchBookmarks === "loading" ? (
           <div className="flex justify-center items-center py-12">
             <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
@@ -142,7 +137,6 @@ const BookmarksPage = () => {
           </div>
         ) : (
           <>
-            {/* Bookmarks Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {bookmarks.map((bookmark) => {
                 const content = bookmark.contentId;
@@ -153,7 +147,6 @@ const BookmarksPage = () => {
                     key={bookmark._id}
                     className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
                   >
-                    {/* Header */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <Link
@@ -186,7 +179,6 @@ const BookmarksPage = () => {
                       </div>
                     </div>
 
-                    {/* Categories/Tags */}
                     {content.category && content.category.length > 0 && (
                       <div className="flex items-center gap-2 mb-4">
                         <Tag className="w-4 h-4 text-gray-500" />
@@ -208,7 +200,6 @@ const BookmarksPage = () => {
                       </div>
                     )}
 
-                    {/* Footer */}
                     <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
@@ -220,7 +211,6 @@ const BookmarksPage = () => {
               })}
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 mt-8">
                 <button
@@ -245,7 +235,6 @@ const BookmarksPage = () => {
               </div>
             )}
 
-            {/* Stats */}
             <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
               Showing {bookmarks.length} of {total} bookmarks
             </div>

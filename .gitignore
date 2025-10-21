@@ -182,5 +182,3 @@ cypress/screenshots/
 # Temporary files
 *.tmp
 
-# Feature documentation
-BOOKMARK_FEATURE_README.md

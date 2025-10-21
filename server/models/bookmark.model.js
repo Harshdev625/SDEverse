@@ -26,10 +26,7 @@ const bookmarkSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Compound index to prevent duplicate bookmarks
 bookmarkSchema.index({ user: 1, contentId: 1, contentType: 1 }, { unique: true });
-
-// Additional indexes for efficient queries
 bookmarkSchema.index({ user: 1, contentType: 1 });
 bookmarkSchema.index({ user: 1, createdAt: -1 });
 
