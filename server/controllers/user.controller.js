@@ -673,6 +673,8 @@ const updateMyProfile = asyncHandler(async (req, res) => {
   let imageUrl = user.avatarUrl;
   let image = req.body.avatarUrl;
 
+  let bannerUrl = req.body.bannerUrl;
+
   if (image) {
     if (image.startsWith("https://data:") || image.startsWith("http://data:")) {
       image = image.replace(/^https?:\/\//, "");
@@ -688,7 +690,15 @@ const updateMyProfile = asyncHandler(async (req, res) => {
       imageUrl = uploadResponse.secure_url;
     }
   }
+
+  if (bannerUrl) {
+    const uploadResponse = await cloudinary.uploader.upload(bannerUrl, {
+      folder: "profile_banners",
+    });
+    bannerUrl = uploadResponse.secure_url;
+  }
   user.avatarUrl = imageUrl;
+  user.bannerUrl = bannerUrl;
 
   updatableFields.forEach((field) => {
     if (req.body[field] !== undefined) {

@@ -54,15 +54,21 @@ export default function Profile() {
   });
 
   const [urlErrors, setUrlErrors] = useState({});
-
   const [imagePreview, setImagePreview] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState(null);
   const [uploadedImageBase64, setUploadedImageBase64] = useState(null);
+
+  const [uploadedBannerBase64, setUploadedBannerBase64] = useState(null);
 
   const imageData = {
     imagePreview,
     setImagePreview,
     uploadedImageBase64,
     setUploadedImageBase64,
+    bannerPreview,
+    setBannerPreview,
+    uploadedBannerBase64,
+    setUploadedBannerBase64
   };
 
   useEffect(() => {
@@ -75,6 +81,7 @@ export default function Profile() {
         fullName: myProfile.fullName || "",
         bio: myProfile.bio || "",
         avatarUrl: myProfile.avatarUrl || "",
+        bannerUrl: myProfile.bannerUrl || "",
         location: myProfile.location || "",
         website: myProfile.website || "",
         socialLinks: myProfile.socialLinks || {},
@@ -160,6 +167,7 @@ export default function Profile() {
     const isUrlField =
       name === "avatarUrl" ||
       name === "website" ||
+      name === "bannerUrl" ||
       name.startsWith("socialLinks.") ||
       name.startsWith("competitiveProfiles.");
 
@@ -241,10 +249,14 @@ export default function Profile() {
   const getAvatarValue = () => {
     return uploadedImageBase64 || formData.avatarUrl;
   };
+  const getBannerValue = () => {
+    return uploadedBannerBase64;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const avatarValue = getAvatarValue() || formData.avatarUrl;
+    const bannerValue = getBannerValue();
 
     const validationErrors = validateAllUrlsBeforeSubmit(formData);
     if (Object.keys(validationErrors).length > 0) {
@@ -253,7 +265,11 @@ export default function Profile() {
       return;
     }
 
-    const dataToSubmit = { ...formData, avatarUrl: avatarValue };
+    const dataToSubmit = {
+      ...formData,
+      avatarUrl: avatarValue,
+      bannerUrl: bannerValue,
+    };
 
     dataToSubmit.avatarUrl = ensureProtocol(dataToSubmit.avatarUrl);
     dataToSubmit.website = ensureProtocol(dataToSubmit.website);
@@ -289,6 +305,7 @@ export default function Profile() {
         fullName: myProfile.fullName || "",
         bio: myProfile.bio || "",
         avatarUrl: myProfile.avatarUrl || "",
+        bannerUrl: myProfile.bannerUrl || "",
         location: myProfile.location || "",
         website: myProfile.website || "",
         socialLinks: myProfile.socialLinks || {},
@@ -296,7 +313,10 @@ export default function Profile() {
         socialStats: myProfile.socialStats || {},
         competitiveStats: myProfile.competitiveStats || {},
       });
+
     }
+    setImagePreview(null);
+    setBannerPreview(null);
     setIsEditing(false);
     setHasChanges(false);
     setUrlErrors({});
