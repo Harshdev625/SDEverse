@@ -415,17 +415,19 @@ const DataStructures = () => {
                         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                           {ds.title}
                         </h3>
-                        <div className="flex flex-wrap gap-2 mb-3">
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {/* 🟦 Category badges */}
                           {ds.category?.map((cat) => (
                             <span
                               key={cat}
                               className="px-2 py-1 text-xs font-medium rounded-full 
-                                         bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
                             >
                               {cat}
                             </span>
                           ))}
 
+                          {/* 🟩 Difficulty badge */}
                           {ds.difficulty && (
                             <span
                               className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -439,6 +441,17 @@ const DataStructures = () => {
                               {ds.difficulty}
                             </span>
                           )}
+
+                          {/* 🟣 Tags badges */}
+                          {ds.tags?.map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-2 py-1 text-xs font-medium rounded-full 
+                 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200"
+                            >
+                              {tag}
+                            </span>
+                          ))}
                         </div>
 
                         <p className="text-gray-600 dark:text-gray-400 line-clamp-2">
@@ -544,16 +557,18 @@ const DataStructures = () => {
                                           </h4>
 
                                           <div className="flex flex-wrap gap-2 mb-2">
+                                            {/* 🟦 Category badges */}
                                             {ds.category?.map((cat) => (
                                               <span
                                                 key={cat}
                                                 className="px-2 py-1 text-xs font-medium rounded-full 
-                                                           bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
                                               >
                                                 {cat}
                                               </span>
                                             ))}
 
+                                            {/* 🟩 Difficulty badge */}
                                             {ds.difficulty && (
                                               <span
                                                 className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -569,6 +584,17 @@ const DataStructures = () => {
                                                 {ds.difficulty}
                                               </span>
                                             )}
+
+                                            {/* 🟣 Tags badges */}
+                                            {ds.tags?.map((tag) => (
+                                              <span
+                                                key={tag}
+                                                className="px-2 py-1 text-xs font-medium rounded-full 
+                 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200"
+                                              >
+                                                {tag}
+                                              </span>
+                                            ))}
                                           </div>
 
                                           <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">

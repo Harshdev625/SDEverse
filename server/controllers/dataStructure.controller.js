@@ -448,7 +448,7 @@ const getAllDataStructures = asyncHandler(async (req, res) => {
 const getAllDataStructuresForList = asyncHandler(async (req, res) => {
   const { search = "", category = "", type = "", difficulty = "" } = req.query;
 
-  const filters = {};
+  const filters = {isDeleted: false };
 
   if (category) {
     const categoriesArray = Array.isArray(category)
