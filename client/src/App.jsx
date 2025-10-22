@@ -38,6 +38,7 @@ import { getMe } from "./features/auth/authSlice";
 import { toast } from "react-toastify";
 import Contact from "./pages/Contact";
 import AdminUsersContact from "./pages/AdminUsersContact";
+import FaqPage from './pages/FaqPage';
 
 const router = createBrowserRouter([
   {
