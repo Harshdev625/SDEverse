@@ -736,9 +736,12 @@ const searchUsers = asyncHandler(async (req, res) => {
       results.push(sdeverseSuggestion);
     }
 
-    // Find other users matching the query
+    // Find other users matching the query (exclude admin users)
     const otherUsers = await User.find(
-      { username: { $regex: query, $options: "i" } },
+      { 
+        username: { $regex: query, $options: "i" },
+        role: { $ne: "admin" } // Exclude admin users from suggestions
+      },
       { username: 1, _id: 1, avatarUrl: 1 }
     ).limit(4); // Limit to 4 since we might add sdeverse
 

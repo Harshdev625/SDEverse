@@ -17,7 +17,8 @@ const {
 const { protect, admin } = require("../middleware/auth.middleware");
 
 router.get('/analytics', protect, admin, getAdminAnalytics);
-router.get("/search", protect, searchUsers);
+// Public endpoint: allow mention suggestions without auth
+router.get("/search", searchUsers);
 router.get("/me", protect, getMyProfile);
 router.patch("/me", protect, updateMyProfile);
 router.get("/update-competitive-stats", protect, updateAllCompetitiveStats);

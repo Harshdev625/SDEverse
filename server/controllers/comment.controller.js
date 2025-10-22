@@ -160,11 +160,39 @@ const getCommentsByParent = asyncHandler(async (req, res) => {
   }
 
   const comments = await Comment.find({ parentType, parentId })
-    .populate("user", "username avatarUrl")
-    .populate("replies.user", "username avatarUrl")
+    .populate("user", "username avatarUrl role")
+    .populate("replies.user", "username avatarUrl role")
     .lean();
 
-  res.json(comments);
+  // Add displayUsername for admins as 'sdeverse' while preserving original username for links
+  const transformed = comments.map((comment) => {
+    const updated = { ...comment };
+    if (updated.user) {
+      updated.user = {
+        ...updated.user,
+        displayUsername:
+          updated.user.role === "admin" ? "sdeverse" : updated.user.username,
+      };
+    }
+    if (Array.isArray(updated.replies)) {
+      updated.replies = updated.replies.map((reply) => {
+        if (reply.user) {
+          return {
+            ...reply,
+            user: {
+              ...reply.user,
+              displayUsername:
+                reply.user.role === "admin" ? "sdeverse" : reply.user.username,
+            },
+          };
+        }
+        return reply;
+      });
+    }
+    return updated;
+  });
+
+  res.json(transformed);
 });
 
 const addReplyToComment = asyncHandler(async (req, res) => {

@@ -239,19 +239,19 @@ const CommentSection = ({ parentType, parentId, parentSlug }) => {
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-3">
-                    <Link to={`/profile/${comment.user.username}`}>
+                    <Link to={`/profile/${comment.user.displayUsername || comment.user.username}`}>
                       <img
                         src={comment.user.avatarUrl || "/default-avatar.png"}
-                        alt={comment.user.username}
+                        alt={comment.user.displayUsername || comment.user.username}
                         className="w-10 h-10 rounded-full object-cover"
                       />
                     </Link>
                     <div className="flex flex-col sm:flex-row sm:items-center">
                       <Link
-                        to={`/profile/${comment.user.username}`}
+                        to={`/profile/${comment.user.displayUsername || comment.user.username}`}
                         className="font-semibold text-gray-900 dark:text-white hover:underline"
                       >
-                        {comment.user.username}
+                        {comment.user.displayUsername || comment.user.username}
                       </Link>
                       <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 sm:ml-3">
                         {formatDistanceToNow(new Date(comment.createdAt), {
@@ -288,7 +288,7 @@ const CommentSection = ({ parentType, parentId, parentSlug }) => {
 
                 {isReplyOpen && (
                   <ReplyInput
-                    initialText={`@${comment.user.username} `}
+                    initialText={`@${comment.user.displayUsername || comment.user.username} `}
                     onCancel={() => setReplyOpenFor(null)}
                     onSubmit={(text) => handleReplySubmit(comment._id, text)}
                   />
@@ -305,21 +305,21 @@ const CommentSection = ({ parentType, parentId, parentSlug }) => {
                           className="relative space-y-2 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-inner"
                         >
                           <div className="flex items-center space-x-3 mb-1">
-                            <Link to={`/profile/${reply.user.username}`}>
+                            <Link to={`/profile/${reply.user.displayUsername || reply.user.username}`}>
                               <img
                                 src={
                                   reply.user.avatarUrl || "/default-avatar.png"
                                 }
-                                alt={reply.user.username}
+                                alt={reply.user.displayUsername || reply.user.username}
                                 className="w-8 h-8 rounded-full object-cover"
                               />
                             </Link>
                             <div className="flex flex-col sm:flex-row sm:items-center">
                               <Link
-                                to={`/profile/${reply.user.username}`}
+                                to={`/profile/${reply.user.displayUsername || reply.user.username}`}
                                 className="font-semibold text-gray-900 dark:text-white hover:underline text-sm"
                               >
-                                {reply.user.username}
+                                {reply.user.displayUsername || reply.user.username}
                               </Link>
                               <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 sm:ml-3">
                                 {formatDistanceToNow(
@@ -359,7 +359,7 @@ const CommentSection = ({ parentType, parentId, parentSlug }) => {
 
                           {isReplyOpen && (
                             <ReplyInput
-                              initialText={`@${reply.user.username} `}
+                              initialText={`@${reply.user.displayUsername || reply.user.username} `}
                               onCancel={() => setReplyOpenFor(null)}
                               onSubmit={(text) =>
                                 handleReplySubmit(reply._id, text)
