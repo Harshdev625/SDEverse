@@ -416,17 +416,6 @@ const DataStructures = () => {
                           {ds.title}
                         </h3>
                         <div className="flex flex-wrap gap-2 mb-2">
-                          {/* 🟦 Category badges */}
-                          {ds.category?.map((cat) => (
-                            <span
-                              key={cat}
-                              className="px-2 py-1 text-xs font-medium rounded-full 
-                 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
-                            >
-                              {cat}
-                            </span>
-                          ))}
-
                           {/* 🟩 Difficulty badge */}
                           {ds.difficulty && (
                             <span
@@ -442,12 +431,12 @@ const DataStructures = () => {
                             </span>
                           )}
 
-                          {/* 🟣 Tags badges */}
+                          {/* 🔵 Tags badges */}
                           {ds.tags?.map((tag) => (
                             <span
                               key={tag}
                               className="px-2 py-1 text-xs font-medium rounded-full 
-                 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200"
+                 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
                             >
                               {tag}
                             </span>
@@ -557,17 +546,6 @@ const DataStructures = () => {
                                           </h4>
 
                                           <div className="flex flex-wrap gap-2 mb-2">
-                                            {/* 🟦 Category badges */}
-                                            {ds.category?.map((cat) => (
-                                              <span
-                                                key={cat}
-                                                className="px-2 py-1 text-xs font-medium rounded-full 
-                 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
-                                              >
-                                                {cat}
-                                              </span>
-                                            ))}
-
                                             {/* 🟩 Difficulty badge */}
                                             {ds.difficulty && (
                                               <span
@@ -585,12 +563,12 @@ const DataStructures = () => {
                                               </span>
                                             )}
 
-                                            {/* 🟣 Tags badges */}
+                                            {/* 🔵 Tags badges */}
                                             {ds.tags?.map((tag) => (
                                               <span
                                                 key={tag}
                                                 className="px-2 py-1 text-xs font-medium rounded-full 
-                 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200"
+                 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
                                               >
                                                 {tag}
                                               </span>
