@@ -45,6 +45,11 @@ const dataStructureSchema = new mongoose.Schema(
       enum: DATA_STRUCTURE,
       required: true,
     },
+    difficulty: {
+      type: String,
+      enum: ["Easy", "Medium", "Hard"],
+      default: "Medium",
+    },
     type: {
       type: String,
       enum: ["Linear", "Non-Linear", "Hierarchical", "Graph", "Other"],
