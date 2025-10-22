@@ -4,19 +4,26 @@ import MonacoEditor from "@monaco-editor/react";
 import AlgorithmPreview from "../../pages/AlgorithmPreview"; // Assuming this path is correct
 import clsx from "clsx"; // For conditional class joining
 import { useSelector } from "react-redux";
+import isEqual from "lodash/isEqual";
+
+const defaultFormData = {
+  title: "",
+  problemStatement: "",
+  intuition: "",
+  explanation: "",
+  complexity: { time: "", space: "" },
+  difficulty: "Easy",
+  category: [],
+  tags: [],
+  links: [],
+  codes: [{ language: "", code: "" }],
+};
 
 const ProposalForm = ({ proposal = {}, onSave, categories = [], mode }) => {
   const themeMode = useSelector((state) => state.theme.mode);
-  const [editedData, setEditedData] = useState({
-    title: proposal.title || "",
-    problemStatement: proposal.problemStatement || "",
-    intuition: proposal.intuition || "",
-    explanation: proposal.explanation || "",
-    complexity: proposal.complexity || { time: "", space: "" },
-    difficulty: proposal.difficulty || "Easy",
-    category: proposal.category || [],
-    tags: proposal.tags || [],
-    links: proposal.links || [],
+ const [editedData, setEditedData] = useState({
+    ...defaultFormData,
+    ...proposal,
     codes: proposal.codes?.length ? proposal.codes : [{ language: "", code: "" }],
   });
 
@@ -24,38 +31,45 @@ const ProposalForm = ({ proposal = {}, onSave, categories = [], mode }) => {
   const [showDifficultyDropdown, setShowDifficultyDropdown] = useState(false);
   const [showInfo, setShowInfo] = useState(true);
 
+  const prevProposalRef = useRef(null);
+
   // Ref to store the latest onSave callback
   const onSaveRef = useRef(onSave);
-  useEffect(() => {
-    onSaveRef.current = onSave;
-  }, [onSave]);
+useEffect(() => {
+  onSaveRef.current = onSave;
+}, [onSave]);
 
   // Effect to call onSave whenever editedData changes
   useEffect(() => {
+  const timeout = setTimeout(() => {
     onSaveRef.current(editedData);
-  }, [editedData]);
+  }, 500);
+  return () => clearTimeout(timeout);
+}, [editedData]);
+
 
   // Effect to update internal state when proposal prop changes (for EditProposal)
   useEffect(() => {
+  if (!proposal) return;
+
+  if (!isEqual(prevProposalRef.current, proposal)) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEditedData({
-      title: proposal.title || "",
-      problemStatement: proposal.problemStatement || "",
-      intuition: proposal.intuition || "",
-      explanation: proposal.explanation || "",
-      complexity: proposal.complexity || { time: "", space: "" },
-      difficulty: proposal.difficulty || "Easy",
-      category: proposal.category || [],
-      tags: proposal.tags || [],
-      links: proposal.links || [],
+      ...defaultFormData,
+      ...proposal,
       codes: proposal.codes?.length ? proposal.codes : [{ language: "", code: "" }],
     });
-    // Reset selected code index if codes array becomes empty or the selected index is out of bounds
-    if (proposal.codes?.length > 0 && selectedCodeIndex >= proposal.codes.length) {
-        setSelectedCodeIndex(Math.max(0, proposal.codes.length - 1));
-    } else if (proposal.codes?.length === 0) {
-        setSelectedCodeIndex(0);
-    }
-  }, [proposal]);
+
+    setSelectedCodeIndex(
+      proposal.codes?.length
+        ? Math.min(selectedCodeIndex, proposal.codes.length - 1)
+        : 0
+    );
+
+    prevProposalRef.current = proposal;
+  }
+}, [proposal]);
+
 
 
   const handleChange = (field, value) => {
