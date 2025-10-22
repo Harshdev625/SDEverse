@@ -15,39 +15,33 @@ const AdminUsersContact = () => {
   const [input, setInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedContactId, setExpandedContactId] = useState(null);
-  const [selectedContact, setSelectedContact] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 🔹 Fetch contacts when search or page changes
+  // 🔹 Fetch contacts when page changes
   useEffect(() => {
     dispatch(
       getContactList({
         search: searchQuery || undefined,
         page: currentPage,
-        limit: 5, // You can adjust as needed
+        limit: 5,
       })
     );
-  }, [dispatch, currentPage]);
+  }, [dispatch, currentPage, searchQuery]);
 
-   const filteredContacts = contactList.filter((contact) =>
+  const filteredContacts = contactList.filter((contact) =>
     [contact.firstName, contact.lastName, contact.email, contact.subject]
       .join(" ")
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
 
-
-  // 🔹 Delete contact
+  // 🔹 Delete contact directly (no modal)
   const handleDelete = async (id) => {
     try {
       await dispatch(removeContact(id)).unwrap();
       toast.success("Contact deleted successfully!");
     } catch (err) {
       toast.error(`Failed to delete contact: ${err.message || err}`);
-    } finally {
-      setIsModalOpen(false);
-      setSelectedContact(null);
     }
   };
 
@@ -120,9 +114,7 @@ const AdminUsersContact = () => {
                     <th
                       key={head}
                       className={`px-4 py-3 ${
-                        themeMode === "dark"
-                          ? "text-white"
-                          : "text-gray-900"
+                        themeMode === "dark" ? "text-white" : "text-gray-900"
                       }`}
                     >
                       {head}
@@ -161,10 +153,7 @@ const AdminUsersContact = () => {
                       </td>
                       <td className="px-4 py-3">
                         <button
-                          onClick={() => {
-                            setSelectedContact(contact);
-                            setIsModalOpen(true);
-                          }}
+                          onClick={() => handleDelete(contact._id)}
                           title="Delete Contact"
                         >
                           <FaTrash className="text-lg hover:text-red-500" />
@@ -212,65 +201,6 @@ const AdminUsersContact = () => {
             No contact submissions found.
           </p>
         )
-      )}
-
-      {/* 🔹 Delete Confirmation Modal */}
-      {isModalOpen && selectedContact && (
-        <div
-          className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm"
-          onClick={() => setIsModalOpen(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className={`relative w-[90%] max-w-sm p-6 rounded-2xl shadow-2xl ${
-              themeMode === "dark"
-                ? "bg-gray-800 text-white"
-                : "bg-white text-gray-900"
-            }`}
-          >
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-200"
-            >
-              ✕
-            </button>
-
-            <div className="text-center">
-              <div className="flex justify-center items-center w-16 h-16 mx-auto rounded-full bg-red-100 mb-4">
-                <FaTrash className="text-red-600 text-2xl" />
-              </div>
-
-              <h2 className="text-xl font-semibold mb-3">Delete Contact?</h2>
-              <p className="text-gray-400 mb-6">
-                Are you sure you want to delete this message from{" "}
-                <span className="font-semibold text-gray-400">
-                  {selectedContact.firstName}
-                </span>
-                ?
-              </p>
-
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className={`px-5 py-2 rounded-lg font-medium transition ${
-                    themeMode === "dark"
-                      ? "bg-gray-700 hover:bg-gray-600"
-                      : "bg-gray-200 hover:bg-gray-300"
-                  }`}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={() => handleDelete(selectedContact._id)}
-                  className="px-5 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       )}
 
       {/* 🔹 Pagination */}
