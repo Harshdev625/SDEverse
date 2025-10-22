@@ -21,6 +21,11 @@ const initialState = {
   loading: false,
   voteLoading: false,
   error: null,
+  filters: {
+    difficulty: "",
+    category: "",
+  },
+  isSearchingActive: false,
 };
 
 const getUser = (getState) => getState().auth?.user;
@@ -44,8 +49,15 @@ export const createNewAlgorithm = createAsyncThunk(
 
 export const fetchAlgorithms = createAsyncThunk(
   "algorithm/fetchAlgorithms",
-  async (params, { rejectWithValue }) => {
+  async (filters = {}, { rejectWithValue }) => {
     try {
+      const params = {};
+
+      if (filters.difficulty) params.difficulty = filters.difficulty;
+      if (filters.category) params.category = filters.category;
+      if (filters.page) params.page = filters.page; // existing pagination support
+
+      // existing helper function already calls axios.get('/api/algorithms', { params })
       return await getAllAlgorithms(params);
     } catch (error) {
       return rejectWithValue(error);
@@ -59,7 +71,9 @@ export const fetchAlgorithmsForList = createAsyncThunk(
     try {
       return await getAlgorithmsForList(params);
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Something went wrong"
+      );
     }
   }
 );
@@ -155,6 +169,15 @@ const algorithmSlice = createSlice({
     },
     clearAlgorithm: (state) => {
       state.algorithm = null;
+    },
+    setFilters: (state, action) => {
+      state.filters = { ...state.filters, ...action.payload };
+    },
+    clearFilters: (state) => {
+      state.filters = { difficulty: "", category: "" };
+    },
+    setIsSearchingActive: (state, action) => {
+      state.isSearchingActive = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -297,5 +320,6 @@ const algorithmSlice = createSlice({
   },
 });
 
-export const { resetAlgorithmState, clearAlgorithm } = algorithmSlice.actions;
+export const { resetAlgorithmState, clearAlgorithm, setFilters, clearFilters, setIsSearchingActive } =
+  algorithmSlice.actions;
 export default algorithmSlice.reducer;

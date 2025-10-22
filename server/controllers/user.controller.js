@@ -21,6 +21,8 @@ const {
   fetchSocialStats,
 } = require("../utils/socialProfileFetchers");
 
+const cloudinary = require("../config/cloudinary");
+
 const socialStatsFieldsMap = {
   github: [
     { sourcePath: "profile.publicRepos", targetField: "publicRepos" },
@@ -660,13 +662,43 @@ const updateMyProfile = asyncHandler(async (req, res) => {
 
   const updatableFields = [
     "fullName",
-    "avatarUrl",
     "location",
     "website",
     "bio",
     "competitiveProfiles",
     "socialLinks",
   ];
+
+  // Handle image upload or direct URL
+  let imageUrl = user.avatarUrl;
+  let image = req.body.avatarUrl;
+
+  let bannerUrl = req.body.bannerUrl;
+
+  if (image) {
+    if (image.startsWith("https://data:") || image.startsWith("http://data:")) {
+      image = image.replace(/^https?:\/\//, "");
+    }
+    if (image.startsWith("http://") || image.startsWith("https://")) {
+      // No need to upload
+      imageUrl = image;
+    } else {
+      // It's a base64 image (e.g., data:image/png;base64,...)
+      const uploadResponse = await cloudinary.uploader.upload(image, {
+        folder: "profile_avatars",
+      });
+      imageUrl = uploadResponse.secure_url;
+    }
+  }
+
+  if (bannerUrl) {
+    const uploadResponse = await cloudinary.uploader.upload(bannerUrl, {
+      folder: "profile_banners",
+    });
+    bannerUrl = uploadResponse.secure_url;
+  }
+  user.avatarUrl = imageUrl;
+  user.bannerUrl = bannerUrl;
 
   updatableFields.forEach((field) => {
     if (req.body[field] !== undefined) {

@@ -125,6 +125,11 @@ To get the SDEverse backend up and running locally:
     MONGO_URI=mongodb://localhost:27017/sdeversedb # Your MongoDB connection string
     JWT_SECRET=your_jwt_secret_key # A strong, random secret key for JWTs
     JWT_EXPIRE=30d # JWT expiry time, e.g., 30 days
+
+    CLOUDINARY_CLOUD_NAME=
+    CLOUDINARY_API_KEY=
+    CLOUDINARY_API_SECRET=
+
     # Add any other environment variables needed for external API keys, etc.
     ```
     *Make sure to replace placeholder values with your actual credentials and connection strings.*
