@@ -270,7 +270,6 @@ const DataStructures = () => {
       transition={{ duration: 0.3 }}
       className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl"
     >
-      
       <div className="flex justify-between items-center mb-8">
         <div className="flex justify-between items-center w-full">
           <button
@@ -540,11 +539,9 @@ const DataStructures = () => {
                                                      hover:bg-gray-50 dark:hover:bg-gray-700 
                                                      border border-gray-200 dark:border-gray-700 transition-all"
                                         >
-                                          {ds.title !== category && (
-                                            <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                                              {ds.title}
-                                            </h4>
-                                          )}
+                                          <h4 className="font-medium text-gray-900 dark:text-white mb-1">
+                                            {ds.title}
+                                          </h4>
 
                                           <div className="flex flex-wrap gap-2 mb-2">
                                             {ds.category?.map((cat) => (
