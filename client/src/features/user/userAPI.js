@@ -37,6 +37,16 @@ export const fetchUserById = async (id, token) => {
   }
 };
 
+export const fetchUserByUsername = async (username) => {
+  try {
+    const response = await api.get(`/users/username/${username}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user by username:", error);
+    throw error;
+  }
+};
+
 export const deleteUserById = async (id, token) => {
   try {
     const response = await api.delete(`/users/${id}`, {

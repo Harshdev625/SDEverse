@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 import {
   getMyProfile,
+  getUserByUsername,
   patchMyProfile,
   refreshSocialStats,
   refreshCompetitiveStats,
@@ -41,7 +43,8 @@ const ensureProtocol = (url) => {
 
 export default function Profile() {
   const dispatch = useDispatch();
-  const { myProfile, status } = useSelector((state) => state.user);
+  const { username } = useParams();
+  const { myProfile, selectedUser, status } = useSelector((state) => state.user);
   const themeMode = useSelector((state) => state.theme.mode);
 
   const [formData, setFormData] = useState(null);
@@ -72,31 +75,38 @@ export default function Profile() {
   };
 
   useEffect(() => {
-    dispatch(getMyProfile());
-  }, [dispatch]);
+    if (username) {
+      // Viewing another user's profile
+      dispatch(getUserByUsername(username));
+    } else {
+      // Viewing own profile
+      dispatch(getMyProfile());
+    }
+  }, [dispatch, username]);
 
   useEffect(() => {
-    if (myProfile) {
+    const profileData = username ? selectedUser : myProfile;
+    if (profileData) {
       setFormData({
-        fullName: myProfile.fullName || "",
-        bio: myProfile.bio || "",
-        avatarUrl: myProfile.avatarUrl || "",
-        bannerUrl: myProfile.bannerUrl || "",
-        location: myProfile.location || "",
-        website: myProfile.website || "",
-        socialLinks: myProfile.socialLinks || {},
-        competitiveProfiles: myProfile.competitiveProfiles || {},
-        socialStats: myProfile.socialStats || {},
-        competitiveStats: myProfile.competitiveStats || {},
+        fullName: profileData.fullName || "",
+        bio: profileData.bio || "",
+        avatarUrl: profileData.avatarUrl || "",
+        bannerUrl: profileData.bannerUrl || "",
+        location: profileData.location || "",
+        website: profileData.website || "",
+        socialLinks: profileData.socialLinks || {},
+        competitiveProfiles: profileData.competitiveProfiles || {},
+        socialStats: profileData.socialStats || {},
+        competitiveStats: profileData.competitiveStats || {},
       });
       setLastRefreshed({
-        competitive: myProfile.lastCompetitiveRefresh || null,
-        social: myProfile.lastSocialRefresh || null,
+        competitive: profileData.lastCompetitiveRefresh || null,
+        social: profileData.lastSocialRefresh || null,
       });
       setHasChanges(false);
       setUrlErrors({});
     }
-  }, [myProfile]);
+  }, [myProfile, selectedUser, username]);
 
   const isValidUrl = (val) => {
     if (!val) return true;
@@ -347,7 +357,10 @@ export default function Profile() {
     }
   };
 
-  if (status === "loading" || !formData) {
+  const isLoading = status.fetchProfile === "loading" || status.fetchSelectedUser === "loading";
+  const isViewingOtherUser = !!username;
+  
+  if (isLoading || !formData) {
     return (
       <div
         className={`flex items-center justify-center min-h-screen ${
@@ -372,7 +385,7 @@ export default function Profile() {
     >
       <ProfileForm
         formData={formData}
-        isEditing={isEditing}
+        isEditing={isEditing && !isViewingOtherUser}
         hasChanges={hasChanges}
         refreshing={refreshing}
         lastRefreshed={lastRefreshed}
@@ -380,9 +393,10 @@ export default function Profile() {
         onChange={handleChange}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
-        onEditToggle={() => setIsEditing(!isEditing)}
+        onEditToggle={() => !isViewingOtherUser && setIsEditing(!isEditing)}
         onRefresh={handleRefresh}
         imageData={imageData}
+        readonly={isViewingOtherUser}
       />
     </div>
   );

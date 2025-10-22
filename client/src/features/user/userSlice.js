@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   fetchAllUsers,
   fetchUserById,
+  fetchUserByUsername,
   deleteUserById,
   updateUserRole,
   fetchMyProfile,
@@ -86,6 +87,17 @@ export const getUserById = createAsyncThunk(
     const token = thunkAPI.getState().auth.token;
     try {
       return await fetchUserById(id, token);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(safeReject(error));
+    }
+  }
+);
+
+export const getUserByUsername = createAsyncThunk(
+  "user/getByUsername",
+  async (username, thunkAPI) => {
+    try {
+      return await fetchUserByUsername(username);
     } catch (error) {
       return thunkAPI.rejectWithValue(safeReject(error));
     }
@@ -227,6 +239,19 @@ const userSlice = createSlice({
         state.selectedUser = action.payload;
       })
       .addCase(getUserById.rejected, (state, action) => {
+        state.status.fetchSelectedUser = "failed";
+        state.error.fetchSelectedUser = action.payload;
+      })
+
+      .addCase(getUserByUsername.pending, (state) => {
+        state.status.fetchSelectedUser = "loading";
+        state.error.fetchSelectedUser = null;
+      })
+      .addCase(getUserByUsername.fulfilled, (state, action) => {
+        state.status.fetchSelectedUser = "succeeded";
+        state.selectedUser = action.payload;
+      })
+      .addCase(getUserByUsername.rejected, (state, action) => {
         state.status.fetchSelectedUser = "failed";
         state.error.fetchSelectedUser = action.payload;
       })

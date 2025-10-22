@@ -9,6 +9,7 @@ import {
 import { useSearchParams } from "react-router-dom";
 import { Send, Trash2, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import sdeverseIcon from "../assets/sdeverse.png";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -21,10 +22,15 @@ import { formatDistanceToNow } from "date-fns";
 import MentionInput from "../components/MentionInput";
 
 export const MarkdownRenderer = ({ children }) => {
-  // Process text to convert @mentions to markdown links
+  // Process text to convert @mentions to markdown links, but disable @sdeverse links
   const processedText = String(children).replace(
     /@([a-zA-Z0-9_]+)/g,
-    '[@$1](/profile/$1)'
+    (match, username) => {
+      if (username === 'sdeverse') {
+        return '@sdeverse'; // Keep as plain text, no link
+      }
+      return `[@${username}](/profile/${username})`;
+    }
   );
 
   return (
@@ -239,20 +245,39 @@ const CommentSection = ({ parentType, parentId, parentSlug }) => {
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-3">
-                    <Link to={`/profile/${comment.user.displayUsername || comment.user.username}`}>
-                      <img
-                        src={comment.user.avatarUrl || "/default-avatar.png"}
-                        alt={comment.user.displayUsername || comment.user.username}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                    </Link>
-                    <div className="flex flex-col sm:flex-row sm:items-center">
-                      <Link
-                        to={`/profile/${comment.user.displayUsername || comment.user.username}`}
-                        className="font-semibold text-gray-900 dark:text-white hover:underline"
-                      >
-                        {comment.user.displayUsername || comment.user.username}
+                    {comment.user.displayUsername === 'sdeverse' ? (
+                      <div className="relative">
+                        <img
+                          src={sdeverseIcon}
+                          alt="sdeverse"
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">S</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <Link to={`/profile/${comment.user.displayUsername || comment.user.username}`}>
+                        <img
+                          src={comment.user.avatarUrl || "/default-avatar.png"}
+                          alt={comment.user.displayUsername || comment.user.username}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
                       </Link>
+                    )}
+                    <div className="flex flex-col sm:flex-row sm:items-center">
+                      {comment.user.displayUsername === 'sdeverse' ? (
+                        <span className="font-semibold text-gray-900 dark:text-white">
+                          {comment.user.displayUsername || comment.user.username}
+                        </span>
+                      ) : (
+                        <Link
+                          to={`/profile/${comment.user.displayUsername || comment.user.username}`}
+                          className="font-semibold text-gray-900 dark:text-white hover:underline"
+                        >
+                          {comment.user.displayUsername || comment.user.username}
+                        </Link>
+                      )}
                       <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 sm:ml-3">
                         {formatDistanceToNow(new Date(comment.createdAt), {
                           addSuffix: true,
@@ -305,22 +330,41 @@ const CommentSection = ({ parentType, parentId, parentSlug }) => {
                           className="relative space-y-2 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-inner"
                         >
                           <div className="flex items-center space-x-3 mb-1">
-                            <Link to={`/profile/${reply.user.displayUsername || reply.user.username}`}>
-                              <img
-                                src={
-                                  reply.user.avatarUrl || "/default-avatar.png"
-                                }
-                                alt={reply.user.displayUsername || reply.user.username}
-                                className="w-8 h-8 rounded-full object-cover"
-                              />
-                            </Link>
-                            <div className="flex flex-col sm:flex-row sm:items-center">
-                              <Link
-                                to={`/profile/${reply.user.displayUsername || reply.user.username}`}
-                                className="font-semibold text-gray-900 dark:text-white hover:underline text-sm"
-                              >
-                                {reply.user.displayUsername || reply.user.username}
+                            {reply.user.displayUsername === 'sdeverse' ? (
+                              <div className="relative">
+                                <img
+                                  src={sdeverseIcon}
+                                  alt="sdeverse"
+                                  className="w-8 h-8 rounded-full object-cover"
+                                />
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
+                                  <span className="text-white text-xs font-bold">S</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <Link to={`/profile/${reply.user.displayUsername || reply.user.username}`}>
+                                <img
+                                  src={
+                                    reply.user.avatarUrl || "/default-avatar.png"
+                                  }
+                                  alt={reply.user.displayUsername || reply.user.username}
+                                  className="w-8 h-8 rounded-full object-cover"
+                                />
                               </Link>
+                            )}
+                            <div className="flex flex-col sm:flex-row sm:items-center">
+                              {reply.user.displayUsername === 'sdeverse' ? (
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                                  {reply.user.displayUsername || reply.user.username}
+                                </span>
+                              ) : (
+                                <Link
+                                  to={`/profile/${reply.user.displayUsername || reply.user.username}`}
+                                  className="font-semibold text-gray-900 dark:text-white hover:underline text-sm"
+                                >
+                                  {reply.user.displayUsername || reply.user.username}
+                                </Link>
+                              )}
                               <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 sm:ml-3">
                                 {formatDistanceToNow(
                                   new Date(reply.createdAt),
