@@ -84,9 +84,8 @@ const addComment = asyncHandler(async (req, res) => {
   const createdComment = await newComment.save();
 
   const slug = parent.slug;
-  const baseLink = `/${parentType.toLowerCase()}s/${slug}?commentId=${
-    createdComment._id
-  }`;
+  const baseLink = `/${parentType.toLowerCase()}s/${slug}?commentId=${createdComment._id
+    }`;
   const preview = createdComment.text.slice(0, 100);
   const notifications = [];
 
@@ -112,9 +111,8 @@ const addComment = asyncHandler(async (req, res) => {
       commentId: createdComment._id,
       preview,
       link: baseLink,
-      message: `A new comment on your ${parentType.toLowerCase()} "${
-        parent.title || parent.slug
-      }"`,
+      message: `A new comment on your ${parentType.toLowerCase()} "${parent.title || parent.slug
+        }"`,
     });
   }
 
@@ -126,9 +124,8 @@ const addComment = asyncHandler(async (req, res) => {
           recipient: admin._id,
           sender: req.user._id,
           type: "platform_request",
-          message: `Platform Request from @${
-            req.user.username
-          } on ${parentType} "${parent.title || parent.slug}"`,
+          message: `Platform Request from @${req.user.username
+            } on ${parentType} "${parent.title || parent.slug}"`,
           commentId: createdComment._id,
           link: baseLink,
           preview,
@@ -202,9 +199,8 @@ const addReplyToComment = asyncHandler(async (req, res) => {
   comment.replies.push(newReply);
   await comment.save();
 
-  const baseLink = `/${parentType.toLowerCase()}s/${slug}?commentId=${
-    comment._id
-  }`;
+  const baseLink = `/${parentType.toLowerCase()}s/${slug}?commentId=${comment._id
+    }`;
   const preview = text.slice(0, 100);
   const notifications = [];
 
@@ -229,9 +225,8 @@ const addReplyToComment = asyncHandler(async (req, res) => {
       commentId: comment._id,
       preview,
       link: baseLink,
-      message: `Someone replied to your comment on "${
-        parent.title || parent.slug
-      }"`,
+      message: `Someone replied to your comment on "${parent.title || parent.slug
+        }"`,
     });
   }
 
@@ -243,9 +238,8 @@ const addReplyToComment = asyncHandler(async (req, res) => {
           recipient: admin._id,
           sender: req.user._id,
           type: "platform_request",
-          message: `Platform Request from @${
-            req.user.username
-          } in a reply on ${parentType} "${parent.title || parent.slug}"`,
+          message: `Platform Request from @${req.user.username
+            } in a reply on ${parentType} "${parent.title || parent.slug}"`,
           commentId: comment._id,
           link: baseLink,
           preview,
