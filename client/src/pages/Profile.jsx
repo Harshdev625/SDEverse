@@ -68,7 +68,7 @@ export default function Profile() {
     bannerPreview,
     setBannerPreview,
     uploadedBannerBase64,
-    setUploadedBannerBase64
+    setUploadedBannerBase64,
   };
 
   useEffect(() => {
@@ -250,12 +250,12 @@ export default function Profile() {
     return uploadedImageBase64 || formData.avatarUrl;
   };
   const getBannerValue = () => {
-    return uploadedBannerBase64;
+    return uploadedBannerBase64 || formData.bannerUrl;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const avatarValue = getAvatarValue() || formData.avatarUrl;
+    const avatarValue = getAvatarValue();
     const bannerValue = getBannerValue();
 
     const validationErrors = validateAllUrlsBeforeSubmit(formData);
@@ -271,7 +271,13 @@ export default function Profile() {
       bannerUrl: bannerValue,
     };
 
-    dataToSubmit.avatarUrl = ensureProtocol(dataToSubmit.avatarUrl);
+    if (dataToSubmit.avatarUrl && !dataToSubmit.avatarUrl.startsWith("data:")) {
+      dataToSubmit.avatarUrl = ensureProtocol(dataToSubmit.avatarUrl);
+    }
+    if (dataToSubmit.bannerUrl && !dataToSubmit.bannerUrl.startsWith("data:")) {
+      dataToSubmit.bannerUrl = ensureProtocol(dataToSubmit.bannerUrl);
+    }
+
     dataToSubmit.website = ensureProtocol(dataToSubmit.website);
 
     if (dataToSubmit.socialLinks) {
@@ -297,6 +303,11 @@ export default function Profile() {
     setIsEditing(false);
     setHasChanges(false);
     setUrlErrors({});
+
+    setImagePreview(null);
+    setBannerPreview(null);
+    setUploadedImageBase64(null);
+    setUploadedBannerBase64(null);
   };
 
   const handleCancel = () => {
@@ -313,7 +324,6 @@ export default function Profile() {
         socialStats: myProfile.socialStats || {},
         competitiveStats: myProfile.competitiveStats || {},
       });
-
     }
     setImagePreview(null);
     setBannerPreview(null);

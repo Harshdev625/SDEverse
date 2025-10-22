@@ -1,5 +1,6 @@
-import React, { useRef, useState } from "react";
-import AvatarEditor from "react-avatar-editor";
+import React, { useRef, useState, useCallback } from "react";
+import Cropper from "react-easy-crop";
+import { getCroppedImg } from "../utils/cropImage"; // Make sure this path is correct
 
 export default function ProfileSection({
   isEditing,
@@ -19,12 +20,8 @@ export default function ProfileSection({
     setUploadedBannerBase64,
   } = imageData;
 
-  console.log(formData, "formdata");
-
   const fileInputRef = useRef(null);
   const bannerInputRef = useRef(null);
-  const editorRef = useRef(null);
-  const bannerEditorRef = useRef(null);
 
   const [errorMsgImage, setErrorMsgImage] = useState("");
   const [errorMsgBanner, setErrorMsgBanner] = useState("");
@@ -49,8 +46,21 @@ export default function ProfileSection({
     height: 200,
   });
 
+  const [avatarCrop, setAvatarCrop] = useState({ x: 0, y: 0 });
+  const [bannerCrop, setBannerCrop] = useState({ x: 0, y: 0 });
+  const [avatarCroppedAreaPixels, setAvatarCroppedAreaPixels] = useState(null);
+  const [bannerCroppedAreaPixels, setBannerCroppedAreaPixels] = useState(null);
+
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [showBannerModal, setShowBannerModal] = useState(false);
+
+  const onAvatarCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+    setAvatarCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const onBannerCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+    setBannerCroppedAreaPixels(croppedAreaPixels);
+  }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -77,11 +87,10 @@ export default function ProfileSection({
     const reader = new FileReader();
     reader.onloadend = () => {
       setAvatarEditorConfig({
+        ...avatarEditorConfig,
         image: reader.result,
         scale: 1,
         rotate: 0,
-        width: 200,
-        height: 200,
       });
       setShowAvatarModal(true);
     };
@@ -113,45 +122,58 @@ export default function ProfileSection({
     const reader = new FileReader();
     reader.onloadend = () => {
       setBannerEditorConfig({
+        ...bannerEditorConfig,
         image: reader.result,
         scale: 1,
         rotate: 0,
-        width: 600,
-        height: 200,
       });
       setShowBannerModal(true);
     };
     reader.readAsDataURL(file);
   };
 
-  const handleSaveAvatar = () => {
-    if (editorRef.current) {
-      const canvas = editorRef.current.getImageScaledToCanvas();
-      const editedImageBase64 = canvas.toDataURL();
+  const handleSaveAvatar = async () => {
+    if (avatarCroppedAreaPixels) {
+      try {
+        const editedImageBase64 = await getCroppedImg(
+          avatarEditorConfig.image,
+          avatarCroppedAreaPixels,
+          avatarEditorConfig.rotate
+        );
 
-      setImagePreview(editedImageBase64);
-      setUploadedImageBase64(editedImageBase64);
-      handleChange({ target: { name: "avatarUrl", value: "" } });
-      setShowAvatarModal(false);
+        setImagePreview(editedImageBase64);
+        setUploadedImageBase64(editedImageBase64);
+        handleChange({ target: { name: "avatarUrl", value: "" } });
+        setShowAvatarModal(false);
 
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      } catch (e) {
+        console.error("Error cropping image:", e);
       }
     }
   };
 
-  const handleSaveBanner = () => {
-    if (bannerEditorRef.current) {
-      const canvas = bannerEditorRef.current.getImageScaledToCanvas();
-      const editedBannerBase64 = canvas.toDataURL();
+  const handleSaveBanner = async () => {
+    if (bannerCroppedAreaPixels) {
+      try {
+        const editedBannerBase64 = await getCroppedImg(
+          bannerEditorConfig.image,
+          bannerCroppedAreaPixels,
+          bannerEditorConfig.rotate
+        );
 
-      setBannerPreview(editedBannerBase64);
-      setUploadedBannerBase64(editedBannerBase64);
-      handleChange({ target: { name: "bannerUrl", value: "" } });
-      setShowBannerModal(false);
+        setBannerPreview(editedBannerBase64);
+        setUploadedBannerBase64(editedBannerBase64);
+        handleChange({ target: { name: "bannerUrl", value: "" } });
+        setShowBannerModal(false);
 
-      if (bannerInputRef.current) {
-        bannerInputRef.current.value = "";
+        if (bannerInputRef.current) {
+          bannerInputRef.current.value = "";
+        }
+      } catch (e) {
+        console.error("Error cropping banner:", e);
       }
     }
   };
@@ -167,11 +189,10 @@ export default function ProfileSection({
   const handleReopenAvatarEditor = () => {
     if (imagePreview || uploadedImageBase64) {
       setAvatarEditorConfig({
+        ...avatarEditorConfig,
         image: imagePreview || uploadedImageBase64,
         scale: 1,
         rotate: 0,
-        width: 200,
-        height: 200,
       });
       setShowAvatarModal(true);
     }
@@ -180,11 +201,10 @@ export default function ProfileSection({
   const handleReopenBannerEditor = () => {
     if (bannerPreview || uploadedBannerBase64) {
       setBannerEditorConfig({
+        ...bannerEditorConfig,
         image: bannerPreview || uploadedBannerBase64,
         scale: 1,
         rotate: 0,
-        width: 600,
-        height: 200,
       });
       setShowBannerModal(true);
     }
@@ -523,25 +543,28 @@ export default function ProfileSection({
 
               <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
                 <div className="flex-1 flex justify-center items-center">
-                  <div className="bg-gray-100 dark:bg-gray-700 p-4 sm:p-8 rounded-lg">
-                    <div className="relative">
-                      <AvatarEditor
-                        ref={editorRef}
-                        image={avatarEditorConfig.image}
-                        width={avatarEditorConfig.width}
-                        height={avatarEditorConfig.height}
-                        border={20}
-                        borderRadius={100}
-                        color={[0, 0, 0, 0.6]}
-                        scale={avatarEditorConfig.scale}
-                        rotate={avatarEditorConfig.rotate}
-                        className="border-2 border-gray-300 dark:border-gray-600"
-                      />
-                      <div
-                        className="absolute inset-0 rounded-full border-2 border-blue-500 pointer-events-none"
-                        style={{ margin: "20px" }}
-                      ></div>
-                    </div>
+                  <div
+                    className="relative bg-gray-100 dark:bg-gray-700 w-full"
+                    style={{
+                      height: "400px",
+                    }}
+                  >
+                    <Cropper
+                      image={avatarEditorConfig.image}
+                      crop={avatarCrop}
+                      zoom={avatarEditorConfig.scale}
+                      rotation={avatarEditorConfig.rotate}
+                      aspect={1}
+                      cropShape="round"
+                      onCropChange={setAvatarCrop}
+                      onZoomChange={(zoom) =>
+                        setAvatarEditorConfig((prev) => ({ ...prev, scale: zoom }))
+                      }
+                      onRotationChange={(rotate) =>
+                        setAvatarEditorConfig((prev) => ({ ...prev, rotate }))
+                      }
+                      onCropComplete={onAvatarCropComplete}
+                    />
                   </div>
                 </div>
 
@@ -591,6 +614,7 @@ export default function ProfileSection({
                   </div>
 
                   <div className="pt-2 sm:pt-4">
+                    {/* THIS IS THE FIXED LINE */}
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2">
                       The circular area shows what will be visible in your
                       profile picture
@@ -628,25 +652,28 @@ export default function ProfileSection({
 
               <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
                 <div className="flex-1 flex justify-center items-center overflow-x-auto">
-                  <div className="bg-gray-100 dark:bg-gray-700 p-4 sm:p-6 rounded-lg">
-                    <div className="relative">
-                      <AvatarEditor
-                        ref={bannerEditorRef}
-                        image={bannerEditorConfig.image}
-                        width={bannerEditorConfig.width}
-                        height={bannerEditorConfig.height}
-                        border={20}
-                        borderRadius={0}
-                        color={[0, 0, 0, 0.6]}
-                        scale={bannerEditorConfig.scale}
-                        rotate={bannerEditorConfig.rotate}
-                        className="border-2 border-gray-300 dark:border-gray-600"
-                      />
-                      <div
-                        className="absolute inset-0 border-2 border-blue-500 pointer-events-none"
-                        style={{ margin: "20px" }}
-                      ></div>
-                    </div>
+                  <div
+                    className="relative bg-gray-100 dark:bg-gray-700 w-full"
+                    style={{
+                      height: "400px",
+                    }}
+                  >
+                    <Cropper
+                      image={bannerEditorConfig.image}
+                      crop={bannerCrop}
+                      zoom={bannerEditorConfig.scale}
+                      rotation={bannerEditorConfig.rotate}
+                      aspect={bannerEditorConfig.width / bannerEditorConfig.height}
+                      cropShape="rect"
+                      onCropChange={setBannerCrop}
+                      onZoomChange={(zoom) =>
+                        setBannerEditorConfig((prev) => ({ ...prev, scale: zoom }))
+                      }
+                      onRotationChange={(rotate) =>
+                        setBannerEditorConfig((prev) => ({ ...prev, rotate }))
+                      }
+                      onCropComplete={onBannerCropComplete}
+                    />
                   </div>
                 </div>
 
