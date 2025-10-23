@@ -178,6 +178,7 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
         state.otpSent = false;
+        state.otpValidated = false;
       })
       .addCase(forgotPassword.fulfilled, (state) => {
         state.loading = false;
