@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/user.model");
 const OTP = require("../models/otp.model");
 const generateToken = require("../utils/generateToken");
-const sendEmail = require("../utils/sendEmail");
+const sendEmail = require("../config/sendEmail");
 
 const validateEmail = (email) => {
   if (typeof email !== "string") return false;
