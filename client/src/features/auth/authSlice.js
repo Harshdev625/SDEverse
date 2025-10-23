@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { loginUserAPI, registerUserAPI, getMeAPI, resetPasswordAPI} from "./authAPI";
+import { loginUserAPI, registerUserAPI, getMeAPI, forgotPasswordAPI, validateOTPAPI, resetPasswordAPI} from "./authAPI";
 
 const tokenFromStorage = localStorage.getItem("token");
 
@@ -9,6 +9,8 @@ const initialState = {
   loading: false,
   error: null,
   resetSuccess: false,
+  otpSent: false,
+  otpValidated: false,
 };
 
 export const registerUser = createAsyncThunk(
@@ -50,6 +52,34 @@ export const getMe = createAsyncThunk("auth/getMe", async (token, thunkAPI) => {
   }
 });
 
+export const forgotPassword = createAsyncThunk(
+  "auth/forgotPassword",
+  async (emailData, thunkAPI) => {
+    try {
+      const data = await forgotPasswordAPI(emailData);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Forgot password request failed"
+      );
+    }
+  }
+);
+
+export const validateOTP = createAsyncThunk(
+  "auth/validateOTP",
+  async (otpData, thunkAPI) => {
+    try {
+      const data = await validateOTPAPI(otpData);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Invalid or expired OTP"
+      );
+    }
+  }
+);  
+
 export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
   async (resetData, thunkAPI) => {
@@ -74,10 +104,14 @@ const authSlice = createSlice({
       state.loading = false;
       state.error = null;
       state.resetSuccess = false;
+      state.otpSent = false;
+      state.otpValidated = false;
       localStorage.removeItem("token");
     },
     clearResetSuccess: (state) => {
       state.resetSuccess = false;
+      state.otpSent = false;
+      state.otpValidated = false;
       state.error = null;
     },
   },
@@ -139,6 +173,36 @@ const authSlice = createSlice({
           email: action.payload.email,
           role: action.payload.role,
         };
+      })
+      .addCase(forgotPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.otpSent = false;
+      })
+      .addCase(forgotPassword.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+        state.otpSent = true;
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.otpSent = false;
+      })
+      .addCase(validateOTP.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.otpValidated = false;
+      })
+      .addCase(validateOTP.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+        state.otpValidated = true;
+      })
+      .addCase(validateOTP.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.otpValidated = false;
       })
       .addCase(resetPassword.pending, (state) => {
         state.loading = true;
