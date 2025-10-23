@@ -1,25 +1,17 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 const sendEmail = async (email, subject, message) => {
     try {
-        const transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_HOST,
-            port: parseInt(process.env.EMAIL_PORT, 10),
-            secure: process.env.EMAIL_SECURE === 'true',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
-        });
+        const resend = new Resend(process.env.RESEND_API_KEY);
     
-        await transporter.sendMail({
-            from: `"No Reply" <${process.env.EMAIL_FROM}>`,
+        await resend.emails.send({
+            from: process.env.EMAIL_FROM,
             to: email,
             subject: subject,
             text: message,
         });
     } catch (error) {
-        throw new Error('Email could not be sent');
+        throw new Error(`Email could not be sent: ${error.message}`);
     }
 }
 

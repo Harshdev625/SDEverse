@@ -220,7 +220,7 @@ const resetPassword = asyncHandler(async (req, res) => {
   sanitizedEmail = sanitizeInput(email);
   const otpRecord = await OTP.findOne({ email: sanitizedEmail, code: Number(code) });
     
-  if (!otpRecord || Data.now() > otpRecord.createdAt.getTime() + 5 * 60 * 1000) {
+  if (!otpRecord || Date.now() > otpRecord.createdAt.getTime() + 5 * 60 * 1000) {
     res.status(400);
     throw new Error("Invalid or expired OTP");
   }
