@@ -6,7 +6,7 @@ const otpSchema = new mongoose.Schema({
         required: true,
     },
     code: {
-        type: Number,
+        type: String,
         required: true,
     },
     createdAt: {
@@ -16,4 +16,4 @@ const otpSchema = new mongoose.Schema({
     }
 });
 
-modules.exports =  mongoose.model('OTP', otpSchema);
+module.exports = mongoose.model('OTP', otpSchema);

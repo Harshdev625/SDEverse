@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/user.model");
 const OTP = require("../models/otp.model");
 const generateToken = require("../utils/generateToken");
+const sendEmail = require("../utils/sendEmail");
 
 const validateEmail = (email) => {
   if (typeof email !== "string") return false;
@@ -164,8 +165,11 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email: sanitizedEmail.toLowerCase() });
 
   if (!user) {
-    res.status(404);
-    throw new Error("User not found with this email");
+    res.status(200).json({ 
+      message: "If an account exists with this email, an OTP has been sent",
+      success: true 
+    });
+    return;
   }
 
   const otpCode = Math.floor(100000 + Math.random() * 999999);
@@ -190,10 +194,10 @@ const forgotPassword = asyncHandler(async (req, res) => {
 const validateOTP = asyncHandler(async (req, res) => {
   const { email, code } = req.body;
 
-  sanitizedEmail = sanitizeInput(email);
+  const sanitizedEmail = sanitizeInput(email);
   const otpRecord = await OTP.findOne({ email: sanitizedEmail, code: Number(code) });
     
-  if (!otpRecord || Data.now() > otpRecord.createdAt.getTime() + 5 * 60 * 1000) {
+  if (!otpRecord || Date.now() > otpRecord.createdAt.getTime() + 5 * 60 * 1000) {
     res.status(400);
     throw new Error("Invalid or expired OTP");
   }
