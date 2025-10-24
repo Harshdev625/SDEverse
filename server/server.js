@@ -13,6 +13,7 @@ const feedbackRoutes = require("./routes/feedback.routes");
 const communityRoutes = require("./routes/community.routes");
 const dataStructureRoutes = require("./routes/dataStructure.routes");
 const dataStructureProposalRoutes = require("./routes/dataStructureProposal.routes");
+const contactRoutes = require("./routes/contact.routes")
 
 const { notFound, errorHandler } = require("./middleware/error.middleware");
 
@@ -21,7 +22,7 @@ connectDB();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -33,6 +34,8 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/community", communityRoutes);
 app.use("/api/data-structures", dataStructureRoutes);
 app.use("/api/data-structure-proposals", dataStructureProposalRoutes);
+app.use("/api/contact", contactRoutes);
+
 
 // Health check endpoint for keep-alive
 app.get("/health", (req, res) => {
@@ -45,7 +48,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  
+
   // Initialize keep-alive
   const keepAlive = new KeepAlive();
   setTimeout(() => keepAlive.start(), 10000);

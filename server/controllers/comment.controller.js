@@ -84,9 +84,8 @@ const addComment = asyncHandler(async (req, res) => {
   const createdComment = await newComment.save();
 
   const slug = parent.slug;
-  const baseLink = `/${parentType.toLowerCase()}s/${slug}?commentId=${
-    createdComment._id
-  }`;
+  const baseLink = `/${parentType.toLowerCase()}s/${slug}?commentId=${createdComment._id
+    }`;
   const preview = createdComment.text.slice(0, 100);
   const notifications = [];
 
@@ -112,9 +111,8 @@ const addComment = asyncHandler(async (req, res) => {
       commentId: createdComment._id,
       preview,
       link: baseLink,
-      message: `A new comment on your ${parentType.toLowerCase()} "${
-        parent.title || parent.slug
-      }"`,
+      message: `A new comment on your ${parentType.toLowerCase()} "${parent.title || parent.slug
+        }"`,
     });
   }
 
@@ -126,9 +124,8 @@ const addComment = asyncHandler(async (req, res) => {
           recipient: admin._id,
           sender: req.user._id,
           type: "platform_request",
-          message: `Platform Request from @${
-            req.user.username
-          } on ${parentType} "${parent.title || parent.slug}"`,
+          message: `Platform Request from @${req.user.username
+            } on ${parentType} "${parent.title || parent.slug}"`,
           commentId: createdComment._id,
           link: baseLink,
           preview,
@@ -163,11 +160,39 @@ const getCommentsByParent = asyncHandler(async (req, res) => {
   }
 
   const comments = await Comment.find({ parentType, parentId })
-    .populate("user", "username avatarUrl")
-    .populate("replies.user", "username avatarUrl")
+    .populate("user", "username avatarUrl role")
+    .populate("replies.user", "username avatarUrl role")
     .lean();
 
-  res.json(comments);
+  // Add displayUsername for admins as 'sdeverse' while preserving original username for links
+  const transformed = comments.map((comment) => {
+    const updated = { ...comment };
+    if (updated.user) {
+      updated.user = {
+        ...updated.user,
+        displayUsername:
+          updated.user.role === "admin" ? "sdeverse" : updated.user.username,
+      };
+    }
+    if (Array.isArray(updated.replies)) {
+      updated.replies = updated.replies.map((reply) => {
+        if (reply.user) {
+          return {
+            ...reply,
+            user: {
+              ...reply.user,
+              displayUsername:
+                reply.user.role === "admin" ? "sdeverse" : reply.user.username,
+            },
+          };
+        }
+        return reply;
+      });
+    }
+    return updated;
+  });
+
+  res.json(transformed);
 });
 
 const addReplyToComment = asyncHandler(async (req, res) => {
@@ -202,9 +227,8 @@ const addReplyToComment = asyncHandler(async (req, res) => {
   comment.replies.push(newReply);
   await comment.save();
 
-  const baseLink = `/${parentType.toLowerCase()}s/${slug}?commentId=${
-    comment._id
-  }`;
+  const baseLink = `/${parentType.toLowerCase()}s/${slug}?commentId=${comment._id
+    }`;
   const preview = text.slice(0, 100);
   const notifications = [];
 
@@ -229,9 +253,8 @@ const addReplyToComment = asyncHandler(async (req, res) => {
       commentId: comment._id,
       preview,
       link: baseLink,
-      message: `Someone replied to your comment on "${
-        parent.title || parent.slug
-      }"`,
+      message: `Someone replied to your comment on "${parent.title || parent.slug
+        }"`,
     });
   }
 
@@ -243,9 +266,8 @@ const addReplyToComment = asyncHandler(async (req, res) => {
           recipient: admin._id,
           sender: req.user._id,
           type: "platform_request",
-          message: `Platform Request from @${
-            req.user.username
-          } in a reply on ${parentType} "${parent.title || parent.slug}"`,
+          message: `Platform Request from @${req.user.username
+            } in a reply on ${parentType} "${parent.title || parent.slug}"`,
           commentId: comment._id,
           link: baseLink,
           preview,

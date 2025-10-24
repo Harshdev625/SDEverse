@@ -21,6 +21,8 @@ const {
   fetchSocialStats,
 } = require("../utils/socialProfileFetchers");
 
+const cloudinary = require("../config/cloudinary");
+
 const socialStatsFieldsMap = {
   github: [
     { sourcePath: "profile.publicRepos", targetField: "publicRepos" },
@@ -614,6 +616,15 @@ const getUserById = asyncHandler(async (req, res) => {
   res.json(user);
 });
 
+const getUserByUsername = asyncHandler(async (req, res) => {
+  const user = await User.findOne({ username: req.params.username }).select("-password");
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+  res.json(user);
+});
+
 const deleteUser = asyncHandler(async (req, res) => {
   const user = await User.findByIdAndDelete(req.params.id);
   if (!user) {
@@ -660,13 +671,74 @@ const updateMyProfile = asyncHandler(async (req, res) => {
 
   const updatableFields = [
     "fullName",
-    "avatarUrl",
     "location",
     "website",
     "bio",
     "competitiveProfiles",
     "socialLinks",
   ];
+
+  // Handle image upload or direct URL
+  let imageUrl = user.avatarUrl;
+  let image = req.body.avatarUrl;
+  let bannerUrl = req.body.bannerUrl;
+
+  // Normalize possible data URI prefixes and detect base64 data correctly.
+  // Valid base64 data URIs start with 'data:' (optionally prefixed by protocol if submitted wrong).
+  const isBase64Data = (str) => {
+    if (!str || typeof str !== "string") return false;
+    // strip any accidental leading protocol artifacts
+    const trimmed = str.trim();
+    if (trimmed.startsWith("http://data:") || trimmed.startsWith("https://data:")) {
+      return true;
+    }
+    if (trimmed.startsWith("data:")) return true;
+    return false;
+  };
+
+  if (image) {
+    // If the client sent a data URI (base64), upload it to Cloudinary
+    try {
+      if (isBase64Data(image)) {
+        // remove accidental protocol if present
+        const cleaned = image.replace(/^https?:\/\//, "");
+        const uploadResponse = await cloudinary.uploader.upload(cleaned, {
+          folder: "profile_avatars",
+        });
+        imageUrl = uploadResponse.secure_url;
+      } else if (image.startsWith("http://") || image.startsWith("https://")) {
+        // image is already a valid URL
+        imageUrl = image;
+      } else {
+        // If it's neither a URL nor a data URI, assume it's already a URL-ish string and set it
+        imageUrl = image;
+      }
+    } catch (err) {
+      console.error("Error uploading avatar to cloudinary:", err.message || err);
+      // keep existing avatarUrl on failure
+    }
+  }
+
+  if (bannerUrl) {
+    try {
+      if (isBase64Data(bannerUrl)) {
+        const cleaned = bannerUrl.replace(/^https?:\/\//, "");
+        const uploadResponse = await cloudinary.uploader.upload(cleaned, {
+          folder: "profile_banners",
+        });
+        bannerUrl = uploadResponse.secure_url;
+      } else if (bannerUrl.startsWith("http://") || bannerUrl.startsWith("https://")) {
+        // leave as-is
+      } else {
+        // leave as-is
+      }
+    } catch (err) {
+      console.error("Error uploading banner to cloudinary:", err.message || err);
+      // keep existing banner on failure
+    }
+  }
+  user.avatarUrl = imageUrl;
+  user.bannerUrl = bannerUrl;
 
   updatableFields.forEach((field) => {
     if (req.body[field] !== undefined) {
@@ -681,9 +753,52 @@ const updateMyProfile = asyncHandler(async (req, res) => {
   res.json({ message: "Profile updated", user: updatedUser });
 });
 
+const searchUsers = asyncHandler(async (req, res) => {
+  try {
+    const { query } = req.query;
+    
+    // Hardcoded @sdeverse suggestion (not in database)
+    const sdeverseSuggestion = {
+      _id: "sdeverse-admin",
+      username: "sdeverse",
+      avatarUrl: "/default-avatar.png"
+    };
+
+    // Handle empty query - show @sdeverse first (when user types @)
+    if (!query || query.trim() === "") {
+      return res.json([sdeverseSuggestion]);
+    }
+
+    const results = [];
+    
+    // Only show @sdeverse if query starts with 's'
+    if (query.toLowerCase().startsWith('s')) {
+      results.push(sdeverseSuggestion);
+    }
+
+    // Find other users matching the query (exclude admin users)
+    const otherUsers = await User.find(
+      { 
+        username: { $regex: query, $options: "i" },
+        role: { $ne: "admin" } // Exclude admin users from suggestions
+      },
+      { username: 1, _id: 1, avatarUrl: 1 }
+    ).limit(4); // Limit to 4 since we might add sdeverse
+
+    // Add other matching users
+    results.push(...otherUsers);
+
+    res.json(results);
+  } catch (error) {
+    console.error("Error fetching user suggestions:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = {
   getAllUsers,
   getUserById,
+  getUserByUsername,
   deleteUser,
   updateUserRole,
   getMyProfile,
@@ -693,4 +808,5 @@ module.exports = {
   updateSingleCompetitiveStat,
   updateSingleSocialStat,
   getAdminAnalytics,
+  searchUsers,
 };

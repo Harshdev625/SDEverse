@@ -197,6 +197,10 @@ cp .env.example .env
 # - JWT_SECRET=your-secret-key
 # - PORT=5000
 
+# - CLOUDINARY_CLOUD_NAME=
+# - CLOUDINARY_API_KEY=
+# - CLOUDINARY_API_SECRET=
+
 # Start development server
 npm run dev
 ```

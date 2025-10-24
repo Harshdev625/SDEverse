@@ -23,6 +23,8 @@ const userSchema = new mongoose.Schema(
 
     fullName: { type: String, trim: true, default: "" },
     avatarUrl: { type: String, trim: true, default: "" },
+    bannerUrl: { type: String, trim: true, default: "" },
+
     location: { type: String, trim: true, default: "" },
     website: { type: String, trim: true, default: "" },
 

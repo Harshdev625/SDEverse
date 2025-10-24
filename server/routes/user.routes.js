@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getAllUsers,
   getUserById,
+  getUserByUsername,
   deleteUser,
   updateUserRole,
   getMyProfile,
@@ -11,17 +12,21 @@ const {
   updateSocialProfiles,
   updateSingleCompetitiveStat,
   updateSingleSocialStat,
-  getAdminAnalytics
+  getAdminAnalytics,
+  searchUsers
 } = require("../controllers/user.controller");
 const { protect, admin } = require("../middleware/auth.middleware");
 
 router.get('/analytics', protect, admin, getAdminAnalytics);
+// Public endpoint: allow mention suggestions without auth
+router.get("/search", searchUsers);
 router.get("/me", protect, getMyProfile);
 router.patch("/me", protect, updateMyProfile);
 router.get("/update-competitive-stats", protect, updateAllCompetitiveStats);
 router.get("/update-social-stats", protect, updateSocialProfiles);
 router.get("/", protect, admin, getAllUsers);
 
+router.get("/username/:username", getUserByUsername);
 router.get("/:id", protect, admin, getUserById);
 router.delete("/:id", protect, admin, deleteUser);
 router.put("/:id/role", protect, admin, updateUserRole);

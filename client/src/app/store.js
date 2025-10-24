@@ -7,6 +7,7 @@ import themeReducer from "../features/theme/themeSlice";
 import proposalReducer from "../features/proposal/proposalSlice";
 import notificationReducer from "../features/notification/notificationSlice";
 import feedbackReducer from "../features/feedback/feedbackSlice";
+import contactReducer from "../features/contact/contactSlice";
 import communityReducer from "../features/community/communitySlice";
 import dataStructureReducer from "../features/dataStructure/dataStructureSlice";
 import dataStructureProposalReducer from "../features/dataStructureProposal/dataStructureProposalSlice";
@@ -20,6 +21,7 @@ const store = configureStore({
     theme: themeReducer,
     proposal: proposalReducer,
     notification: notificationReducer,
+    contact: contactReducer,
     feedback: feedbackReducer,
     community: communityReducer,
     dataStructure: dataStructureReducer,

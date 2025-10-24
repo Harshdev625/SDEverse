@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createComment,
@@ -9,6 +9,7 @@ import {
 import { useSearchParams } from "react-router-dom";
 import { Send, Trash2, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import sdeverseIcon from "../assets/sdeverse.png";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -18,48 +19,67 @@ import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "katex/dist/katex.min.css";
 import { toast } from "react-toastify";
 import { formatDistanceToNow } from "date-fns";
+import MentionInput from "../components/MentionInput";
 
-export const MarkdownRenderer = ({ children }) => (
-  <ReactMarkdown
-    remarkPlugins={[remarkGfm, remarkMath]}
-    rehypePlugins={[rehypeKatex]}
-    components={{
-      code({ inline, className, children, ...props }) {
-        const match = /language-(\w+)/.exec(className || "");
-        return !inline && match ? (
-          <SyntaxHighlighter
-            style={oneDark}
-            language={match[1]}
-            PreTag="div"
-            {...props}
-          >
-            {String(children).replace(/\n$/, "")}
-          </SyntaxHighlighter>
-        ) : (
-          <code
-            className="bg-gray-200 dark:bg-gray-700 rounded px-1.5 py-0.5 font-mono text-sm"
-            {...props}
-          >
-            {children}
-          </code>
-        );
-      },
-    }}
-  >
-    {children}
-  </ReactMarkdown>
-);
+export const MarkdownRenderer = ({ children }) => {
+  // Process text to convert @mentions to markdown links, but disable @sdeverse links
+  const processedText = String(children).replace(
+    /@([a-zA-Z0-9_]+)/g,
+    (match, username) => {
+      if (username === 'sdeverse') {
+        return '@sdeverse'; // Keep as plain text, no link
+      }
+      return `[@${username}](/profile/${username})`;
+    }
+  );
+
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm, remarkMath]}
+      rehypePlugins={[rehypeKatex]}
+      components={{
+        code({ inline, className, children, ...props }) {
+          const match = /language-(\w+)/.exec(className || "");
+          return !inline && match ? (
+            <SyntaxHighlighter
+              style={oneDark}
+              language={match[1]}
+              PreTag="div"
+              {...props}
+            >
+              {String(children).replace(/\n$/, "")}
+            </SyntaxHighlighter>
+          ) : (
+            <code
+              className="bg-gray-200 dark:bg-gray-700 rounded px-1.5 py-0.5 font-mono text-sm"
+              {...props}
+            >
+              {children}
+            </code>
+          );
+        },
+        a({ href, children, ...props }) {
+          // Style mention links differently
+          const isMention = href?.startsWith('/profile/');
+          return (
+            <a
+              href={href}
+              className={isMention ? "text-blue-500 hover:underline font-medium" : "text-blue-600 hover:underline"}
+              {...props}
+            >
+              {children}
+            </a>
+          );
+        },
+      }}
+    >
+      {processedText}
+    </ReactMarkdown>
+  );
+};
 
 const ReplyInput = ({ initialText = "", onCancel, onSubmit }) => {
   const [text, setText] = useState(initialText);
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.setSelectionRange(text.length, text.length);
-      inputRef.current.focus();
-    }
-  }, [text]);
 
   const handleSubmit = () => {
     if (text.trim().length === 0) return;
@@ -68,18 +88,15 @@ const ReplyInput = ({ initialText = "", onCancel, onSubmit }) => {
   };
 
   return (
-    <div className="relative w-full mt-4 flex items-start space-x-3">
-      <input
-        ref={inputRef}
-        type="text"
+    <div className="relative w-full mt-4 flex flex-col space-y-3">
+      <MentionInput
         value={text}
-        onChange={(e) => setText(e.target.value)}
-        className="flex-1 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+        onChange={setText}
         placeholder="Write a reply..."
-        spellCheck={false}
-        aria-label="Reply input"
+        rows={2}
+        className="text-sm"
       />
-      <div className="flex space-x-1.5">
+      <div className="flex space-x-1.5 justify-end">
         <button
           onClick={handleSubmit}
           disabled={text.trim().length === 0}
@@ -186,29 +203,28 @@ const CommentSection = ({ parentType, parentId, parentSlug }) => {
         Discussion
       </h2>
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <input
-          type="text"
-          placeholder="Leave a comment..."
+      <div className="flex flex-col gap-3 mb-6">
+        <MentionInput
           value={newCommentText}
-          onChange={(e) => setNewCommentText(e.target.value)}
-          className="flex-1 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-gray-900 dark:text-gray-100 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-          spellCheck={false}
-          aria-label="New comment input"
+          onChange={setNewCommentText}
+          placeholder="Leave a comment..."
+          rows={4}
         />
-        <button
-          onClick={handleNewCommentSubmit}
-          disabled={!newCommentText.trim()}
-          className={`flex items-center justify-center gap-1 rounded-md px-5 py-3 text-white text-base transition ${
-            newCommentText.trim()
-              ? "bg-blue-600 hover:bg-blue-700"
-              : "bg-blue-300 cursor-not-allowed"
-          }`}
-          aria-label="Submit comment"
-          title="Post comment"
-        >
-          Post <Send size={18} />
-        </button>
+        <div className="flex justify-end">
+          <button
+            onClick={handleNewCommentSubmit}
+            disabled={!newCommentText.trim()}
+            className={`flex items-center justify-center gap-1 rounded-md px-5 py-3 text-white text-base transition ${
+              newCommentText.trim()
+                ? "bg-blue-600 hover:bg-blue-700"
+                : "bg-blue-300 cursor-not-allowed"
+            }`}
+            aria-label="Submit comment"
+            title="Post comment"
+          >
+            Post <Send size={18} />
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -229,20 +245,39 @@ const CommentSection = ({ parentType, parentId, parentSlug }) => {
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-3">
-                    <Link to={`/profile/${comment.user.username}`}>
-                      <img
-                        src={comment.user.avatarUrl || "/default-avatar.png"}
-                        alt={comment.user.username}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                    </Link>
-                    <div className="flex flex-col sm:flex-row sm:items-center">
-                      <Link
-                        to={`/profile/${comment.user.username}`}
-                        className="font-semibold text-gray-900 dark:text-white hover:underline"
-                      >
-                        {comment.user.username}
+                    {comment.user.displayUsername === 'sdeverse' ? (
+                      <div className="relative">
+                        <img
+                          src={sdeverseIcon}
+                          alt="sdeverse"
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">S</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <Link to={`/profile/${comment.user.displayUsername || comment.user.username}`}>
+                        <img
+                          src={comment.user.avatarUrl || "/default-avatar.png"}
+                          alt={comment.user.displayUsername || comment.user.username}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
                       </Link>
+                    )}
+                    <div className="flex flex-col sm:flex-row sm:items-center">
+                      {comment.user.displayUsername === 'sdeverse' ? (
+                        <span className="font-semibold text-gray-900 dark:text-white">
+                          {comment.user.displayUsername || comment.user.username}
+                        </span>
+                      ) : (
+                        <Link
+                          to={`/profile/${comment.user.displayUsername || comment.user.username}`}
+                          className="font-semibold text-gray-900 dark:text-white hover:underline"
+                        >
+                          {comment.user.displayUsername || comment.user.username}
+                        </Link>
+                      )}
                       <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 sm:ml-3">
                         {formatDistanceToNow(new Date(comment.createdAt), {
                           addSuffix: true,
@@ -278,7 +313,7 @@ const CommentSection = ({ parentType, parentId, parentSlug }) => {
 
                 {isReplyOpen && (
                   <ReplyInput
-                    initialText={`@${comment.user.username} `}
+                    initialText={`@${comment.user.displayUsername || comment.user.username} `}
                     onCancel={() => setReplyOpenFor(null)}
                     onSubmit={(text) => handleReplySubmit(comment._id, text)}
                   />
@@ -295,22 +330,41 @@ const CommentSection = ({ parentType, parentId, parentSlug }) => {
                           className="relative space-y-2 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-inner"
                         >
                           <div className="flex items-center space-x-3 mb-1">
-                            <Link to={`/profile/${reply.user.username}`}>
-                              <img
-                                src={
-                                  reply.user.avatarUrl || "/default-avatar.png"
-                                }
-                                alt={reply.user.username}
-                                className="w-8 h-8 rounded-full object-cover"
-                              />
-                            </Link>
-                            <div className="flex flex-col sm:flex-row sm:items-center">
-                              <Link
-                                to={`/profile/${reply.user.username}`}
-                                className="font-semibold text-gray-900 dark:text-white hover:underline text-sm"
-                              >
-                                {reply.user.username}
+                            {reply.user.displayUsername === 'sdeverse' ? (
+                              <div className="relative">
+                                <img
+                                  src={sdeverseIcon}
+                                  alt="sdeverse"
+                                  className="w-8 h-8 rounded-full object-cover"
+                                />
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
+                                  <span className="text-white text-xs font-bold">S</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <Link to={`/profile/${reply.user.displayUsername || reply.user.username}`}>
+                                <img
+                                  src={
+                                    reply.user.avatarUrl || "/default-avatar.png"
+                                  }
+                                  alt={reply.user.displayUsername || reply.user.username}
+                                  className="w-8 h-8 rounded-full object-cover"
+                                />
                               </Link>
+                            )}
+                            <div className="flex flex-col sm:flex-row sm:items-center">
+                              {reply.user.displayUsername === 'sdeverse' ? (
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                                  {reply.user.displayUsername || reply.user.username}
+                                </span>
+                              ) : (
+                                <Link
+                                  to={`/profile/${reply.user.displayUsername || reply.user.username}`}
+                                  className="font-semibold text-gray-900 dark:text-white hover:underline text-sm"
+                                >
+                                  {reply.user.displayUsername || reply.user.username}
+                                </Link>
+                              )}
                               <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 sm:ml-3">
                                 {formatDistanceToNow(
                                   new Date(reply.createdAt),
@@ -349,7 +403,7 @@ const CommentSection = ({ parentType, parentId, parentSlug }) => {
 
                           {isReplyOpen && (
                             <ReplyInput
-                              initialText={`@${reply.user.username} `}
+                              initialText={`@${reply.user.displayUsername || reply.user.username} `}
                               onCancel={() => setReplyOpenFor(null)}
                               onSubmit={(text) =>
                                 handleReplySubmit(reply._id, text)
