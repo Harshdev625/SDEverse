@@ -270,7 +270,7 @@ const Sidebar = () => {
             </NavLink>
 
             <NavLink
-              to="/algorithms"
+              to="/algorithms/proposals/new"
               className={({ isActive }) =>
                 getNavItemClass("algorithms", isActive)
               }
