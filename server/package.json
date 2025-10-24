@@ -35,6 +35,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.1",
     "node-cron": "^4.2.1",
+    "resend": "^6.2.2",
     "slugify": "^1.6.6"
   },
   "devDependencies": {
