@@ -5,9 +5,9 @@ const Footer = () => {
   return (
     <footer className="w-full border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8 text-sm">
           <div>
-            <h3 className="text-lg font-bold mb-2">SDEverse</h3>
+            <h3 className="text-lg font-bold mb-2 text-indigo-600 dark:text-indigo-400">SDEverse</h3>
             <p className="text-gray-600 dark:text-gray-400">
               Your ultimate platform for mastering DSA with community collaboration.
             </p>
