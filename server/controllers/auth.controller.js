@@ -173,7 +173,6 @@ const forgotPassword = asyncHandler(async (req, res) => {
   }
 
   const otpCode = Math.floor(100000 + Math.random() * 999999);
-  console.log(`OTP for ${sanitizedEmail}: ${otpCode}`);
 
   const newOtp = new OTP({
     email: sanitizedEmail.toLowerCase(),
