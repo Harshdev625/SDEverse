@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2, Eye, EyeOff, ArrowLeft, Check, X } from "lucide-react";
 import SDEverse from "../assets/sdeverse.png";
+import { toast } from "react-toastify";
 
 const Register = () => {
   const dispatch = useDispatch();
@@ -73,7 +74,7 @@ const Register = () => {
     return errors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     
     const errors = validateForm();
@@ -83,7 +84,12 @@ const Register = () => {
     }
 
     setValidationErrors({});
-    dispatch(registerUser(formData));
+    const responses = await dispatch(registerUser(formData));
+    if(responses.meta.requestStatus === "fulfilled"){
+      toast(" ☑️ Succesfully Registered")
+    }else if (responses.meta.requestStatus === "rejected"){
+      toast(" ❌ Error, Please try again")
+    }
   };
 
   const formatErrorMessage = (error) => {
@@ -104,7 +110,6 @@ const Register = () => {
     if (errorString.includes("validation")) {
       return "Please check your input and try again.";
     }
-    
     return errorString;
   };
 

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../features/auth/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import SDEverse from "../assets/sdeverse.png";
 
@@ -17,9 +18,14 @@ const Login = () => {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    dispatch(loginUser(formData));
+    const responses = await dispatch(loginUser(formData));
+    if(user || responses.meta.requestStatus === "fulfilled"){
+      toast(" ☑️ Login successfull")
+    }else if (responses.meta.requestStatus === "rejected"){
+      toast(" ❌ Invalid email or password ")
+    }
   };
 
   useEffect(() => {
