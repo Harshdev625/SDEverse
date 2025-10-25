@@ -269,8 +269,8 @@ const Algorithm = () => {
       className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl"
     >
       {/* Navigation Controls */}
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex justify-between items-center w-full">
+      <div className="flex justify-between items-center mb-4 mt-6 sm:mt-0 ">
+        <div className="flex justify-between items-center px-5 sm:px-0 w-200 sm:w-full">
           <button
             onClick={() => navigate(-1)}
             className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all shadow-sm"
@@ -293,7 +293,7 @@ const Algorithm = () => {
 
       {/* Toggle + Info */}
       <div className="mb-4 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto">
-        <div className="flex items-center justify-end space-x-3">
+        <div className="flex items-center justify-end space-x-3 mr-2 sm:mr-0">
           <button
             onClick={() => setAllowMultipleDropdowns(!allowMultipleDropdowns)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
