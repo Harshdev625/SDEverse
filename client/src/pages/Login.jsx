@@ -18,19 +18,23 @@ const Login = () => {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const responses = await dispatch(loginUser(formData));
-    if(user || responses.meta.requestStatus === "fulfilled"){
-      toast(" ☑️ Login successfull")
-    }else if (responses.meta.requestStatus === "rejected"){
-      toast(" ❌ Invalid email or password ")
-    }
+    dispatch(loginUser(formData));
   };
 
   useEffect(() => {
-    if (user) navigate("/");
+    if (user) {
+      toast.success("Login successful!");
+      navigate("/");
+    }
   }, [user, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error("Invalid email or password");
+    }
+  }, [error]);
 
   return (
     <motion.div

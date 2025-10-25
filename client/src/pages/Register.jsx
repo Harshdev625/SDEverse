@@ -74,7 +74,7 @@ const Register = () => {
     return errors;
   };
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     
     const errors = validateForm();
@@ -84,12 +84,8 @@ const Register = () => {
     }
 
     setValidationErrors({});
-    const responses = await dispatch(registerUser(formData));
-    if(responses.meta.requestStatus === "fulfilled"){
-      toast(" ☑️ Succesfully Registered")
-    }else if (responses.meta.requestStatus === "rejected"){
-      toast(" ❌ Error, Please try again")
-    }
+    dispatch(registerUser(formData));
+    
   };
 
   const formatErrorMessage = (error) => {
@@ -114,8 +110,17 @@ const Register = () => {
   };
 
   useEffect(() => {
-    if (user) navigate("/");
+    if (user) {
+      toast.success("Successfully Registered")
+      navigate("/");
+    } 
   }, [user, navigate]);
+
+  useEffect(()=>{
+    if(error){
+      toast.error("Error,Please try again")
+    }
+  } , [error])
 
   return (
     <motion.div
