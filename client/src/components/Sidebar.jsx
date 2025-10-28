@@ -98,6 +98,12 @@ const Sidebar = () => {
       active: "bg-gradient-to-r from-teal-500 to-cyan-600",
       border: "border-l-teal-500",
     },
+    problemSheets: {
+      bg: "bg-violet-50/80 dark:bg-violet-900/30",
+      hover: "hover:bg-violet-100 dark:hover:bg-violet-900/40",
+      active: "bg-gradient-to-r from-violet-500 to-purple-600",
+      border: "border-l-violet-500",
+    },
     profile: {
       bg: "bg-amber-50/80 dark:bg-amber-900/30",
       hover: "hover:bg-amber-100 dark:hover:bg-amber-900/40",
@@ -290,6 +296,18 @@ const Sidebar = () => {
             >
               <Database size={20} className="min-w-[20px]" />
               <span className="truncate">Data Structures</span>
+              <ChevronRight className="ml-auto opacity-70" size={16} />
+            </NavLink>
+
+            <NavLink
+              to="/problem-sheets"
+              className={({ isActive }) =>
+                getNavItemClass("problemSheets", isActive)
+              }
+              onClick={handleLinkClick}
+            >
+              <Workflow size={20} className="min-w-[20px]" />
+              <span className="truncate">Problem Sheets</span>
               <ChevronRight className="ml-auto opacity-70" size={16} />
             </NavLink>
 
