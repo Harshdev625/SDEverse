@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const problemSchema = new mongoose.Schema({
     sheetId: {
-        typeof: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "problemSheet",
         required: true,
         index: true,
@@ -14,12 +14,17 @@ const problemSchema = new mongoose.Schema({
         trim: true,
     },
     description: {
-        type: String,
         tag: [String],
         platforms: {
             type: [String],
             required: true,
-            enum: ['LeetCode', 'HackerRank', 'CodeChef', 'CodeForces', 'AtCoder', 'Other'],
+            validate: {
+                validator: function(arr) {
+                    const validPlatforms = ['LeetCode', 'HackerRank', 'CodeChef', 'CodeForces', 'AtCoder', 'Other'];
+                    return arr.every(platform => validPlatforms.includes(platform));
+                },
+                message: props => `Invalid platform in array: ${props.value}`
+            }
         },
     },
     order: {
@@ -51,7 +56,7 @@ const problemSchema = new mongoose.Schema({
             default: [],
         },
         unlockedBy: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: [mongoose.Schema.Types.ObjectId],
             ref: "User",
         }
     },
@@ -63,7 +68,7 @@ const problemSchema = new mongoose.Schema({
             cpp: { type: String },
         },
         unlockedBy: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: [mongoose.Schema.Types.ObjectId],
             ref: "User",
         },
     }

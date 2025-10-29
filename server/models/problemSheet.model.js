@@ -22,16 +22,25 @@ const problemSheetSchema = new mongoose.Schema({
     },
     completedProblems: {
         type: Number,
-        default: 0, 
-    },
-    progressPercentage: {
-        type: Number,
-        default: 0, 
+        default: 0,
+        validate: {
+            validator: function(v) {
+                return v >= 0 && v <= this.totalProblems;
+            },
+            message: 'completedProblems must be between 0 and totalProblems'
+        }
     },
     isActive: {
         type: Boolean,
         default: true,
     }, 
 }, { timestamps: true });
+
+problemSheetSchema.virtual('progressPercentage').get(function() {
+    return this.totalProblems === 0 ? 0 : Math.round((this.completedProblems / this.totalProblems) * 100);
+});
+
+problemSheetSchema.set('toJSON', { virtuals: true });
+problemSheetSchema.set('toObject', { virtuals: true });
 
 module.exports = mongoose.model('ProblemSheet', problemSheetSchema);
