@@ -13,6 +13,7 @@ const SolutionsModal = ({ problem, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [expandedHints, setExpandedHints] = useState({});
   const [expandedSolution, setExpandedSolution] = useState(false);
+  const [selectedLang, setSelectedLang] = useState("python");
 
   useEffect(() => {
     loadHintsSolution();
@@ -134,8 +135,6 @@ const SolutionsModal = ({ problem, onClose }) => {
 
   const renderSolution = () => {
   if (!data.solution) return null;
-
-  const [selectedLang, setSelectedLang] = useState("python");
 
   const availableLangs = Object.keys(data.solution?.content || {});
 
