@@ -43,4 +43,14 @@ problemSheetSchema.virtual('progressPercentage').get(function() {
 problemSheetSchema.set('toJSON', { virtuals: true });
 problemSheetSchema.set('toObject', { virtuals: true });
 
+problemSheetSchema.pre('save', function(next) {
+    if (this.completedProblems > this.totalProblems) {
+        return next(new Error('completedProblems cannot exceed totalProblems'));
+    }
+    if (this.completedProblems < 0) {
+        return next(new Error('completedProblems cannot be negative'));
+    }
+    next();
+});
+
 module.exports = mongoose.model('ProblemSheet', problemSheetSchema);
