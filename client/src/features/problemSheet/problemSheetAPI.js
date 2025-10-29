@@ -10,13 +10,13 @@ export const getSheetById = async (sheetId) => {
     return res.data;
 };
 
-export const getSuiteProblems = async (sheetId, suiteId, params = {}) => {
-    const res = await api.get(`/problem-sheets/${sheetId}/suites/${suiteId}/problems`, { params });
+export const getSheetProblems = async (sheetId, params = {}) => {
+    const res = await api.get(`/problem-sheets/${sheetId}/problems`, { params });
     return res.data;
 };
 
-export const getSuiteMetrics = async (sheetId, suiteId, params = {}) => {
-    const res = await api.get(`/problem-sheets/${sheetId}/suites/${suiteId}/metrics`, { params });
+export const getSheetMetrics = async (sheetId, params = {}) => {
+    const res = await api.get(`/problem-sheets/${sheetId}/metrics`, { params });
     return res.data;
 };
 
@@ -30,8 +30,13 @@ export const getProblemNotes = async (problemId) => {
     return res.data;
 };
 
-export const updateProblemNotes = async (problemId, notes) => {
-    const res = await api.put(`/problems/${problemId}/notes`, { notes });
+export const saveProblemNotes = async (problemId, notes) => {
+    const res = await api.put(`/problems/${problemId}/notes`, { content: notes });
+    return res.data;
+};
+
+export const deleteProblemNotes = async (problemId) => {
+    const res = await api.delete(`/problems/${problemId}/notes`);
     return res.data;
 };
 

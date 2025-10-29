@@ -1,10 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import * as api from  './problemSheetAPI';
+import * as api from './problemSheetAPI';
 
 const initialState = {
     sheets: [],
     currentSheet: null,
-    currentSuite: null,
     problems: [],
     metrics: null,
     pagination: null,
@@ -34,17 +33,17 @@ export const fetchSheetById = createAsyncThunk(
         try {
             const data = await api.getSheetById(sheetId);
             return data;
-        } catch (err){
-            return rejectWithValue(err.response?.data?.message || err.message);                     
-        } 
+        } catch (err) {
+            return rejectWithValue(err.response?.data?.message || err.message);
+        }
     }
 );
 
-export const fetchSuiteProblems = createAsyncThunk(
-    'problemSheet/fetchSuiteProblems',
-    async ({ sheetId, suiteId, params }, { rejectWithValue }) => {
+export const fetchSheetProblems = createAsyncThunk(
+    'problemSheet/fetchSheetProblems',
+    async ({ sheetId, params }, { rejectWithValue }) => {
         try {
-            const data = await api.getSuiteProblems(sheetId, suiteId, params);
+            const data = await api.getSheetProblems(sheetId, params);
             return data;
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || err.message);
@@ -52,11 +51,11 @@ export const fetchSuiteProblems = createAsyncThunk(
     }
 );
 
-export const fetchSuiteMetrics = createAsyncThunk(
-    'problemSheet/fetchSuiteMetrics',
-    async ({ sheetId, suiteId, params }, { rejectWithValue }) => {
+export const fetchSheetMetrics = createAsyncThunk(
+    'problemSheet/fetchSheetMetrics',
+    async ({ sheetId, params }, { rejectWithValue }) => {
         try {
-            const data = await api.getSuiteMetrics(sheetId, suiteId, params);
+            const data = await api.getSheetMetrics(sheetId, params);
             return data;
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || err.message);
@@ -74,7 +73,7 @@ export const toggleProblemComplete = createAsyncThunk(
             return rejectWithValue(err.response?.data?.message || err.message);
         }
     }
-);          
+);
 
 // Slice
 const problemSheetSlice = createSlice({
@@ -83,16 +82,15 @@ const problemSheetSlice = createSlice({
     reducers: {
         clearCurrentSheet(state) {
             state.currentSheet = null;
-            state.currentSuite = null;
             state.problems = [];
             state.metrics = null;
             state.pagination = null;
-        },      
-        updateProblemList: (state, action) => {
+        },
+        updateProblemInList: (state, action) => {
             const updatedProblem = action.payload;
             const index = state.problems.findIndex(problem => problem.id === updatedProblem.id);
             if (index !== -1) {
-                state.problems[index] = {...state.problems[index], ...updatedProblem };
+                state.problems[index] = { ...state.problems[index], ...updatedProblem };
             }
         },
     },
@@ -111,7 +109,7 @@ const problemSheetSlice = createSlice({
                 state.sheetsLoading = false;
                 state.error = action.payload;
             })
-            // fetchSheetById   
+            // fetchSheetById
             .addCase(fetchSheetById.pending, (state) => {
                 state.sheetLoading = true;
                 state.error = null;
@@ -124,34 +122,30 @@ const problemSheetSlice = createSlice({
                 state.sheetLoading = false;
                 state.error = action.payload;
             })
-            // fetchSuiteProblems
-            .addCase(fetchSuiteProblems.pending, (state) => {
+            // fetchSheetProblems
+            .addCase(fetchSheetProblems.pending, (state) => {
                 state.problemsLoading = true;
                 state.error = null;
             })
-            .addCase(fetchSuiteProblems.fulfilled, (state, action) => {
+            .addCase(fetchSheetProblems.fulfilled, (state, action) => {
                 state.problemsLoading = false;
                 state.problems = action.payload.problems;
                 state.pagination = action.payload.pagination;
-                state.currentSuite = {
-                    id: action.meta.arg.suiteId,
-                    name: action.payload.suiteName,
-                };
             })
-            .addCase(fetchSuiteProblems.rejected, (state, action) => {
+            .addCase(fetchSheetProblems.rejected, (state, action) => {
                 state.problemsLoading = false;
                 state.error = action.payload;
             })
-            // fetchSuiteMetrics
-            .addCase(fetchSuiteMetrics.pending, (state) => {
+            // fetchSheetMetrics
+            .addCase(fetchSheetMetrics.pending, (state) => {
                 state.metricsLoading = true;
                 state.error = null;
             })
-            .addCase(fetchSuiteMetrics.fulfilled, (state, action) => {
+            .addCase(fetchSheetMetrics.fulfilled, (state, action) => {
                 state.metricsLoading = false;
                 state.metrics = action.payload;
             })
-            .addCase(fetchSuiteMetrics.rejected, (state, action) => {
+            .addCase(fetchSheetMetrics.rejected, (state, action) => {
                 state.metricsLoading = false;
                 state.error = action.payload;
             })
@@ -165,6 +159,6 @@ const problemSheetSlice = createSlice({
     },
 });
 
-export const { clearCurrentSheet, updateProblemList } = problemSheetSlice.actions;
+export const { clearCurrentSheet, updateProblemInList } = problemSheetSlice.actions;
 
-export default problemSheetSlice.reducer;   
+export default problemSheetSlice.reducer;
