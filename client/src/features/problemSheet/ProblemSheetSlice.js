@@ -7,7 +7,7 @@ const initialState = {
     currentSuite: null,
     problems: [],
     metrics: null,
-    paginsation: null,
+    pagination: null,
     sheetsLoading: false,
     sheetLoading: false,
     problemsLoading: false,

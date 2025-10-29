@@ -23,6 +23,7 @@ const NotesModal = ({ problem, onClose }) => {
       setNotes(response.data.content || "");
     } catch (error) {
       console.error("Error loading notes:", error);
+      toast.error("Failed to load notes");
     } finally {
       setLoading(false);
     }

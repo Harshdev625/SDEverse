@@ -163,12 +163,12 @@ const SuiteProblems = () => {
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Total Progress</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {metrics.overall.completedProblems} / {metrics.overall.totalProblems}
+                {metrics.overall?.completedProblems ?? 0} / {metrics.overall?.totalProblems ?? 0}
               </p>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3">
                 <div
                   className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all"
-                  style={{ width: `${metrics.overall.progressPercentage}%` }}
+                  style={{ width: `${metrics.overall?.progressPercentage ?? 0}%` }}
                 />
               </div>
             </div>
@@ -177,10 +177,10 @@ const SuiteProblems = () => {
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Easy</p>
               <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                {metrics.byDifficulty.easy.completed} / {metrics.byDifficulty.easy.total}
+                {metrics.byDifficulty?.easy?.completed ?? 0} / {metrics.byDifficulty?.easy?.total ?? 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                {metrics.byDifficulty.easy.percentage.toFixed(1)}% completed
+                {(metrics.byDifficulty?.easy?.percentage ?? 0).toFixed(1)}% completed
               </p>
             </div>
 
@@ -188,10 +188,10 @@ const SuiteProblems = () => {
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Medium</p>
               <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                {metrics.byDifficulty.medium.completed} / {metrics.byDifficulty.medium.total}
+                {metrics.byDifficulty?.medium?.completed ?? 0} / {metrics.byDifficulty?.medium?.total ?? 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                {metrics.byDifficulty.medium.percentage.toFixed(1)}% completed
+                {(metrics.byDifficulty?.medium?.percentage ?? 0).toFixed(1)}% completed
               </p>
             </div>
 
@@ -199,10 +199,10 @@ const SuiteProblems = () => {
             <div className="text-center md:col-start-2">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Hard</p>
               <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                {metrics.byDifficulty.hard.completed} / {metrics.byDifficulty.hard.total}
+                {metrics.byDifficulty?.hard?.completed ?? 0} / {metrics.byDifficulty?.hard?.total ?? 0}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                {metrics.byDifficulty.hard.percentage.toFixed(1)}% completed
+                {(metrics.byDifficulty?.hard?.percentage ?? 0).toFixed(1)}% completed
               </p>
             </div>
           </div>

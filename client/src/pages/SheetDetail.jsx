@@ -40,7 +40,15 @@ const SheetDetail = () => {
     );
   }
 
-  if (!currentSheet) return null;
+  if (!currentSheet) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-400 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300 px-4 py-3 rounded-lg">
+          Sheet not found
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -77,13 +85,13 @@ const SheetDetail = () => {
               Total Progress
             </span>
             <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-              {currentSheet.completedProblems} / {currentSheet.totalProblems}
+              {currentSheet.completedProblems ?? 0} / {currentSheet.totalProblems ?? 0}
             </span>
           </div>
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
             <div
               className="bg-gradient-to-r from-blue-500 to-blue-600 h-4 rounded-full transition-all"
-              style={{ width: `${currentSheet.progressPercentage}%` }}
+              style={{ width: `${currentSheet.progressPercentage ?? 0}%` }}
             />
           </div>
         </div>
@@ -117,7 +125,7 @@ const SheetDetail = () => {
                     {suite.totalProblems} problems
                   </span>
                   <span className="text-blue-600 dark:text-blue-400 font-medium">
-                    {suite.progressPercentage.toFixed(0)}% completed
+                    {(suite.progressPercentage ?? 0).toFixed(0)}% completed
                   </span>
                 </div>
               </div>
@@ -163,12 +171,12 @@ const SheetDetail = () => {
                     <div>
                       <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
                         <span>Progress</span>
-                        <span>{suite.completedProblems} / {suite.totalProblems}</span>
+                        <span>{suite.completedProblems ?? 0} / {suite.totalProblems ?? 0}</span>
                       </div>
                       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                         <div
                           className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all"
-                          style={{ width: `${suite.progressPercentage}%` }}
+                          style={{ width: `${suite.progressPercentage ?? 0}%` }}
                         />
                       </div>
                     </div>

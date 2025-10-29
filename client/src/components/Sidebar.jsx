@@ -99,10 +99,10 @@ const Sidebar = () => {
       border: "border-l-teal-500",
     },
     problemSheets: {
-      bg: "bg-violet-50/80 dark:bg-violet-900/30",
-      hover: "hover:bg-violet-100 dark:hover:bg-violet-900/40",
-      active: "bg-gradient-to-r from-violet-500 to-purple-600",
-      border: "border-l-violet-500",
+      bg: "bg-green-50/80 dark:bg-green-900/30",
+      hover: "hover:bg-green-100 dark:hover:bg-green-900/40",
+      active: "bg-gradient-to-r from-green-500 to-emerald-600",
+      border: "border-l-green-500",
     },
     profile: {
       bg: "bg-amber-50/80 dark:bg-amber-900/30",
@@ -306,7 +306,7 @@ const Sidebar = () => {
               }
               onClick={handleLinkClick}
             >
-              <Workflow size={20} className="min-w-[20px]" />
+              <FileCheck size={20} className="min-w-[20px]" />
               <span className="truncate">Problem Sheets</span>
               <ChevronRight className="ml-auto opacity-70" size={16} />
             </NavLink>

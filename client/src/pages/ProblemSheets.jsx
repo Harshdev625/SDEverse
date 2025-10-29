@@ -49,12 +49,14 @@ const ProblemSheets = () => {
       <div className="flex justify-between items-center mb-8">
         <button
           onClick={() => navigate(-1)}
+          aria-label="Go back"
           className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all shadow-sm"
         >
           <ArrowLeft size={20} />
         </button>
         <button
           onClick={() => navigate(1)}
+          aria-label="Go forward"
           className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all shadow-sm"
         >
           <ArrowRight size={20} />
@@ -90,6 +92,8 @@ const ProblemSheets = () => {
               {/* Sheet Header */}
               <button
                 onClick={() => toggleSheet(sheet.id)}
+                aria-expanded={expandedSheet === sheet.id}
+                aria-label={`${expandedSheet === sheet.id ? 'Collapse' : 'Expand'} ${sheet.name} details`}
                 className="w-full flex justify-between items-center p-6 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center space-x-4">
@@ -99,7 +103,7 @@ const ProblemSheets = () => {
                       {sheet.name}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {sheet.totalProblems} problems · {sheet.progressPercentage.toFixed(1)}% completed
+                      {sheet.totalProblems} problems · {(sheet.progressPercentage ?? 0).toFixed(1)}% completed
                     </p>
                   </div>
                 </div>
@@ -131,12 +135,12 @@ const ProblemSheets = () => {
                       <div>
                         <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
                           <span>Overall Progress</span>
-                          <span>{sheet.completedProblems} / {sheet.totalProblems}</span>
+                          <span>{sheet.completedProblems ?? 0} / {sheet.totalProblems ?? 0}</span>
                         </div>
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                           <div
                             className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-300"
-                            style={{ width: `${sheet.progressPercentage}%` }}
+                            style={{ width: `${sheet.progressPercentage ?? 0}%` }}
                           />
                         </div>
                       </div>
