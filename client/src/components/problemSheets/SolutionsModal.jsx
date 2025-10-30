@@ -84,6 +84,8 @@ const SolutionsModal = ({ problem, onClose }) => {
       >
         <button
           onClick={() => toggleHint(hint.hintNumber)}
+          aria-expanded={isViewed && isExpanded}
+          aria-label={`Hint ${hint.hintNumber}${isViewed ? '' : ' - scroll to view'}`}
           className={`w-full flex items-center justify-between p-4 transition-colors ${
             isViewed
               ? "bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50"
@@ -154,6 +156,9 @@ const SolutionsModal = ({ problem, onClose }) => {
               toast.info(`View all ${data.hints?.length || 0} hints to unlock the solution`);
             }
           }}
+          aria-expanded={isUnlocked && expandedSolution}
+          aria-label={`Complete solution${!isUnlocked ? ' - locked' : ''}`}
+          disabled={!isUnlocked}
           className={`w-full flex items-center justify-between p-4 transition-colors ${
             isUnlocked
               ? "bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50"

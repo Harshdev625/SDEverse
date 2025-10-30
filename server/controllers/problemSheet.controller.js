@@ -177,10 +177,7 @@ const problemSheetController = {
       ]);
 
       // Get user progress
-      let progressFilter = { sheetId: new Schema.Types.ObjectId(sheetId), userId };
-      if (difficulty && difficulty !== 'all') {
-        progressFilter.problemDifficulty = difficulty;
-      }
+      const progressFilter = { sheetId: new mongoose.Types.ObjectId(sheetId), userId };
 
       const progress = await ProblemProgress.aggregate([
         { $match: progressFilter },
