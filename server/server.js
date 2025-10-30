@@ -15,6 +15,7 @@ const dataStructureRoutes = require("./routes/dataStructure.routes");
 const dataStructureProposalRoutes = require("./routes/dataStructureProposal.routes");
 const noteRoutes = require('./routes/noteRoutes');
 const contactRoutes = require("./routes/contact.routes");
+const blogRoutes = require("./routes/blog.routes");
 
 const { notFound, errorHandler } = require("./middleware/error.middleware");
 
@@ -39,6 +40,7 @@ app.use("/api/data-structures", dataStructureRoutes);
 app.use("/api/data-structure-proposals", dataStructureProposalRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/blogs", blogRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
