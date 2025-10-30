@@ -1,6 +1,6 @@
 const Problem = require('../models/problem.model');
 const ProblemProgress = require('../models/problemProgress.model');
-const ProblemNotes = require('../models/problemNotes.model');
+const ProblemNotes = require('../models/problemNote.model');
 
 const problemController = {
   // Mark problem as complete
