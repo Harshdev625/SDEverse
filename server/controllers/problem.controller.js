@@ -115,11 +115,10 @@ const problemController = {
     }
   },
 
-  // Get hints and solution
+  // Get hints and solution (no unlock tracking needed on backend)
   getHintsSolution: async (req, res) => {
     try {
       const { problemId } = req.params;
-      const userId = req.user._id;
 
       const problem = await Problem.findById(problemId)
         .select('hints solution')
@@ -129,112 +128,19 @@ const problemController = {
         return res.status(404).json({ error: 'Problem not found' });
       }
 
-      // Get progress to check what user unlocked
-      const progress = await ProblemProgress.findOne({
-        problemId,
-        userId,
-      }).lean();
-
-      // Format hints
+      // Format hints - return all hints with content, no unlock tracking
       const hints = (problem.hints || []).map(hint => ({
         hintNumber: hint.hintNumber,
-        isUnlocked: progress?.unlockedHints?.includes(hint.hintNumber) || false,
-        content: progress?.unlockedHints?.includes(hint.hintNumber) ? hint.content : null,
+        content: hint.content,
       }));
 
-      // Check if all hints are unlocked to allow solution unlock
-      const allHintsUnlocked = hints.every(h => h.isUnlocked);
-
+      // Return solution content directly - no unlock tracking on backend
       res.status(200).json({
         data: {
           hints,
           solution: {
-            isUnlocked: progress?.solutionUnlocked || false,
-            canUnlock: allHintsUnlocked,
-            content: progress?.solutionUnlocked ? problem.solution.content : null,
+            content: problem.solution.content,
           },
-        },
-      });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  // Unlock hint
-  unlockHint: async (req, res) => {
-    try {
-      const { problemId } = req.params;
-      const { hintNumber } = req.body;
-      const userId = req.user._id;
-
-      const problem = await Problem.findById(problemId);
-      if (!problem) {
-        return res.status(404).json({ error: 'Problem not found' });
-      }
-
-      const hint = problem.hints?.find(h => h.hintNumber === hintNumber);
-      if (!hint) {
-        return res.status(404).json({ error: 'Hint not found' });
-      }
-
-      // Get or create progress
-      let progress = await ProblemProgress.findOne({ problemId, userId });
-      if (!progress) {
-        progress = new ProblemProgress({
-          problemId,
-          userId,
-          sheetId: problem.sheetId,
-          unlockedHints: [hintNumber],
-        });
-      } else {
-        if (!progress.unlockedHints) {
-          progress.unlockedHints = [hintNumber];
-        } else if (!progress.unlockedHints.includes(hintNumber)) {
-          progress.unlockedHints.push(hintNumber);
-        }
-      }
-
-      await progress.save();
-
-      res.status(200).json({
-        data: {
-          content: hint.content,
-        },
-      });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  // Unlock solution
-  unlockSolution: async (req, res) => {
-    try {
-      const { problemId } = req.params;
-      const userId = req.user._id;
-
-      const problem = await Problem.findById(problemId);
-      if (!problem) {
-        return res.status(404).json({ error: 'Problem not found' });
-      }
-
-      // Check if all hints are unlocked
-      const progress = await ProblemProgress.findOne({ problemId, userId });
-      if (!progress || progress.unlockedHints?.length !== problem.hints?.length) {
-        return res.status(403).json({
-          error: {
-            message: 'Unlock all hints first to view the solution',
-          },
-        });
-      }
-
-      // Update progress
-      progress.solutionUnlocked = true;
-      progress.unlockedAt = new Date();
-      await progress.save();
-
-      res.status(200).json({
-        data: {
-          solution: problem.solution.content,
         },
       });
     } catch (error) {
@@ -242,3 +148,5 @@ const problemController = {
     }
   },
 };
+
+module.exports = problemController;

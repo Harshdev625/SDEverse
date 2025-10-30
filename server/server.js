@@ -14,6 +14,7 @@ const communityRoutes = require("./routes/community.routes");
 const dataStructureRoutes = require("./routes/dataStructure.routes");
 const dataStructureProposalRoutes = require("./routes/dataStructureProposal.routes");
 const contactRoutes = require("./routes/contact.routes")
+const problemSheetRoutes = require("./routes/problemSheet.routes")
 
 const { notFound, errorHandler } = require("./middleware/error.middleware");
 
@@ -35,6 +36,7 @@ app.use("/api/community", communityRoutes);
 app.use("/api/data-structures", dataStructureRoutes);
 app.use("/api/data-structure-proposals", dataStructureProposalRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api", problemSheetRoutes);
 
 
 // Health check endpoint for keep-alive

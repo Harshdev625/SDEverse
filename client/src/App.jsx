@@ -41,6 +41,9 @@ import Contact from "./pages/Contact";
 import AdminUsersContact from "./pages/AdminUsersContact";
 import FaqPage from './pages/FaqPage';
 
+import ProblemSheets from "./pages/ProblemSheets";
+import SheetDetail from "./pages/SheetDetail";
+
 const router = createBrowserRouter([
   {
     path: "/login",
@@ -121,6 +124,14 @@ const router = createBrowserRouter([
       {
         path: "community-guidelines",
         element: <CommunityGuidelines />,
+      },
+      {
+        path: "problem-sheets",
+        element: <ProblemSheets />,
+      },
+      {
+        path: "problem-sheets/:sheetId",
+        element: <SheetDetail />,
       },
       {
         path: "admin/manage-algorithms",

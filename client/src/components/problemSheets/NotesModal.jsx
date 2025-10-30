@@ -3,8 +3,8 @@ import { useDispatch } from "react-redux";
 import { X, Save, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
-import * as api from "../../features/problemSheet/problemSheetAPI";
-import { updateProblemInList } from "../../features/problemSheet/problemSheetSlice";
+import * as api from "../../features/problemSheet/problemSheetAPI.js";
+import { updateProblemInList } from "../../features/problemSheet/ProblemSheetSlice.js";
 
 const NotesModal = ({ problem, onClose }) => {
   const dispatch = useDispatch();

@@ -3,29 +3,18 @@ const mongoose = require('mongoose');
 const problemSchema = new mongoose.Schema({
     sheetId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "problemSheet",
+        ref: "ProblemSheet",
         required: true,
         index: true,
     },
     title: {
         type: String,
         required: true,
-        unique: true,
         trim: true,
     },
     description: {
-        tag: [String],
-        platforms: {
-            type: [String],
-            required: true,
-            validate: {
-                validator: function(arr) {
-                    const validPlatforms = ['LeetCode', 'HackerRank', 'CodeChef', 'CodeForces', 'AtCoder', 'Other'];
-                    return arr.every(platform => validPlatforms.includes(platform));
-                },
-                message: props => `Invalid platform in array: ${props.value}`
-            }
-        },
+        type: String,
+        trim: true,
     },
     order: {
         type: Number,
@@ -33,45 +22,48 @@ const problemSchema = new mongoose.Schema({
     },
     difficulty: {
         type: String,
-        enum: ['Easy', 'Medium', 'Hard'],
+        enum: ['easy', 'medium', 'hard'],
         required: true,
+        lowercase: true,
         index: true,
     },
-    platformLinks: {
+    platform: {
+        type: String,
+        enum: ['leetcode', 'hackerrank', 'codeforces', 'codechef', 'atcoder', 'other'],
+        required: true,
+    },
+    platformLink: {
         type: String,
         required: true,
         validate: {
             validator: function(v) {
-                return /^https?:\/\/.+$/.test(v);
+                return /^https?:\/\/.+/.test(v);
             },
-            message: props => `${props.value} is not a valid URL!`
-        }
-    },
-    hints: {
-        hintNumber: {
-            type: Number,
+            message: 'Invalid URL format',
         },
-        hintText: {
-            type: [String],
-            default: [],
-        },
-        unlockedBy: {
-            type: [mongoose.Schema.Types.ObjectId],
-            ref: "User",
-        }
     },
+    tags: {
+        type: [String],
+        default: [],
+    },
+    hints: [{
+        hintNumber: Number,
+        content: String,
+    }],
     solution: {
         content: {
-            python: { type: String },
-            javascript: { type: String },
-            java: { type: String },
-            cpp: { type: String },
+            python: String,
+            javascript: String,
+            java: String,
+            cpp: String,
+            csharp: String,
         },
-        unlockedBy: {
-            type: [mongoose.Schema.Types.ObjectId],
-            ref: "User",
-        },
-    }
+        explanation: String,
+    },
 }, { timestamps: true });
+
+// Index for efficient queries
+problemSchema.index({ sheetId: 1, difficulty: 1 });
+problemSchema.index({ sheetId: 1, order: 1 });
 
 module.exports = mongoose.model('Problem', problemSchema);

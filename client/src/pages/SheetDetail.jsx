@@ -7,7 +7,7 @@ import {
   fetchSheetMetrics,
   toggleProblemComplete,
   clearCurrentSheet,
-} from "../features/problemSheet/problemSheetSlice";
+} from "../features/problemSheet/ProblemSheetSlice.js";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,

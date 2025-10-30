@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const { protect } = require('../middleware/auth.middleware');
 const problemSheetController = require('../controllers/problemSheet.controller');
 const problemController = require('../controllers/problem.controller');
 
@@ -9,16 +9,16 @@ router.get('/problem-sheets', problemSheetController.getAllSheets);
 router.get('/problem-sheets/:sheetId', problemSheetController.getSheetById);
 
 // Protected routes
-router.get('/problem-sheets/:sheetId/problems', auth, problemSheetController.getSheetProblems);
-router.get('/problem-sheets/:sheetId/metrics', auth, problemSheetController.getSheetMetrics);
+router.get('/problem-sheets/:sheetId/problems', protect, problemSheetController.getSheetProblems);
+router.get('/problem-sheets/:sheetId/metrics', protect, problemSheetController.getSheetMetrics);
 
-router.post('/problems/:problemId/complete', auth, problemController.markProblemComplete);
-router.get('/problems/:problemId/notes', auth, problemController.getProblemNotes);
-router.put('/problems/:problemId/notes', auth, problemController.saveProblemNotes);
-router.delete('/problems/:problemId/notes', auth, problemController.deleteProblemNotes);
+// Problem routes
+router.post('/problems/:problemId/complete', protect, problemController.markProblemComplete);
+router.get('/problems/:problemId/notes', protect, problemController.getProblemNotes);
+router.put('/problems/:problemId/notes', protect, problemController.saveProblemNotes);
+router.delete('/problems/:problemId/notes', protect, problemController.deleteProblemNotes);
 
-router.get('/problems/:problemId/hints-solution', auth, problemController.getHintsSolution);
-router.post('/problems/:problemId/unlock-hint', auth, problemController.unlockHint);
-router.post('/problems/:problemId/unlock-solution', auth, problemController.unlockSolution);
+// Hints and Solution (no unlock tracking - frontend only)
+router.get('/problems/:problemId/hints-solution', protect, problemController.getHintsSolution);
 
 module.exports = router;

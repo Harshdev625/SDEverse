@@ -26,18 +26,20 @@ const problemProgressSchema = new mongoose.Schema({
     completedAt: {
         type: Date,
     },
-    unlockedHints: {
-        type: [Number], 
-        default: [],
+    attempts: {
+        type: Number,
+        default: 0,
     },
-    solutionUnlocked: {
-        type: Boolean,
-        default: false, 
+    lastAttemptAt: {
+        type: Date,
     },
 }, { timestamps: true });
 
-problemProgressSchema.index({ problemId: 1, userId: 1, sheetId: 1 }, { unique: true });
+// Compound index for fast lookups
+problemProgressSchema.index({ problemId: 1, userId: 1 }, { unique: true });
+problemProgressSchema.index({ sheetId: 1, userId: 1 });
 
+// Auto-set completedAt when marking complete
 problemProgressSchema.pre('save', function(next) {
     if (this.isModified('completed') && this.completed && !this.completedAt) {
         this.completedAt = new Date();

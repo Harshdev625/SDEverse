@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
-const ProblemSheet = require('../models/ProblemSheet');
-const ProblemProgress = require('../models/ProblemProgress');
-const Problem = require('../models/Problem');
+const ProblemSheet = require('../models/problemSheet.model');
+const ProblemProgress = require('../models/ProblemProgress.model');
+const Problem = require('../models/problem.model');
 
 const problemSheetController = {
   // Get all sheets
@@ -251,3 +251,5 @@ const problemSheetController = {
     }
   },
 };
+
+module.exports = problemSheetController;

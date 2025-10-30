@@ -1,4 +1,4 @@
-import api from '../../api/apiClient';
+import api from '../../utils/api';
 
 export const getAllSheets = async () => {
     const res = await api.get('/problem-sheets');
@@ -42,15 +42,5 @@ export const deleteProblemNotes = async (problemId) => {
 
 export const getHintsSolution = async (problemId) => {
     const res = await api.get(`/problems/${problemId}/hints-solution`);
-    return res.data;
-};
-
-export const unlockHint = async (problemId, hintNumber) => {
-    const res = await api.post(`/problems/${problemId}/unlock-hint`, { hintNumber });
-    return res.data;
-};
-
-export const unlockSolution = async (problemId) => {
-    const res = await api.post(`/problems/${problemId}/unlock-solution`);
     return res.data;
 };
