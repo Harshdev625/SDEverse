@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Home, Users, BookOpen, User } from "lucide-react";
+import { Home, Users, BookOpen, User, FileText } from "lucide-react";
 import { useSelector } from "react-redux";
 
 const NavLinks = ({ onClick }) => {
@@ -13,6 +13,10 @@ const NavLinks = ({ onClick }) => {
 
       <Link to="/algorithms" onClick={onClick} className="flex items-center gap-2 hover:text-blue-600">
         <BookOpen size={20} /> Algorithms
+      </Link>
+
+      <Link to="/blogs" onClick={onClick} className="flex items-center gap-2 hover:text-blue-600">
+        <FileText size={20} /> Blogs
       </Link>
 
       {user?.role === "admin" && (

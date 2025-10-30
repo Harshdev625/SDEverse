@@ -40,6 +40,12 @@ import { toast } from "react-toastify";
 import Contact from "./pages/Contact";
 import AdminUsersContact from "./pages/AdminUsersContact";
 import FaqPage from './pages/FaqPage';
+import Blogs from "./pages/Blogs";
+import BlogDetail from "./pages/BlogDetail";
+import CreateBlog from "./pages/CreateBlog";
+import EditBlog from "./pages/EditBlog";
+import MyBlogs from "./pages/MyBlogs";
+import AdminBlogReview from "./pages/AdminBlogReview";
 
 const router = createBrowserRouter([
   {
@@ -181,6 +187,34 @@ const router = createBrowserRouter([
       {
         path: "faq",
         element: <FaqPage />,
+      },
+      {
+        path: "blogs",
+        element: <Blogs />,
+      },
+      {
+        path: "blogs/new",
+        element: <CreateBlog />,
+      },
+      {
+        path: "my-posts",
+        element: <MyBlogs />,
+      },
+      {
+        path: "blogs/:slug",
+        element: <BlogDetail />,
+      },
+      {
+        path: "blogs/:slug/edit",
+        element: <EditBlog />,
+      },
+      {
+        path: "admin/blogs/review",
+        element: (
+          <AdminRoute>
+            <AdminBlogReview />
+          </AdminRoute>
+        ),
       },
     ],
   },

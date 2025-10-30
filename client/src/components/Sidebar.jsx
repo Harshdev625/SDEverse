@@ -20,7 +20,8 @@ import {
   Workflow,
   UserCircle,
   Database,
-  Contact
+  Contact,
+  BookOpen
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleTheme } from "../features/theme/themeSlice";
@@ -97,6 +98,12 @@ const Sidebar = () => {
       hover: "hover:bg-teal-100 dark:hover:bg-teal-900/40",
       active: "bg-gradient-to-r from-teal-500 to-cyan-600",
       border: "border-l-teal-500",
+    },
+    blogs: {
+      bg: "bg-orange-50/80 dark:bg-orange-900/30",
+      hover: "hover:bg-orange-100 dark:hover:bg-orange-900/40",
+      active: "bg-gradient-to-r from-orange-500 to-red-600",
+      border: "border-l-orange-500",
     },
     profile: {
       bg: "bg-amber-50/80 dark:bg-amber-900/30",
@@ -290,6 +297,18 @@ const Sidebar = () => {
             >
               <Database size={20} className="min-w-[20px]" />
               <span className="truncate">Data Structures</span>
+              <ChevronRight className="ml-auto opacity-70" size={16} />
+            </NavLink>
+
+            <NavLink
+              to="/blogs"
+              className={({ isActive }) =>
+                getNavItemClass("blogs", isActive)
+              }
+              onClick={handleLinkClick}
+            >
+              <BookOpen size={20} className="min-w-[20px]" />
+              <span className="truncate">Blogs</span>
               <ChevronRight className="ml-auto opacity-70" size={16} />
             </NavLink>
 
