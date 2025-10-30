@@ -316,13 +316,13 @@ const SheetDetail = () => {
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {problems.map((problem) => (
                   <tr
-                    key={problem.id}
+                    key={problem._id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                   >
                     {/* Checkbox */}
                     <td className="px-6 py-4">
                       <button
-                        onClick={() => handleToggleComplete(problem.id, problem.completed)}
+                        onClick={() => handleToggleComplete(problem._id, problem.completed)}
                         className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
                           problem.completed
                             ? "bg-green-500 border-green-500"

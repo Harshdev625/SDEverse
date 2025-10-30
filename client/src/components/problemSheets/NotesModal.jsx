@@ -14,12 +14,12 @@ const NotesModal = ({ problem, onClose }) => {
 
   useEffect(() => {
     loadNotes();
-  }, [problem.id]);
+  }, [problem._id]);
 
   const loadNotes = async () => {
     try {
       setLoading(true);
-      const response = await api.getProblemNotes(problem.id);
+      const response = await api.getProblemNotes(problem._id);
       setNotes(response.data.content || "");
     } catch (error) {
       console.error("Error loading notes:", error);
@@ -32,7 +32,7 @@ const NotesModal = ({ problem, onClose }) => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      await api.saveProblemNotes(problem.id, notes);
+      await api.saveProblemNotes(problem._id, notes);
       dispatch(updateProblemInList({ id: problem.id, hasNotes: notes.trim().length > 0 }));
       toast.success("Notes saved successfully!");
       onClose();
@@ -54,9 +54,9 @@ const NotesModal = ({ problem, onClose }) => {
     }
 
     try {
-      await api.deleteProblemNotes(problem.id);
+      await api.deleteProblemNotes(problem._id);
       setNotes("");
-      dispatch(updateProblemInList({ id: problem.id, hasNotes: false }));
+      dispatch(updateProblemInList({ id: problem._id, hasNotes: false }));
       toast.success("Notes deleted successfully!");
       onClose();
     } catch (error) {

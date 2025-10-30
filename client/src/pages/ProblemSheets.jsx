@@ -86,14 +86,14 @@ const ProblemSheets = () => {
         ) : (
           sheets.map((sheet) => (
             <div
-              key={sheet.id}
+              key={sheet._id} // <-- FIX #1: Use sheet._id for the key prop
               className="border rounded-xl overflow-hidden shadow-sm transition-all border-gray-200 dark:border-gray-700"
             >
               {/* Sheet Header */}
               <button
-                onClick={() => toggleSheet(sheet.id)}
-                aria-expanded={expandedSheet === sheet.id}
-                aria-label={`${expandedSheet === sheet.id ? 'Collapse' : 'Expand'} ${sheet.name} details`}
+                onClick={() => toggleSheet(sheet._id)} // <-- FIX #2: Use sheet._id
+                aria-expanded={expandedSheet === sheet._id} // <-- FIX #3: Use sheet._id
+                aria-label={`${expandedSheet === sheet._id ? 'Collapse' : 'Expand'} ${sheet.name} details`} // <-- FIX #4: Use sheet._id
                 className="w-full flex justify-between items-center p-6 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center space-x-4">
@@ -110,14 +110,14 @@ const ProblemSheets = () => {
                 <ChevronDown
                   size={24}
                   className={`transition-transform ${
-                    expandedSheet === sheet.id ? "rotate-180" : ""
+                    expandedSheet === sheet._id ? "rotate-180" : "" // <-- FIX #5: Use sheet._id
                   } text-gray-500 dark:text-gray-400`}
                 />
               </button>
 
               {/* Sheet Description & Suites */}
               <AnimatePresence>
-                {expandedSheet === sheet.id && (
+                {expandedSheet === sheet._id && ( // <-- FIX #6: Use sheet._id
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
@@ -147,7 +147,7 @@ const ProblemSheets = () => {
 
                       {/* View Sheet Button */}
                       <button
-                        onClick={() => navigate(`/problem-sheets/${sheet.id}`)}
+                        onClick={() => navigate(`/problem-sheets/${sheet._id}`)} // <-- FIX #7: Use sheet._id for navigation
                         className="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md"
                       >
                         View Problem Suites

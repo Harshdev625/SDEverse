@@ -19,7 +19,7 @@ const SolutionsModal = ({ problem, onClose }) => {
 
   useEffect(() => {
     loadHintsSolution();
-  }, [problem.id]);
+  }, [problem._id]);
 
   // Intersection Observer to detect when hints come into view
   useEffect(() => {
@@ -49,7 +49,7 @@ const SolutionsModal = ({ problem, onClose }) => {
   const loadHintsSolution = async () => {
     try {
       setLoading(true);
-      const response = await api.getHintsSolution(problem.id);
+      const response = await api.getHintsSolution(problem._id);
       setData(response.data);
     } catch (error) {
       console.error("Error loading hints/solution:", error);

@@ -88,7 +88,7 @@ const problemSheetSlice = createSlice({
         },
         updateProblemInList: (state, action) => {
             const updatedProblem = action.payload;
-            const index = state.problems.findIndex(problem => problem.id === updatedProblem.id);
+            const index = state.problems.findIndex(problem => problem._id === updatedProblem.id);
             if (index !== -1) {
                 state.problems[index] = { ...state.problems[index], ...updatedProblem };
             }
@@ -151,7 +151,7 @@ const problemSheetSlice = createSlice({
             })
             // toggleProblemComplete
             .addCase(toggleProblemComplete.fulfilled, (state, action) => {
-                const problem = state.problems.find(p => p.id === action.payload.data.problemId);
+                const problem = state.problems.find(p => p._id === action.payload.data.problemId);
                 if (problem) {
                     problem.completed = action.payload.data.completed;
                 }
