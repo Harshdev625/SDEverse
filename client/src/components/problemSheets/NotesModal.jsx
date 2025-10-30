@@ -33,7 +33,7 @@ const NotesModal = ({ problem, onClose }) => {
     try {
       setSaving(true);
       await api.saveProblemNotes(problem._id, notes);
-      dispatch(updateProblemInList({ id: problem.id, hasNotes: notes.trim().length > 0 }));
+      dispatch(updateProblemInList({ id: problem._id, hasNotes: notes.trim().length > 0 }));
       toast.success("Notes saved successfully!");
       onClose();
     } catch (error) {
