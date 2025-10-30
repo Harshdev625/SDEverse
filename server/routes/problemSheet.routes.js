@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const problemSheetController = require('../controllers/problemSheet.controller');
+const problemController = require('../controllers/problem.controller');
 
 // Public routes
 router.get('/problem-sheets', problemSheetController.getAllSheets);

@@ -1,3 +1,8 @@
+const mongoose = require('mongoose');
+const ProblemSheet = require('../models/ProblemSheet');
+const ProblemProgress = require('../models/ProblemProgress');
+const Problem = require('../models/Problem');
+
 const problemSheetController = {
   // Get all sheets
   getAllSheets: async (req, res) => {
@@ -27,7 +32,9 @@ const problemSheetController = {
 
         sheets.forEach(sheet => {
           sheet.completedProblems = progressMap[sheet._id] || 0;
-          sheet.progressPercentage = (sheet.completedProblems / sheet.totalProblems) * 100;
+          sheet.progressPercentage = sheet.completedProblems > 0
+          ? (sheet.completedProblems / sheet.totalProblems) * 100
+          : 0;
         });
       }
 
@@ -51,7 +58,7 @@ const problemSheetController = {
       // Get user's progress for this sheet
       if (userId) {
         const progress = await ProblemProgress.aggregate([
-          { $match: { sheetId: new Schema.Types.ObjectId(sheetId), userId } },
+          { $match: { sheetId: new mongoose.Types.ObjectId(sheetId), userId } },
           { $group: {
               _id: null,
               completedCount: { $sum: { $cond: ['$completed', 1, 0] } }
@@ -61,7 +68,9 @@ const problemSheetController = {
 
         const completed = progress[0]?.completedCount || 0;
         sheet.completedProblems = completed;
-        sheet.progressPercentage = (completed / sheet.totalProblems) * 100;
+        sheet.progressPercentage = sheet.totalProblems > 0 
+          ? (completed / sheet.totalProblems) * 100 
+          : 0;
       }
 
       res.status(200).json(sheet);
@@ -77,10 +86,17 @@ const problemSheetController = {
       const userId = req.user?._id;
       const { page = 1, limit = 15, difficulty } = req.query;
 
-      const skip = (parseInt(page) - 1) * parseInt(limit);
+      const pageNum = parseInt(page);
+      const limitNum = parseInt(limit);
+
+      if (isNaN(pageNum) || pageNum < 1 || isNaN(limitNum) || limitNum < 1) {
+        return res.status(400).json({ error: 'Invalid pagination parameters' });
+      }
+
+      const skip = (pageNum - 1) * limitNum;
 
       // Build filter
-      const filter = { sheetId: new Schema.Types.ObjectId(sheetId) };
+      const filter = { sheetId: new mongoose.Types.ObjectId(sheetId) };
       if (difficulty && difficulty !== 'all') {
         filter.difficulty = difficulty;
       }
@@ -143,10 +159,10 @@ const problemSheetController = {
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
-      const filter = { sheetId: new Schema.Types.ObjectId(sheetId), userId };
+      const filter = { sheetId: new mongoose.Types.ObjectId(sheetId), userId };
 
       // Get problem difficulties
-      let problemFilter = { sheetId: new Schema.Types.ObjectId(sheetId) };
+      let problemFilter = { sheetId: new mongoose.Types.ObjectId(sheetId) };
       if (difficulty && difficulty !== 'all') {
         problemFilter.difficulty = difficulty;
       }
@@ -167,7 +183,7 @@ const problemSheetController = {
       }
 
       const progress = await ProblemProgress.aggregate([
-        { $match: filter },
+        { $match: progressFilter },
         { $lookup: {
             from: 'problems',
             localField: 'problemId',
@@ -176,6 +192,10 @@ const problemSheetController = {
           }
         },
         { $unwind: '$problem' },
+        ...(difficulty && difficulty !== 'all'
+          ? [{ $match: { 'problem.difficulty': difficulty } }]
+          : []
+        ),
         { $group: {
             _id: '$problem.difficulty',
             completed: { $sum: { $cond: ['$completed', 1, 0] } },
@@ -200,14 +220,18 @@ const problemSheetController = {
 
       // Populate problem counts
       problems.forEach(p => {
-        metrics.byDifficulty[p._id].total = p.total;
-        metrics.overall.totalProblems += p.total;
+        if (metrics.byDifficulty[p._id]) {
+          metrics.byDifficulty[p._id].total = p.total;
+          metrics.overall.totalProblems += p.total;
+        }
       });
 
       // Populate completion counts
       progress.forEach(p => {
-        metrics.byDifficulty[p._id].completed = p.completed;
-        metrics.overall.completedProblems += p.completed;
+        if (metrics.byDifficulty[p._id]) {
+          metrics.byDifficulty[p._id].completed = p.completed;
+          metrics.overall.completedProblems += p.completed;
+        }
       });
 
       // Calculate percentages

@@ -1,3 +1,7 @@
+const Problem = require('../models/problem.model');
+const ProblemProgress = require('../models/problemProgress.model');
+const ProblemNotes = require('../models/problemNotes.model');
+
 const problemController = {
   // Mark problem as complete
   markProblemComplete: async (req, res) => {
@@ -134,8 +138,8 @@ const problemController = {
       // Format hints
       const hints = (problem.hints || []).map(hint => ({
         hintNumber: hint.hintNumber,
-        content: hint.content,
         isUnlocked: progress?.unlockedHints?.includes(hint.hintNumber) || false,
+        content: progress?.unlockedHints?.includes(hint.hintNumber) ? hint.content : null,
       }));
 
       // Check if all hints are unlocked to allow solution unlock
@@ -183,7 +187,9 @@ const problemController = {
           unlockedHints: [hintNumber],
         });
       } else {
-        if (!progress.unlockedHints.includes(hintNumber)) {
+        if (!progress.unlockedHints) {
+          progress.unlockedHints = [hintNumber];
+        } else if (!progress.unlockedHints.includes(hintNumber)) {
           progress.unlockedHints.push(hintNumber);
         }
       }
