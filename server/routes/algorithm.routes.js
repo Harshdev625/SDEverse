@@ -19,7 +19,7 @@ const { protect, admin } = require("../middleware/auth.middleware");
 const validateAlgorithm = require("../middleware/validateAlgorithm");
 
 router.get("/", getAllAlgorithms);
-router.get("/list", getAlgorithmsForList);
+router.get("/list", getAlgorithmsForList); 
 router.get("/categories", getAllCategories);
 router.get("/search", searchAlgorithms);
 router.get("/:slug", getAlgorithmBySlug);

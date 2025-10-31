@@ -14,9 +14,6 @@ router.get('/:sheetId/metrics', protect, problemSheetController.getSheetMetrics)
 
 // Problem routes
 router.post('/problems/:problemId/complete', protect, problemController.markProblemComplete);
-router.get('/problems/:problemId/notes', protect, problemController.getProblemNotes);
-router.put('/problems/:problemId/notes', protect, problemController.saveProblemNotes);
-router.delete('/problems/:problemId/notes', protect, problemController.deleteProblemNotes);
 
 // Hints and Solution (no unlock tracking - frontend only)
 router.get('/problems/:problemId/hints-solution', protect, problemController.getHintsSolution);

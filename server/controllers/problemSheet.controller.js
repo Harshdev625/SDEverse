@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const ProblemSheet = require('../models/problemSheet.model');
-const ProblemProgress = require('../models/problemProgress.model');
+const ProblemSheet = require('../models/sheet.model');
+const ProblemProgress = require('../models/userProgress.model');
 const Problem = require('../models/problem.model');
 
 const problemSheetController = {
