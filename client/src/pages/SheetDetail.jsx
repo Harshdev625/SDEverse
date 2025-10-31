@@ -19,7 +19,6 @@ import {
   ExternalLink,
 } from "lucide-react";
 import Loader from "../components/Loader";
-import NotesModal from "../components/problemSheets/NotesModal";
 import SolutionsModal from "../components/problemSheets/SolutionsModal";
 import { toast } from "react-toastify";
 
@@ -43,7 +42,6 @@ const SheetDetail = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [difficulty, setDifficulty] = useState("all");
   const [selectedProblem, setSelectedProblem] = useState(null);
-  const [showNotesModal, setShowNotesModal] = useState(false);
   const [showSolutionsModal, setShowSolutionsModal] = useState(false);
 
   // Fetch sheet data
@@ -102,16 +100,6 @@ const SheetDetail = () => {
     } catch (error) {
       toast.error("Failed to update progress");
     }
-  };
-
-  // Handle notes modal
-  const handleOpenNotes = (problem) => {
-    if (!user) {
-      toast.info("Please log in to add notes");
-      return;
-    }
-    setSelectedProblem(problem);
-    setShowNotesModal(true);
   };
 
   // Handle solutions modal
@@ -401,17 +389,13 @@ const SheetDetail = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
                         <button
-                          onClick={() => handleOpenNotes(problem)}
+                          onClick={() => toast.info("Notes feature is coming soon!")}
                           className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                          title="Notes"
+                          title="Notes (Coming Soon)"
                         >
                           <StickyNote
                             size={18}
-                            className={
-                              problem.hasNotes
-                                ? "text-yellow-500"
-                                : "text-gray-400 dark:text-gray-500"
-                            }
+                            className="text-gray-400 dark:text-gray-500"
                           />
                         </button>
                         <button
@@ -487,16 +471,6 @@ const SheetDetail = () => {
       )}
 
       {/* Modals */}
-      {showNotesModal && selectedProblem && (
-        <NotesModal
-          problem={selectedProblem}
-          onClose={() => {
-            setShowNotesModal(false);
-            setSelectedProblem(null);
-          }}
-        />
-      )}
-
       {showSolutionsModal && selectedProblem && (
         <SolutionsModal
           problem={selectedProblem}

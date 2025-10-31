@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const ProblemSheet = require('../models/problemSheet.model');
 const ProblemProgress = require('../models/problemProgress.model');
 const Problem = require('../models/problem.model');
-const ProblemNotes = require('../models/problemNote.model'); // <-- 1. ADD THIS IMPORT
 
 const problemSheetController = {
   // Get all sheets
@@ -125,21 +124,9 @@ const problemSheetController = {
           progressMap[p.problemId] = p;
         });
 
-        const notes = await ProblemNotes.find(
-          { problemId: { $in: problemIds }, userId }
-        ).select('problemId content').lean(); 
-
-        const notesMap = {};
-        notes.forEach(n => {
-          if (n.content && n.content.trim().length > 0) {
-            notesMap[n.problemId] = true;
-          }
-        });
-
         problems.forEach(problem => {
           const prog = progressMap[problem._id];
           problem.completed = prog?.completed || false;
-          problem.hasNotes = notesMap[problem._id] || false;
         });
       }
 

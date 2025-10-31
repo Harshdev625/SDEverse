@@ -1,6 +1,5 @@
 const Problem = require('../models/problem.model');
 const ProblemProgress = require('../models/problemProgress.model');
-const ProblemNotes = require('../models/problemNote.model');
 
 const problemController = {
   // Mark problem as complete
@@ -43,73 +42,6 @@ const problemController = {
           completed,
         },
       });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  // Get problem notes
-  getProblemNotes: async (req, res) => {
-    try {
-      const { problemId } = req.params;
-      const userId = req.user._id;
-
-      let notes = await ProblemNotes.findOne({ problemId, userId });
-
-      if (!notes) {
-        notes = { content: '' };
-      }
-
-      res.status(200).json({
-        data: {
-          content: notes.content || '',
-        },
-      });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  // Save problem notes
-  saveProblemNotes: async (req, res) => {
-    try {
-      const { problemId } = req.params;
-      const { content } = req.body;
-      const userId = req.user._id;
-
-      let notes = await ProblemNotes.findOne({ problemId, userId });
-
-      if (!notes) {
-        notes = new ProblemNotes({
-          problemId,
-          userId,
-          content,
-        });
-      } else {
-        notes.content = content;
-        notes.updatedAt = new Date();
-      }
-
-      await notes.save();
-
-      res.status(200).json({
-        message: 'Notes saved successfully',
-        data: notes,
-      });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  // Delete problem notes
-  deleteProblemNotes: async (req, res) => {
-    try {
-      const { problemId } = req.params;
-      const userId = req.user._id;
-
-      await ProblemNotes.deleteOne({ problemId, userId });
-
-      res.status(200).json({ message: 'Notes deleted successfully' });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
