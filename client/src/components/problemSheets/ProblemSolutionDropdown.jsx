@@ -11,8 +11,9 @@ const ProblemSolutionDropdown = ({ problemId }) => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   
-  // State to track viewed hints
+  // State to track viewed hints 
   const [viewedHints, setViewedHints] = useState(new Set());
+  const [solutionViewed, setSolutionViewed] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -31,12 +32,45 @@ const ProblemSolutionDropdown = ({ problemId }) => {
   }, [problemId]);
 
   const handleViewHint = (hintNumber) => {
-    setViewedHints((prev) => new Set(prev).add(hintNumber));
+    // Check if this is the first hint or if previous hint was viewed
+    if (hintNumber === 1 || viewedHints.has(hintNumber - 1)) {
+      setViewedHints((prev) => new Set(prev).add(hintNumber));
+    } else {
+      toast.info(`Please unlock Hint ${hintNumber - 1} first`);
+    }
   };
 
   const allHintsViewed = () => {
-    if (!data?.hints || data.hints.length === 0) return true; // No hints to view, so solution is unlocked
+    if (!data?.hints || data.hints.length === 0) return true;
     return data.hints.every((hint) => viewedHints.has(hint.hintNumber));
+  };
+
+  // Convert solution content object to array format for CodeDisplay
+  const formatSolutionCodes = () => {
+    if (!data?.solution?.content) return [];
+    
+    const content = data.solution.content;
+    const codes = [];
+    
+    // Map language names to proper casing
+    const languageMap = {
+      python: 'Python',
+      javascript: 'JavaScript',
+      java: 'Java',
+      cpp: 'C++',
+      csharp: 'C#',
+    };
+
+    Object.entries(content).forEach(([lang, code]) => {
+      if (code) {
+        codes.push({
+          language: languageMap[lang] || lang,
+          code,
+        });
+      }
+    });
+
+    return codes;
   };
 
   if (loading) {
@@ -56,6 +90,11 @@ const ProblemSolutionDropdown = ({ problemId }) => {
   if (!data) return null;
 
   const isSolutionUnlocked = allHintsViewed();
+  const solutionCodes = formatSolutionCodes();
+
+  const handleViewSolution = () => {
+    setSolutionViewed(true);
+  };
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-800">
@@ -76,13 +115,25 @@ const ProblemSolutionDropdown = ({ problemId }) => {
                   Hint {hint.hintNumber}
                 </p>
                 {!viewedHints.has(hint.hintNumber) ? (
-                  <button
-                    onClick={() => handleViewHint(hint.hintNumber)}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700"
-                  >
-                    <Lock size={14} />
-                    Click to Reveal Hint
-                  </button>
+                  <>
+                    {hint.hintNumber > 1 && !viewedHints.has(hint.hintNumber - 1) ? (
+                      <button
+                        disabled
+                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-gray-400 text-white cursor-not-allowed opacity-60"
+                      >
+                        <Lock size={14} />
+                        Unlock Hint {hint.hintNumber - 1} First
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleViewHint(hint.hintNumber)}
+                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                      >
+                        <Lock size={14} />
+                        Click to Reveal Hint
+                      </button>
+                    )}
+                  </>
                 ) : (
                   <p className="text-gray-700 dark:text-gray-300">
                     {hint.content}
@@ -98,7 +149,7 @@ const ProblemSolutionDropdown = ({ problemId }) => {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            {isSolutionUnlocked ? (
+            {isSolutionUnlocked && solutionViewed ? (
               <Unlock size={18} className="text-green-500" />
             ) : (
               <Lock size={18} className="text-gray-400" />
@@ -112,20 +163,26 @@ const ProblemSolutionDropdown = ({ problemId }) => {
           )}
         </div>
 
-        {isSolutionUnlocked ? (
-          data.solution?.content ? (
-            <CodeDisplay implementation={{ codes: data.solution.content }} />
-          ) : (
-            <p className="text-gray-500 dark:text-gray-400">
-              No solution code available for this problem.
-            </p>
-          )
-        ) : (
+        {!isSolutionUnlocked ? (
           <div className="flex items-center justify-center h-32 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
             <p className="text-gray-500 dark:text-gray-400">
               Solution is locked
             </p>
           </div>
+        ) : !solutionViewed ? (
+          <button
+            onClick={handleViewSolution}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-green-600 text-white hover:bg-green-700"
+          >
+            <Unlock size={14} />
+            Click to Reveal Solution
+          </button>
+        ) : solutionCodes.length > 0 ? (
+          <CodeDisplay algorithm={{ codes: solutionCodes }} />
+        ) : (
+          <p className="text-gray-500 dark:text-gray-400">
+            No solution code available for this problem.
+          </p>
         )}
       </div>
     </div>
