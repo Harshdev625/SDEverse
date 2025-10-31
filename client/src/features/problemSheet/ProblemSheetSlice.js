@@ -86,13 +86,6 @@ const problemSheetSlice = createSlice({
             state.metrics = null;
             state.pagination = null;
         },
-        updateProblemInList: (state, action) => {
-            const updatedProblem = action.payload;
-            const index = state.problems.findIndex(problem => problem._id === updatedProblem.id);
-            if (index !== -1) {
-                state.problems[index] = { ...state.problems[index], ...updatedProblem };
-            }
-        },
     },
     extraReducers: (builder) => {
         builder
