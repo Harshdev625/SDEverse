@@ -4,6 +4,116 @@ const ProblemProgress = require('../models/userProgress.model');
 const Problem = require('../models/problem.model');
 
 const problemSheetController = {
+  // Admin controls:
+  // Create Problem Sheet
+  createProblemSheet: async (req, res) => {
+    try {
+      const { name, description, icon } = req.body;
+      const slug = await generateUniqueSlug(name, ProblemSheet);
+      
+      const newSheet = new ProblemSheet({
+        name, slug, description, icon: icon ||'📋',
+      });
+
+      const saveSheet = await newSheet.save();
+
+      if (!saveSheet) {
+        res.status(502).json({
+          error: 'Problem sheet not created.'
+        });
+      }
+
+      res.status(201).json(savedSheet);
+    } catch (error) {
+      if (error.code === 11000) {
+        return res.status(400).json({
+          error: 'A problem sheet with this name already exists.'
+        });
+      }
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  // Update Problem Sheet
+  updateProblemSheet: async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const { name, description, icon, isActive } = req.body;
+      
+      let sheet = await ProblemSheet.findOne({ slug });
+
+      if (!sheet) {
+        return res.status(404).json({ error: 'Problem sheet not found' });
+      };
+
+      sheet.description = description;
+      sheet.icon = icon || sheet.icon;
+      sheet.isActive = isActive;
+
+      // regenerate slug if name changed
+      if (name && name !== sheet.name) {
+        sheet.name = name;
+        sheet.slug = await generateUniqueSlug(name, ProblemSheet); 
+      };
+
+      const updateSheet = await sheet.save();
+
+      if (!updateSheet) {
+        res.status(502).json({
+          error: 'Problem sheet not updated.'
+        });
+      }
+
+      res.status(200).json(updatedSheet);
+    } catch (error) {
+      if (error.code === 11000) {
+        return res.status(400).json({
+          error: 'A problem sheet with this name already exists.'
+        });
+      }
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  // Delete Problem Sheet
+  deleteProblemSheet: async (req, res) => {
+    try {
+      const { slug } = req.params;
+
+      const sheet = await ProblemSheet.findOne({ slug });
+      if (!sheet) {
+        return res.status(404).json({ error: 'Problem sheet not found' });
+      }
+
+      // Delete all problems
+      deleteProblems = await Problem.deleteMany({ sheetId: sheet._id });
+
+      if (!deleteProblems) {
+        res.status(502).json({
+          error: 'Problems not deleted.'
+        });
+      }
+
+      // Delete the sheet 
+      deleteSheet = await sheet.deleteOne();
+
+      if (!deleteSheet) {
+        res.status(502).json({
+          error: 'Sheet not deleted.'
+        });
+      }
+
+      res.status(200).json({
+        message: 'Problem sheet and all associated data deleted successfully.'
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  // ============================================================
+
+  // User controls:
   // Get all sheets
   getAllSheets: async (req, res) => {
     try {

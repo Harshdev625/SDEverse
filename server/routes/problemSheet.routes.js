@@ -4,6 +4,35 @@ const { protect } = require('../middleware/auth.middleware');
 const problemSheetController = require('../controllers/problemSheet.controller');
 const problemController = require('../controllers/problem.controller');
 
+// Admin routes: Problem Sheets
+router.post(
+  '/', protect, admin, validateProblemSheet,
+  problemSheetController.createProblemSheet
+);
+router.put(
+  '/:slug', protect, admin, validateProblemSheet,
+  problemSheetController.updateProblemSheet
+);
+router.delete(
+  '/:slug', protect, admin,
+  problemSheetController.deleteProblemSheet
+);
+
+// Admin routes: Problems
+router.post(
+  '/:sheetId/problems', protect, admin, validateProblem,
+  problemController.createProblem
+);
+router.put(
+  '/problems/:problemId', protect, admin, validateProblem,
+  problemController.updateProblem
+);
+router.delete(
+  '/problems/:problemId', protect, admin,
+  problemController.deleteProblem
+);
+
+
 // Public routes
 router.get('/', problemSheetController.getAllSheets);
 router.get('/:sheetId', problemSheetController.getSheetById);
