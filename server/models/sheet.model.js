@@ -14,7 +14,13 @@ const problemSheetSchema = new mongoose.Schema({
     },
     icon: {
         type: String,
-        default: '📋',  
+        default: '📋',
+        validate: {
+            validator: function(v) {
+                return v.length <= 5;
+            },
+            message: 'Icon must be at most 5 characters long'
+        }
     },
     totalProblems: {
         type: Number,
