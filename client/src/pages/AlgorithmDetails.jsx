@@ -8,6 +8,7 @@ import {
 import Loader from "../components/Loader";
 import AlgorithmPreview from "./AlgorithmPreview";
 import CommentSection from "./CommentSection";
+import NoteEditor from "../components/NoteEditor";
 import {
   ArrowLeft,
   ArrowRight,
@@ -205,6 +206,8 @@ const AlgorithmDetail = () => {
             parentSlug={algorithm.slug}
           />
         </section>
+        {/* Note Editor (floating pencil) */}
+        <NoteEditor parentType="Algorithm" parentId={algorithm._id} />
       </main>
     </motion.div>
   );

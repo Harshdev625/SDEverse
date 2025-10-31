@@ -9,6 +9,7 @@ import {
 import Loader from "../components/Loader";
 import DataStructurePreview from "./DataStructurePreview";
 import CommentSection from "./CommentSection";
+import NoteEditor from "../components/NoteEditor";
 import { ArrowLeft, ArrowRight, ThumbsUp, ThumbsDown, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
@@ -221,6 +222,8 @@ const DataStructureDetail = () => {
             parentSlug={dataStructure.slug}
           />
         </section>
+        {/* Note Editor (floating pencil) */}
+        <NoteEditor parentType="DataStructure" parentId={dataStructure._id} />
       </main>
     </motion.div>
   );

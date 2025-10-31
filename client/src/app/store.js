@@ -12,6 +12,7 @@ import communityReducer from "../features/community/communitySlice";
 import dataStructureReducer from "../features/dataStructure/dataStructureSlice";
 import dataStructureProposalReducer from "../features/dataStructureProposal/dataStructureProposalSlice";
 import blogReducer from "../features/blog/blogSlice";
+import noteReducer from "../features/note/noteSlice";
 
 const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ const store = configureStore({
     dataStructure: dataStructureReducer,
     dataStructureProposal: dataStructureProposalReducer,
     blog: blogReducer,
+    note: noteReducer,
   },
   devTools: import.meta.env.MODE !== "production",
 });

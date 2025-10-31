@@ -13,7 +13,7 @@ const feedbackRoutes = require("./routes/feedback.routes");
 const communityRoutes = require("./routes/community.routes");
 const dataStructureRoutes = require("./routes/dataStructure.routes");
 const dataStructureProposalRoutes = require("./routes/dataStructureProposal.routes");
-const noteRoutes = require('./routes/noteRoutes');
+const noteRoutes = require('./routes/note.routes');
 const contactRoutes = require("./routes/contact.routes");
 const blogRoutes = require("./routes/blog.routes");
 
