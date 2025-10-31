@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, Fragment } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -18,8 +18,8 @@ import {
   ChevronRight,
   ExternalLink,
 } from "lucide-react";
+import ProblemSolutionDropdown from "../components/problemSheets/ProblemSolutionDropdown.jsx";
 import Loader from "../components/Loader";
-import SolutionsModal from "../components/problemSheets/SolutionsModal";
 import { toast } from "react-toastify";
 
 const SheetDetail = () => {
@@ -41,8 +41,7 @@ const SheetDetail = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [difficulty, setDifficulty] = useState("all");
-  const [selectedProblem, setSelectedProblem] = useState(null);
-  const [showSolutionsModal, setShowSolutionsModal] = useState(false);
+  const [openSolutionId, setOpenSolutionId] = useState(null);
 
   // Fetch sheet data
   useEffect(() => {
@@ -102,14 +101,8 @@ const SheetDetail = () => {
     }
   };
 
-  // Handle solutions modal
-  const handleOpenSolutions = (problem) => {
-    if (!user) {
-      toast.info("Please log in to view solutions");
-      return;
-    }
-    setSelectedProblem(problem);
-    setShowSolutionsModal(true);
+  const handleToggleSolution = (problemId) => {
+    setOpenSolutionId(prevId => (prevId === problemId ? null : problemId));
   };
 
   // Pagination handlers
@@ -303,111 +296,120 @@ const SheetDetail = () => {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {problems.map((problem) => (
-                  <tr
-                    key={problem._id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                  >
-                    {/* Checkbox */}
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => handleToggleComplete(problem._id, problem.completed)}
-                        className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
-                          problem.completed
-                            ? "bg-green-500 border-green-500"
-                            : "border-gray-300 dark:border-gray-600 hover:border-green-500"
-                        }`}
-                      >
-                        {problem.completed && <Check size={16} className="text-white" />}
-                      </button>
-                    </td>
+                  <Fragment key={problem._id}>
+                    <tr
+                      key={problem._id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    >
+                      {/* Checkbox */}
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => handleToggleComplete(problem._id, problem.completed)}
+                          className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
+                            problem.completed
+                              ? "bg-green-500 border-green-500"
+                              : "border-gray-300 dark:border-gray-600 hover:border-green-500"
+                          }`}
+                        >
+                          {problem.completed && <Check size={16} className="text-white" />}
+                        </button>
+                      </td>
 
-                    {/* Problem Title */}
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="text-gray-900 dark:text-white font-medium">
-                          {problem.title}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          #{problem.order}
-                        </p>
-                      </div>
-                    </td>
+                      {/* Problem Title */}
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="text-gray-900 dark:text-white font-medium">
+                            {problem.title}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            #{problem.order}
+                          </p>
+                        </div>
+                      </td>
 
-                    {/* Difficulty */}
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          problem.difficulty === "easy"
-                            ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
-                            : problem.difficulty === "medium"
-                            ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300"
-                            : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300"
-                        }`}
-                      >
-                        {problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}
-                      </span>
-                    </td>
+                      {/* Difficulty */}
+                      <td className="px-6 py-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            problem.difficulty === "easy"
+                              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
+                              : problem.difficulty === "medium"
+                              ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300"
+                              : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300"
+                          }`}
+                        >
+                          {problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}
+                        </span>
+                      </td>
 
-                    {/* Tags */}
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {problem.tags?.slice(0, 2).map((tag, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs"
+                      {/* Tags */}
+                      <td className="px-6 py-4">
+                        <div className="flex flex-wrap gap-1">
+                          {problem.tags?.slice(0, 2).map((tag, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                          {problem.tags?.length > 2 && (
+                            <span className="px-2 py-1 text-gray-500 dark:text-gray-400 text-xs">
+                              +{problem.tags.length - 2}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Platform Link */}
+                      <td className="px-6 py-4 text-center">
+                        {problem.platformLink && (
+                          <a
+                            href={problem.platformLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                            title={`Open on ${problem.platform || 'external site'}`}
                           >
-                            {tag}
-                          </span>
-                        ))}
-                        {problem.tags?.length > 2 && (
-                          <span className="px-2 py-1 text-gray-500 dark:text-gray-400 text-xs">
-                            +{problem.tags.length - 2}
-                          </span>
+                            <span className="text-sm font-medium">
+                              {problem.platform || 'View'}
+                            </span>
+                            <ExternalLink size={14} />
+                          </a>
                         )}
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Platform Link */}
-                    <td className="px-6 py-4 text-center">
-                      {problem.platformLink && (
-                        <a
-                          href={problem.platformLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                          title={`Open on ${problem.platform || 'external site'}`}
-                        >
-                          <span className="text-sm font-medium">
-                            {problem.platform || 'View'}
-                          </span>
-                          <ExternalLink size={14} />
-                        </a>
-                      )}
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => toast.info("Notes feature is coming soon!")}
-                          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                          title="Notes (Coming Soon)"
-                        >
-                          <StickyNote
-                            size={18}
-                            className="text-gray-400 dark:text-gray-500"
-                          />
-                        </button>
-                        <button
-                          onClick={() => handleOpenSolutions(problem)}
-                          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                          title="Hints & Solution"
-                        >
-                          <Lightbulb size={18} className="text-blue-500" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                      {/* Actions */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => toast.info("Notes feature is coming soon!")}
+                            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                            title="Notes (Coming Soon)"
+                          >
+                            <StickyNote
+                              size={18}
+                              className="text-gray-400 dark:text-gray-500"
+                            />
+                          </button>
+                          <button
+                            onClick={() => handleOpenSolutions(problem)}
+                            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                            title="Hints & Solution"
+                          >
+                            <Lightbulb size={18} className="text-blue-500" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {openSolutionId === problem._id && (
+                      <tr className="border-t-0">
+                        <td colSpan="6" className="p-0">
+                          <ProblemSolutionDropdown problemId={problem._id}/>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 ))}
               </tbody>
             </table>
@@ -468,17 +470,6 @@ const SheetDetail = () => {
             <ChevronRight size={20} />
           </button>
         </div>
-      )}
-
-      {/* Modals */}
-      {showSolutionsModal && selectedProblem && (
-        <SolutionsModal
-          problem={selectedProblem}
-          onClose={() => {
-            setShowSolutionsModal(false);
-            setSelectedProblem(null);
-          }}
-        />
       )}
     </motion.div>
   );
