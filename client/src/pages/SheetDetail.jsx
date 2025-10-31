@@ -393,7 +393,7 @@ const SheetDetail = () => {
                             />
                           </button>
                           <button
-                            onClick={() => handleOpenSolutions(problem)}
+                            onClick={() => handleToggleSolution(problem._id)}
                             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                             title="Hints & Solution"
                           >

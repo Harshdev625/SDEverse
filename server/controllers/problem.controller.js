@@ -66,12 +66,11 @@ const problemController = {
         content: hint.content,
       }));
 
-      // Return solution content directly - no unlock tracking on backend
       res.status(200).json({
         data: {
           hints,
           solution: {
-            content: problem.solution.content,
+            content: problem.solution?.content,
           },
         },
       });

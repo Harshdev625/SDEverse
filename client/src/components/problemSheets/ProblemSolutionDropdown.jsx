@@ -114,7 +114,7 @@ const ProblemSolutionDropdown = ({ problemId }) => {
 
         {isSolutionUnlocked ? (
           data.solution?.content ? (
-            <CodeDisplay codeSnippets={data.solution.content} />
+            <CodeDisplay implementation={{ codes: data.solution.content }} />
           ) : (
             <p className="text-gray-500 dark:text-gray-400">
               No solution code available for this problem.
