@@ -92,11 +92,17 @@ const Sidebar = () => {
       active: "bg-gradient-to-r from-purple-500 to-violet-600",
       border: "border-l-purple-500",
     },
-    dataStructures: {
+    manageDataStructures: {
       bg: "bg-teal-50/80 dark:bg-teal-900/30",
       hover: "hover:bg-teal-100 dark:hover:bg-teal-900/40",
-      active: "bg-gradient-to-r from-teal-500 to-cyan-600",
+      active: "bg-gradient-to-r from-teal-500 to-emerald-600",
       border: "border-l-teal-500",
+    },
+    manageProblemSheets: {
+      bg: "bg-indigo-50/80 dark:bg-indigo-900/30",
+      hover: "hover:bg-indigo-100 dark:hover:bg-indigo-900/40",
+      active: "bg-gradient-to-r from-indigo-500 to-blue-600",
+      border: "border-l-indigo-500",
     },
     problemSheets: {
       bg: "bg-green-50/80 dark:bg-green-900/30",
@@ -363,6 +369,17 @@ const Sidebar = () => {
                 >
                   <Database size={20} className="min-w-[20px]" />
                   <span className="truncate">Manage Data Structures</span>
+                  <ChevronRight className="ml-auto opacity-70" size={16} />
+                </NavLink>
+                <NavLink
+                  to="/admin/manage-problem-sheets"
+                  className={({ isActive }) =>
+                    getNavItemClass("manageProblemSheets", isActive)
+                  }
+                  onClick={handleLinkClick}
+                >
+                  <ClipboardList size={20} className="min-w-[20px]" />
+                  <span className="truncate">Manage Problem Sheets</span>
                   <ChevronRight className="ml-auto opacity-70" size={16} />
                 </NavLink>
                 <NavLink

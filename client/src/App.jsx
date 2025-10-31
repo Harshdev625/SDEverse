@@ -43,6 +43,8 @@ import FaqPage from './pages/FaqPage';
 
 import ProblemSheets from "./pages/ProblemSheets";
 import SheetDetail from "./pages/SheetDetail";
+import AdminProblemSheets from "./pages/AdminProblemSheets";
+import AdminProblemManagement from "./pages/AdminProblemManagement";
 
 const router = createBrowserRouter([
   {
@@ -138,6 +140,22 @@ const router = createBrowserRouter([
         element: (
           <AdminRoute>
             <AdminAlgorithms />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "admin/manage-problem-sheets",
+        element: (
+          <AdminRoute>
+            <AdminProblemSheets />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "admin/manage-problem-sheets/:sheetId",
+        element: (
+          <AdminRoute>
+            <AdminProblemManagement />
           </AdminRoute>
         ),
       },
