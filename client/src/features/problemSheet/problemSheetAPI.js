@@ -29,3 +29,33 @@ export const getHintsSolution = async (problemId) => {
     const res = await api.get(`/problem-sheets/problems/${problemId}/hints-solution`);
     return res.data;
 };
+
+export const createProblemSheet = async (sheetData) => {
+    const res = await api.post('/problem-sheets', sheetData);
+    return res.data;
+};
+
+export const updateProblemSheet = async (slug, sheetData) => {
+    const res = await api.put(`/problem-sheets/${slug}`, sheetData);
+    return res.data;
+};
+
+export const deleteProblemSheet = async (slug) => {
+    const res = await api.delete(`/problem-sheets/${slug}`);
+    return res.data;
+};
+
+export const createProblem = async (sheetId, problemData) => {
+    const res = await api.post(`/problem-sheets/${sheetId}/problems`, problemData);
+    return res.data;
+};
+
+export const updateProblem = async (problemId, problemData) => {
+    const res = await api.put(`/problem-sheets/problems/${problemId}`, problemData);
+    return res.data;
+};
+
+export const deleteProblem = async (problemId) => {
+    const res = await api.delete(`/problem-sheets/problems/${problemId}`);
+    return res.data;
+};
