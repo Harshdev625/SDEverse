@@ -20,31 +20,52 @@ const validateProblem = [
     
   body('difficulty')
     .notEmpty().withMessage('Difficulty is required')
-    .isIn(['easy', 'medium', 'hard']).withMessage('Difficulty must be easy, medium, or hard'),
+    .isIn(['easy', 'medium', 'hard']).withMessage('Difficulty must be easy, medium, or hard')
+    .toLowerCase(),
     
   body('platform')
     .notEmpty().withMessage('Platform is required')
     .isIn(['leetcode', 'hackerrank', 'codeforces', 'codechef', 'atcoder', 'other'])
-    .withMessage('Invalid platform'),
+    .withMessage('Invalid platform')
+    .toLowerCase(),
 
   body('platformLink')
     .notEmpty().withMessage('Platform link is required')
-    .isURL().withMessage('Platform link must be a valid URL'),
+    .trim()
+    .matches(/^https?:\/\/.+/).withMessage('Platform link must be a valid URL starting with http:// or https://'),
+
+  body('description')
+    .optional()
+    .trim()
+    .isLength({ min: 10 }).withMessage('Description must be at least 10 characters'),
 
   body('tags')
     .optional()
     .isArray().withMessage('Tags must be an array'),
   
   body('tags.*')
-    .isString().withMessage('Each tag must be a string'),
+    .isString().withMessage('Each tag must be a string')
+    .trim(),
 
   body('hints')
     .optional()
     .isArray().withMessage('Hints must be an array'),
 
+  body('hints.*.content')
+    .optional()
+    .isString().withMessage('Each hint content must be a string'),
+
+  body('solution')
+    .optional()
+    .isObject().withMessage('Solution must be an object'),
+
   body('solution.content')
     .optional()
     .isObject().withMessage('Solution content must be an object'),
+
+  body('solution.explanation')
+    .optional()
+    .isString().withMessage('Solution explanation must be a string'),
 
   handleValidationErrors,
 ];

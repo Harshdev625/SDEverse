@@ -1,4 +1,6 @@
+const mongoose = require('mongoose');
 const Problem = require('../models/problem.model');
+const ProblemSheet = require('../models/sheet.model');
 const ProblemProgress = require('../models/userProgress.model');
 
 const problemController = {
@@ -6,12 +8,14 @@ const problemController = {
   // Create problem
   createProblem: async (req, res) => {
     try {
-      const { sheetId } = req.params; // sheetId can be slug or ID
+      const { sheetId } = req.params;
       
-      const query = mongoose.Types.ObjectId.isValid(sheetId)
-        ? { _id: sheetId }
-        : { slug: sheetId };
-      const sheet = await ProblemSheet.findOne(query).select('_id');
+      // Validate sheetId
+      if (!mongoose.Types.ObjectId.isValid(sheetId)) {
+        return res.status(400).json({ error: 'Invalid sheet ID' });
+      }
+      
+      const sheet = await ProblemSheet.findById(sheetId).select('_id');
       
       if (!sheet) {
         return res.status(404).json({ error: 'Problem sheet not found' });
@@ -40,6 +44,10 @@ const problemController = {
       const { problemId } = req.params;
       const updateData = req.body;
 
+      if (!mongoose.Types.ObjectId.isValid(problemId)) {
+        return res.status(400).json({ error: 'Invalid problem ID' });
+      }
+
       const problem = await Problem.findById(problemId);
       if (!problem) {
         return res.status(404).json({ error: 'Problem not found' });
@@ -59,6 +67,10 @@ const problemController = {
     try {
       const { problemId } = req.params;
 
+      if (!mongoose.Types.ObjectId.isValid(problemId)) {
+        return res.status(400).json({ error: 'Invalid problem ID' });
+      }
+
       const problem = await Problem.findById(problemId);
       if (!problem) {
         return res.status(404).json({ error: 'Problem not found' });
@@ -67,7 +79,7 @@ const problemController = {
       const sheetId = problem.sheetId;
 
       // Delete the problem
-      await problem.deleteOne();
+      await Problem.deleteOne({ _id: problem._id });
 
       // Delete all user progress for this problem
       await ProblemProgress.deleteMany({ problemId: problem._id });
@@ -90,6 +102,10 @@ const problemController = {
       const { problemId } = req.params;
       const { completed } = req.body;
       const userId = req.user._id;
+
+      if (!mongoose.Types.ObjectId.isValid(problemId)) {
+        return res.status(400).json({ error: 'Invalid problem ID' });
+      }
 
       // Get problem to find sheet
       const problem = await Problem.findById(problemId);
@@ -129,10 +145,14 @@ const problemController = {
     }
   },
 
-  // Get hints and solution (no unlock tracking needed on backend)
+  // Get hints and solution
   getHintsSolution: async (req, res) => {
     try {
       const { problemId } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(problemId)) {
+        return res.status(400).json({ error: 'Invalid problem ID' });
+      }
 
       const problem = await Problem.findById(problemId)
         .select('hints solution')
@@ -142,7 +162,7 @@ const problemController = {
         return res.status(404).json({ error: 'Problem not found' });
       }
 
-      // Format hints - return all hints with content, no unlock tracking
+      // Format hints
       const hints = (problem.hints || []).map(hint => ({
         hintNumber: hint.hintNumber,
         content: hint.content,
@@ -153,6 +173,7 @@ const problemController = {
           hints,
           solution: {
             content: problem.solution?.content,
+            explanation: problem.solution?.explanation,
           },
         },
       });
