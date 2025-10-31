@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  FileText, X, Save, Trash, Code, Eye, Plus, Pencil, GripVertical
+  FileText, X, Save, Trash, Code, Eye, Plus, Pencil
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -10,34 +10,72 @@ import {
   fetchNoteByParent, saveNote, removeNote, clearNote
 } from '../features/note/noteSlice';
 
-// --- Imports for UI & Animation ---
+// UI & Animation
 import { motion, AnimatePresence } from 'framer-motion';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Editor from '@monaco-editor/react';
-import clsx from 'clsx'; // Make sure you have clsx: npm install clsx
+import clsx from 'clsx';
 
-// --- Segmented Control (Unchanged) ---
+// Dark mode helper
+const useDarkMode = () => {
+  const { mode } = useSelector((state) => state.theme);
+  return mode === 'dark';
+};
+
+// Theme-aware code block for Markdown
+const CodeBlock = ({ node, inline, className, children, ...props }) => {
+  const dark = useDarkMode();
+  const match = /language-(\w+)/.exec(className || '');
+  return !inline && match ? (
+    <div className="my-4 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+      <SyntaxHighlighter
+        style={dark ? vscDarkPlus : prism}
+        language={match[1]}
+        PreTag="div"
+        customStyle={{ margin: 0, borderRadius: '0.5rem' }}
+        {...props}
+      >
+        {String(children).replace(/\n$/, '')}
+      </SyntaxHighlighter>
+    </div>
+  ) : (
+    <code
+      className={clsx(
+        'px-1.5 py-0.5 rounded text-sm font-mono',
+        'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </code>
+  );
+};
+
+// Segmented Control
 const EditorToggle = ({ isPreview, onToggle }) => (
   <div className="flex items-center p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
     <button
       onClick={() => onToggle(false)}
-      className={`flex items-center gap-1.5 px-3 py-1 text-sm rounded-md ${
+      className={clsx(
+        'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors',
         !isPreview
           ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white'
           : 'text-gray-500 dark:text-gray-400'
-      } transition-all`}
+      )}
     >
       <Code size={14} /> Write
     </button>
     <button
       onClick={() => onToggle(true)}
-      className={`flex items-center gap-1.5 px-3 py-1 text-sm rounded-md ${
+      className={clsx(
+        'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors',
         isPreview
           ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white'
           : 'text-gray-500 dark:text-gray-400'
-      } transition-all`}
+      )}
     >
       <Eye size={14} /> Preview
     </button>
@@ -47,40 +85,18 @@ const EditorToggle = ({ isPreview, onToggle }) => (
 const NoteEditor = ({ parentType, parentId }) => {
   const dispatch = useDispatch();
   const { note, loading } = useSelector((state) => state.note || {});
-  const { mode: themeMode } = useSelector((state) => state.theme);
-  const darkMode = themeMode === 'dark';
+  const dark = useDarkMode();
 
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState('');
   const [originalContent, setOriginalContent] = useState('');
   const [preview, setPreview] = useState(true);
 
-  // --- Resizable Drawer State ---
+  // Resizable Drawer State
   const [width, setWidth] = useState(450);
   const [isResizing, setIsResizing] = useState(false);
 
-  // --- Theme-Aware CodeBlock ---
-  const CodeBlock = {
-    code({ node, inline, className, children, ...props }) {
-      const match = /language-(\w+)/.exec(className || '');
-      return !inline && match ? (
-        <SyntaxHighlighter
-          style={darkMode ? vscDarkPlus : prism}
-          language={match[1]}
-          PreTag="div"
-          {...props}
-        >
-          {String(children).replace(/\n$/, '')}
-        </SyntaxHighlighter>
-      ) : (
-        <code className={className} {...props}>
-          {children}
-        </code>
-      );
-    },
-  };
-
-  // --- Data Fetching (Unchanged) ---
+  // Data Fetching
   useEffect(() => {
     if (parentType && parentId) {
       dispatch(fetchNoteByParent({ parentType, parentId }))
@@ -108,7 +124,7 @@ const NoteEditor = ({ parentType, parentId }) => {
     }
   }, [open, dispatch, parentType, parentId]);
 
-  // --- Handlers (Unchanged) ---
+  // Handlers
   const handleSave = async () => {
     try {
       await dispatch(saveNote({ parentType, parentId, content })).unwrap();
@@ -137,7 +153,7 @@ const NoteEditor = ({ parentType, parentId }) => {
     setPreview(true);
   };
 
-  // --- Resizing Logic ---
+  // Resizing Logic
   const handleMouseDown = (e) => {
     e.preventDefault();
     setIsResizing(true);
@@ -167,11 +183,10 @@ const NoteEditor = ({ parentType, parentId }) => {
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isResizing, handleMouseMove, handleMouseUp]);
-  // --- End Resizing Logic ---
 
   const hasNote = Boolean(note && note._id);
 
-  // --- Main Content Renderer ---
+  // Main Content Renderer
   const renderContent = (isMobile = false) => {
     if (loading) {
       return <div className="text-sm text-gray-500 p-4">Loading...</div>;
@@ -179,13 +194,26 @@ const NoteEditor = ({ parentType, parentId }) => {
 
     if (preview) {
       return (
-        <div className={clsx("p-4", !isMobile && "h-full")}>
+        <div className={clsx('p-4', !isMobile && 'h-full overflow-y-auto')}>
           {content ? (
-            <div className="prose max-w-none dark:prose-invert">
+            <div
+              className={clsx(
+                'prose prose-sm max-w-none',
+                'dark:prose-invert',
+                'prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-gray-100',
+                'prose-a:text-blue-600 dark:prose-a:text-blue-400',
+                'prose-blockquote:border-l-blue-500',
+                'prose-pre:p-0 prose-pre:my-4',
+                'prose-table:block prose-table:overflow-x-auto',
+                'prose-th:bg-gray-100 dark:prose-th:bg-gray-800 prose-th:border prose-th:px-3 prose-th:py-2',
+                'prose-td:border prose-td:px-3 prose-td:py-2',
+                isMobile && 'text-sm'
+              )}
+            >
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeKatex]}
-                components={CodeBlock}
+                components={{ code: CodeBlock }}
               >
                 {content}
               </ReactMarkdown>
@@ -209,16 +237,16 @@ const NoteEditor = ({ parentType, parentId }) => {
       );
     }
 
-    // --- Editor View ---
+    // Editor View
     return (
       <div className={clsx(
-        "border-gray-200 dark:border-gray-800",
-        isMobile ? "w-full h-[60vh] rounded-md border" : "h-full"
+        'h-full',
+        isMobile ? 'w-full h-[60vh] rounded-md border border-gray-200 dark:border-gray-800' : ''
       )}>
         <Editor
           height="100%"
           language="markdown"
-          theme={darkMode ? 'vs-dark' : 'light'}
+          theme={dark ? 'vs-dark' : 'light'}
           value={content}
           onChange={(value) => setContent(value || '')}
           options={{
@@ -236,12 +264,10 @@ const NoteEditor = ({ parentType, parentId }) => {
     );
   };
 
-  // --- Footer Button Renderer (Unchanged) ---
+  // Footer Button Renderer
   const renderFooter = () => {
-    // ... (This function is identical to the previous version, so I am omitting it for brevity)
-    // ... (Paste your existing renderFooter function here) ...
     if (preview) {
-      if (!content) return null; // Hide footer in empty state
+      if (!content) return null;
       return (
         <>
           <div className="flex items-center gap-2">
@@ -262,7 +288,6 @@ const NoteEditor = ({ parentType, parentId }) => {
         </>
       );
     }
-    // --- Editor Footer ---
     return (
       <>
         <div className="flex items-center gap-2">
@@ -294,12 +319,12 @@ const NoteEditor = ({ parentType, parentId }) => {
 
   return (
     <>
-      {/* --- Floating Button (Animated) --- */}
+      {/* Floating Button */}
       <motion.button
         aria-label="Open notes"
         title="Notes"
         onClick={() => setOpen(true)}
-        className="fixed right-4 top-1/2 -translate-y-1/2 z-40 bg-gradient-to-br from-indigo-600 to-blue-600 text-white p-3 rounded-full shadow-2xl focus:outline-none flex items-center justify-center"
+        className="fixed right-4 top-1/2 -translate-y-1/2 z-40 bg-gradient-to-br from-indigo-600 to-blue-600 text-white p-3 rounded-full shadow-2xl flex items-center justify-center"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -307,22 +332,21 @@ const NoteEditor = ({ parentType, parentId }) => {
         {hasNote && <span className="absolute -top-1 -right-1 inline-flex h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-white" aria-hidden="true" />}
       </motion.button>
 
-      {/* --- Desktop Drawer (NEW ANIMATION) --- */}
+      {/* Desktop Drawer */}
       <AnimatePresence>
         {open && (
           <motion.div
             className="fixed right-0 top-0 h-full z-50 hidden md:block"
-            style={{ width }} // Use the resizable width state
+            style={{ width }}
             initial={{ x: "100%" }}
             animate={{ x: "0%" }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
-            {/* --- MODERN Resizer Handle --- */}
+            {/* Resizer Handle */}
             <div
               className={clsx(
-                "absolute top-1/2 -translate-y-1/2 -left-2 w-4 h-24 cursor-col-resize z-50 group flex items-center justify-center",
-                isResizing && "z-50" // Ensure it's on top when dragging
+                "absolute top-1/2 -translate-y-1/2 -left-2 w-4 h-24 cursor-col-resize z-50 group flex items-center justify-center"
               )}
               onMouseDown={handleMouseDown}
             >
@@ -334,8 +358,8 @@ const NoteEditor = ({ parentType, parentId }) => {
                 )}
               />
             </div>
-            
-            {/* --- Glassmorphism Panel --- */}
+
+            {/* Panel */}
             <div className="h-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-l border-gray-200 dark:border-gray-800 shadow-xl flex flex-col">
               <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Notes</h3>
@@ -360,7 +384,7 @@ const NoteEditor = ({ parentType, parentId }) => {
         )}
       </AnimatePresence>
 
-      {/* --- Mobile Modal (Animated & Fixed) --- */}
+      {/* Mobile Modal */}
       <AnimatePresence>
         {open && (
           <div className="md:hidden fixed inset-0 z-50 flex items-end">
@@ -372,7 +396,7 @@ const NoteEditor = ({ parentType, parentId }) => {
               exit={{ opacity: 0 }}
             />
             <motion.div
-              className="relative w-full bg-white dark:bg-gray-900 rounded-t-2xl p-4 max-h-[85vh] flex flex-col" // Increased max-h
+              className="relative w-full bg-white dark:bg-gray-900 rounded-t-2xl p-4 max-h-[85vh] flex flex-col"
               initial={{ y: "100%" }}
               animate={{ y: "0%" }}
               exit={{ y: "100%" }}
@@ -391,12 +415,10 @@ const NoteEditor = ({ parentType, parentId }) => {
                 </div>
               </div>
 
-              {/* --- Main Scrolling Area --- */}
               <div className="flex-1 overflow-y-auto">
                 {renderContent(true)}
               </div>
 
-              {/* --- Footer --- */}
               <div className="flex-shrink-0 mt-4 flex items-center justify-between">
                 {renderFooter()}
               </div>

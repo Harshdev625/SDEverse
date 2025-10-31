@@ -1,27 +1,20 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { ArrowLeft, Save, Tag, Image, X, Loader2 } from "lucide-react";
+import clsx from "clsx";
+
 import { createNewBlog } from "../features/blog/blogSlice";
-import {
-  Save,
-  X,
-  Image,
-  Tag,
-  Eye,
-  EyeOff,
-  ArrowLeft,
-} from "lucide-react";
-import Button from "../components/ui/Button";
 import Loader from "../components/Loader";
-import BlogPreview from "./BlogPreview";
+import BlogDetail from "./BlogDetail";
 
 const CreateBlog = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading } = useSelector((state) => state.blog);
   const { user } = useSelector((state) => state.auth);
-  const themeMode = useSelector((state) => state.theme.mode);
+  const isDark = useSelector((state) => state.theme.mode === "dark");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -31,16 +24,23 @@ const CreateBlog = () => {
     tags: [],
     featuredImage: "",
     isPublished: false,
+    author: {
+      fullName: user?.fullName || "You",
+      avatarUrl: user?.avatarUrl,
+    },
+    likes: 0,
+    views: 0,
+    commentsCount: 0,
+    publishedAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
   });
 
   const [tagInput, setTagInput] = useState("");
-  const [showPreview, setShowPreview] = useState(false);
+  const [activeTab, setActiveTab] = useState("edit");
   const [errors, setErrors] = useState({});
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
 
-  const titleRef = useRef(null);
-  const contentRef = useRef(null);
-
-  // Redirect if not authenticated
   if (!user) {
     navigate("/login");
     return null;
@@ -48,33 +48,26 @@ const CreateBlog = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error when user starts typing
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ""
-      }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const handleAddTag = () => {
     if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        tags: [...prev.tags, tagInput.trim()]
+        tags: [...prev.tags, tagInput.trim()],
       }));
       setTagInput("");
     }
   };
 
   const handleRemoveTag = (tagToRemove) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
 
@@ -87,369 +80,312 @@ const CreateBlog = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.title.trim()) {
-      newErrors.title = "Title is required";
-    }
-
-    if (!formData.content.trim()) {
-      newErrors.content = "Content is required";
-    }
-
-    if (!formData.category.trim()) {
-      newErrors.category = "Category is required";
-    }
-
-    if (formData.tags.length === 0) {
-      newErrors.tags = "At least one tag is required";
-    }
-
+    if (!formData.title.trim()) newErrors.title = "Title is required";
+    if (!formData.content.trim()) newErrors.content = "Content is required";
+    if (!formData.category.trim()) newErrors.category = "Category is required";
+    if (formData.tags.length === 0) newErrors.tags = "At least one tag is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handlePublish = async () => {
+    if (!validateForm()) return;
 
-    if (!validateForm()) {
-      return;
-    }
+    setIsPublishing(true);
+    const blogData = {
+      ...formData,
+      content: formData.content.trim(),
+      excerpt: formData.excerpt.trim() || formData.content.substring(0, 150) + "...",
+      isPublished: true,
+    };
 
     try {
-      const blogData = {
-        ...formData,
-        content: formData.content.trim(),
-        excerpt: formData.excerpt.trim() || formData.content.substring(0, 150) + "...",
-        // indicate to backend that this should be published
-        status: "published",
-      };
-
       const result = await dispatch(createNewBlog(blogData)).unwrap();
       navigate(`/blogs/${result.slug}`);
     } catch (error) {
-      console.error("Failed to create blog:", error);
-      setErrors({
-        submit: error.message || "Failed to create blog. Please try again."
-      });
+      setErrors({ submit: error.message || "Failed to publish blog." });
+    } finally {
+      setIsPublishing(false);
     }
   };
 
   const handleSaveDraft = async () => {
-    try {
-      const blogData = {
-        ...formData,
-        // save as draft
-        status: "draft",
-        isPublished: false,
-        content: formData.content.trim(),
-        excerpt: formData.excerpt.trim() || formData.content.substring(0, 150) + "...",
-      };
+    if (!formData.title.trim() || !formData.content.trim()) {
+      setErrors({ submit: "Title and content are required to save a draft." });
+      return;
+    }
 
+    setIsSavingDraft(true);
+    const blogData = {
+      ...formData,
+      content: formData.content.trim(),
+      excerpt: formData.excerpt.trim() || formData.content.substring(0, 150) + "...",
+      isPublished: false,
+    };
+
+    try {
       const result = await dispatch(createNewBlog(blogData)).unwrap();
       navigate(`/blogs/${result.slug}`);
     } catch (error) {
-      console.error("Failed to save draft:", error);
-      setErrors({
-        submit: error.message || "Failed to save draft. Please try again."
-      });
+      setErrors({ submit: error.message || "Failed to save draft." });
+    } finally {
+      setIsSavingDraft(false);
     }
   };
 
   const categories = [
-    "Data Structures",
-    "Algorithms",
-    "System Design",
-    "Programming Languages",
-    "Web Development",
-    "Mobile Development",
-    "DevOps",
-    "Machine Learning",
-    "Career Advice",
-    "Interview Prep",
-    "Other"
+    "Data Structures", "Algorithms", "System Design", "Programming Languages",
+    "Web Development", "Mobile Development", "DevOps", "Machine Learning",
+    "Career Advice", "Interview Prep", "Other"
   ];
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-      className={`min-h-screen ${themeMode === 'dark' ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50'}`}
+      className={`min-h-screen ${
+        isDark
+          ? "bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950"
+          : "bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50"
+      }`}
     >
-      {/* Header */}
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-white/20 dark:border-gray-700/50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-2 rounded-full hover:bg-white/50 dark:hover:bg-gray-700/50"
-              >
-                <ArrowLeft size={24} />
-              </motion.button>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Create New Article
-                </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Share your knowledge with the community
-                </p>
-              </div>
-            </div>
-              {/* intentionally keep header minimal - actions are at the bottom of the form */}
-          </div>
-        </div>
-      </div>
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="sticky top-6 left-6 z-40 flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-full shadow-lg hover:shadow-xl transition-all text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+      >
+        <ArrowLeft size={20} />
+        <span className="font-medium hidden sm:inline">Back</span>
+      </button>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {errors.submit && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-xl shadow-sm"
-          >
-            {errors.submit}
-          </motion.div>
-        )}
-
-        <motion.form
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          onSubmit={handleSubmit}
-          className="space-y-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 p-8"
+      {/* Main Container */}
+      <article className="max-w-5xl lg:max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
+        <motion.div
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.7 }}
+          className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl rounded-3xl border border-white/50 dark:border-gray-700/60 shadow-2xl overflow-hidden"
         >
-          {/* Mode Tabs (Edit / Preview) */}
-          <div className="flex gap-2 mb-4">
-            <button
-              type="button"
-              onClick={() => setShowPreview(false)}
-              className={`px-4 py-2 rounded-full text-sm font-medium ${!showPreview ? "bg-indigo-600 text-white" : themeMode === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-200 text-gray-700'}`}
-            >
-              Edit
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowPreview(true)}
-              className={`px-4 py-2 rounded-full text-sm font-medium ${showPreview ? "bg-indigo-600 text-white" : themeMode === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-200 text-gray-700'}`}
-            >
-              Preview
-            </button>
+          {/* Tab Header */}
+          <div className="border-b border-gray-200 dark:border-gray-700">
+            <div className="flex">
+              <button
+                onClick={() => setActiveTab("edit")}
+                className={clsx(
+                  "flex-1 py-4 px-6 text-lg font-semibold transition-all",
+                  activeTab === "edit"
+                    ? "text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                )}
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => setActiveTab("preview")}
+                className={clsx(
+                  "flex-1 py-4 px-6 text-lg font-semibold transition-all",
+                  activeTab === "preview"
+                    ? "text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                )}
+              >
+                Preview
+              </button>
+            </div>
           </div>
 
-          {showPreview ? (
-            // Preview mode: show BlogPreview component
-            <div>
-              {/* Lazy render preview to avoid SSR issues; import below */}
-              <div className="pt-4">
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">Preview (client-side)</div>
-                <div className="space-y-4">
-                  <BlogPreview blog={formData} author={user} />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Title */}
-              <div className="space-y-2">
-                <label htmlFor="title" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Article Title *
-                </label>
-                <input
-                  ref={titleRef}
-                  type="text"
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-300 ${
-                    errors.title ? "border-red-500 focus:ring-red-500/20" : "border-gray-200 dark:border-gray-700"
-                  }`}
-                  placeholder="Enter an engaging title for your article..."
-                />
-                {errors.title && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <span className="text-red-500">⚠</span> {errors.title}
-                  </p>
-                )}
-              </div>
+          {/* Edit Tab */}
+          {activeTab === "edit" && (
+            <div className="p-6 sm:p-8 lg:p-12 2xl:p-16">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-8">
+                Create New Blog Post
+              </h1>
 
-              {/* Category */}
-              <div className="space-y-2">
-                <label htmlFor="category" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Category *
-                </label>
-                <select
-                  id="category"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-300 ${
-                    errors.category ? "border-red-500 focus:ring-red-500/20" : "border-gray-200 dark:border-gray-700"
-                  }`}
-                >
-                  <option value="">Choose a category</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-                {errors.category && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <span className="text-red-500">⚠</span> {errors.category}
-                  </p>
-                )}
-              </div>
-
-              {/* Tags */}
-              <div className="space-y-3">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Tags *
-                </label>
-                <div className="flex flex-wrap gap-2 mb-3 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-xl border-2 border-dashed border-indigo-200 dark:border-gray-600">
-                  {formData.tags.map(tag => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-sm rounded-full shadow-md"
-                    >
-                      #{tag}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(tag)}
-                        className="hover:text-red-300 transition-colors"
-                      >
-                        <X size={14} />
-                      </button>
-                    </span>
-                  ))}
+              {errors.submit && (
+                <div className="mb-8 p-4 bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 rounded-xl">
+                  {errors.submit}
                 </div>
-                <div className="flex gap-3">
+              )}
+
+              <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Title *
+                  </label>
                   <input
                     type="text"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className="flex-1 px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-gray-800 dark:text-white transition-all duration-300"
-                    placeholder="Add relevant tags..."
-                  />
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    type="button"
-                    onClick={handleAddTag}
-                    className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
-                  >
-                    <Tag size={18} />
-                  </motion.button>
-                </div>
-                {errors.tags && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <span className="text-red-500">⚠</span> {errors.tags}
-                  </p>
-                )}
-              </div>
-
-              {/* Excerpt */}
-              <div>
-                <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Excerpt (Optional)
-                </label>
-                <textarea
-                  id="excerpt"
-                  name="excerpt"
-                  value={formData.excerpt}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-white"
-                  placeholder="Brief summary of your blog post..."
-                />
-              </div>
-
-              {/* Featured Image URL */}
-              <div>
-                <label htmlFor="featuredImage" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Featured Image URL (Optional)
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    id="featuredImage"
-                    name="featuredImage"
-                    value={formData.featuredImage}
+                    name="title"
+                    value={formData.title}
                     onChange={handleInputChange}
-                    className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-white"
-                    placeholder="https://example.com/image.jpg"
+                    className={`w-full px-5 py-4 rounded-xl border text-lg ${
+                      errors.title ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    } bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900 dark:text-white`}
+                    placeholder="Enter your blog post title..."
                   />
+                  {errors.title && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.title}</p>}
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Category *
+                  </label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    className={`w-full px-5 py-4 rounded-xl border text-lg ${
+                      errors.category ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    } bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900 dark:text-white`}
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                  {errors.category && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.category}</p>}
+                </div>
+
+                {/* Tags */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Tags *
+                  </label>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {formData.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 text-indigo-800 dark:text-indigo-200 text-sm font-medium rounded-full"
+                      >
+                        #{tag}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(tag)}
+                          className="hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                        >
+                          <X size={14} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      className="flex-1 px-5 py-4 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900 dark:text-white"
+                      placeholder="Add a tag..."
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddTag}
+                      className="px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl shadow-md hover:shadow-lg transition-all"
+                    >
+                      <Tag size={20} />
+                    </button>
+                  </div>
+                  {errors.tags && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.tags}</p>}
+                </div>
+
+                {/* Excerpt */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Excerpt (Optional)
+                  </label>
+                  <textarea
+                    name="excerpt"
+                    value={formData.excerpt}
+                    onChange={handleInputChange}
+                    rows={3}
+                    className="w-full px-5 py-4 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900 dark:text-white resize-none"
+                    placeholder="Brief summary of your blog post..."
+                  />
+                </div>
+
+                {/* Featured Image */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Featured Image URL (Optional)
+                  </label>
+                  <div className="flex gap-3">
+                    <input
+                      type="url"
+                      name="featuredImage"
+                      value={formData.featuredImage}
+                      onChange={handleInputChange}
+                      className="flex-1 px-5 py-4 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900 dark:text-white"
+                      placeholder="https://example.com/image.jpg"
+                    />
+                    <button
+                      type="button"
+                      className="px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl shadow-md hover:shadow-lg transition-all"
+                    >
+                      <Image size={20} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Content *
+                  </label>
+                  <textarea
+                    name="content"
+                    value={formData.content}
+                    onChange={handleInputChange}
+                    rows={22}
+                    className={`w-full px-5 py-5 rounded-xl border font-mono text-base leading-relaxed ${
+                      errors.content ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    } bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900 dark:text-white resize-none`}
+                    placeholder="Write your blog post in Markdown..."
+                  />
+                  {errors.content && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.content}</p>}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-gray-200 dark:border-gray-700">
                   <button
                     type="button"
-                    className="px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    onClick={handleSaveDraft}
+                    disabled={isSavingDraft}
+                    className={clsx(
+                      "flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition-all min-w-[180px]",
+                      "bg-gradient-to-r from-gray-600 to-gray-700 text-white hover:shadow-xl",
+                      isSavingDraft && "opacity-70 cursor-not-allowed"
+                    )}
                   >
-                    <Image size={18} />
+                    {isSavingDraft ? <Loader2 className="animate-spin" size={22} /> : <Save size={22} />}
+                    <span>Save Draft</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handlePublish}
+                    disabled={isPublishing}
+                    className={clsx(
+                      "flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition-all min-w-[180px]",
+                      "bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:shadow-xl",
+                      isPublishing && "opacity-70 cursor-not-allowed"
+                    )}
+                  >
+                    {isPublishing ? <Loader2 className="animate-spin" size={22} /> : "Publish"}
                   </button>
                 </div>
-              </div>
-
-              {/* Content */}
-              <div>
-                <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Content *
-                </label>
-                <textarea
-                  ref={contentRef}
-                  id="content"
-                  name="content"
-                  value={formData.content}
-                  onChange={handleInputChange}
-                  rows={20}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white font-mono text-sm ${
-                    errors.content ? "border-red-500" : "border-gray-300"
-                  }`}
-                  placeholder="Write your blog post content here... (HTML supported)"
-                />
-                {errors.content && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.content}</p>
-                )}
-              </div>
-            </>
+              </form>
+            </div>
           )}
 
-          {/* Submit Buttons */}
-          <div className="flex justify-end gap-4 pt-8 border-t border-gray-200 dark:border-gray-700">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                type="button"
-                onClick={() => navigate(-1)}
-                variant="secondary"
-                className="px-8 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-300 font-medium"
-              >
-                Cancel
-              </Button>
-            </motion.div>
-
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                type="button"
-                onClick={handleSaveDraft}
-                disabled={loading}
-                className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
-              >
-                {loading ? <Loader size="sm" /> : "Save Draft"}
-              </Button>
-            </motion.div>
-
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
-              >
-                {loading ? <Loader size="sm" /> : "Publish Article"}
-              </Button>
-            </motion.div>
-          </div>
-        </motion.form>
-      </div>
+          {/* Preview Tab */}
+          {activeTab === "preview" && (
+            <div className="p-0">
+              <BlogDetail overrideBlog={formData} isPreviewMode={true} />
+            </div>
+          )}
+        </motion.div>
+      </article>
     </motion.div>
   );
 };
