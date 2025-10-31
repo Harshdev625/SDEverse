@@ -17,6 +17,7 @@ const initialState = {
   blogs: [],
   currentBlog: null,
   myBlogs: [],
+  drafts: [],
   categories: [],
   popularTags: [],
   loading: false,
@@ -191,6 +192,51 @@ export const fetchPopularTags = createAsyncThunk(
   }
 );
 
+export const getDraftBlogs = createAsyncThunk(
+  "blog/getDraftBlogs",
+  async (params, { rejectWithValue }) => {
+    try {
+      const { getDraftBlogs } = await import("./blogAPI");
+      const data = await getDraftBlogs(params);
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to load drafts"
+      );
+    }
+  }
+);
+
+export const publishBlog = createAsyncThunk(
+  "blog/publishBlog",
+  async (slug, { rejectWithValue }) => {
+    try {
+      const { publishBlog } = await import("./blogAPI");
+      const data = await publishBlog(slug);
+      return { slug, blog: data };
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to publish"
+      );
+    }
+  }
+);
+
+export const rejectBlog = createAsyncThunk(
+  "blog/rejectBlog",
+  async (slug, { rejectWithValue }) => {
+    try {
+      const { rejectBlog } = await import("./blogAPI");
+      await rejectBlog(slug);
+      return slug;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to reject"
+      );
+    }
+  }
+);
+
 const blogSlice = createSlice({
   name: "blog",
   initialState,
@@ -354,6 +400,50 @@ const blogSlice = createSlice({
 
       .addCase(fetchPopularTags.fulfilled, (state, action) => {
         state.popularTags = action.payload;
+      })
+
+      .addCase(getDraftBlogs.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getDraftBlogs.fulfilled, (state, action) => {
+        state.loading = false;
+        state.drafts = action.payload.drafts || [];
+        state.pagination = {
+          currentPage: action.payload.pagination.currentPage,
+          totalPages: action.payload.pagination.totalPages,
+          totalDrafts: action.payload.pagination.totalDrafts,
+          hasNext: action.payload.pagination.hasNext,
+          hasPrev: action.payload.pagination.hasPrev,
+        };
+      })
+      .addCase(getDraftBlogs.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(publishBlog.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(publishBlog.fulfilled, (state, action) => {
+        state.loading = false;
+        state.drafts = state.drafts.filter((b) => b.slug !== action.payload.slug);
+      })
+      .addCase(publishBlog.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(rejectBlog.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(rejectBlog.fulfilled, (state, action) => {
+        state.loading = false;
+        state.drafts = state.drafts.filter((b) => b.slug !== action.payload);
+      })
+      .addCase(rejectBlog.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

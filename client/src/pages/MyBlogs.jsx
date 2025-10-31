@@ -1,7 +1,8 @@
+/* src/pages/MyBlogs.jsx */
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMyBlogs } from "../features/blog/blogSlice";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Calendar, Search, X } from "lucide-react";
 import Loader from "../components/Loader";
@@ -9,6 +10,7 @@ import Pagination from "./Pagination";
 
 export default function MyBlogs() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { mode } = useSelector((s) => s.theme);
   const { user } = useSelector((s) => s.auth);
   const { myBlogs = [], loading, error } = useSelector((s) => s.blog);
@@ -24,11 +26,9 @@ export default function MyBlogs() {
     if (isLoggedIn) dispatch(fetchMyBlogs());
   }, [dispatch, isLoggedIn]);
 
-  // FIXED: Correct filtering + tag search
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return myBlogs.filter((b) => {
-      // Status Filter
       if (filterStatus !== "all") {
         if (filterStatus === "draft" && b.status !== "draft") return false;
         if (filterStatus === "pending" && b.reviewStatus !== "pending") return false;
@@ -36,8 +36,6 @@ export default function MyBlogs() {
           if (b.status !== "published" || b.reviewStatus !== "approved") return false;
         }
       }
-
-      // Search Filter
       if (!q) return true;
       return (
         (b.title || "").toLowerCase().includes(q) ||
@@ -65,6 +63,11 @@ export default function MyBlogs() {
     setCurrentPage(1);
   };
 
+  const handleEditClick = (e, slug) => {
+    e.stopPropagation();
+    navigate(`/edit/${slug}`);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -85,7 +88,6 @@ export default function MyBlogs() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* HERO */}
         <header className="text-center mb-10 pb-20">
           <motion.div
             initial={{ y: 30, opacity: 0 }}
@@ -99,18 +101,15 @@ export default function MyBlogs() {
                 My Posts
               </span>
             </div>
-
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent leading-normal">
               Manage your content
             </h1>
-
             <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
               Drafts, pending reviews, and published articles – all in one place.
             </p>
           </motion.div>
         </header>
 
-        {/* FILTER BAR */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -154,7 +153,6 @@ export default function MyBlogs() {
                   Create Post
                 </button>
               </Link>
-
               <Link to="/blogs">
                 <button className="px-6 py-3 rounded-xl border-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-500 font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all">
                   Explore Blogs
@@ -164,7 +162,6 @@ export default function MyBlogs() {
           </form>
         </motion.div>
 
-        {/* GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {error && (
             <div className="col-span-full text-center py-8 text-red-600 dark:text-red-400">{error}</div>
@@ -232,7 +229,6 @@ export default function MyBlogs() {
                       {b.excerpt}
                     </p>
 
-                    {/* FIXED: Accurate Status Badges */}
                     <div className="flex justify-end">
                       {b.status === "draft" && (
                         <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
@@ -258,16 +254,17 @@ export default function MyBlogs() {
 
                     <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                       <div className="flex gap-3 text-sm">
-                        {/* FIXED: Correct Edit Link */}
-                        <Link
-                          to={`/edit/${b.slug}`}
-                          className="text-indigo-600 hover:underline"
-                          onClick={(e) => e.stopPropagation()}
+                        {/* EDIT: Use button + navigate */}
+                        <button
+                          onClick={(e) => handleEditClick(e, b.slug)}
+                          className="text-indigo-600 hover:underline focus:outline-none"
                         >
                           Edit
-                        </Link>
+                        </button>
+
+                        {/* VIEW: Keep as Link */}
                         <Link
-                          to={`/blogs/${b.slug}`}
+                          to={`/blogs/${b.slug}/edit`}
                           className="text-gray-600 dark:text-gray-300 hover:underline"
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -286,7 +283,6 @@ export default function MyBlogs() {
           )}
         </div>
 
-        {/* PAGINATION */}
         {totalPages > 1 && (
           <div className="mt-12">
             <Pagination

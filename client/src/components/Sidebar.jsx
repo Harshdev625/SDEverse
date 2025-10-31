@@ -21,7 +21,8 @@ import {
   UserCircle,
   Database,
   Contact,
-  BookOpen
+  BookOpen,
+  FileText,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleTheme } from "../features/theme/themeSlice";
@@ -35,8 +36,7 @@ const Sidebar = () => {
   const { token, user } = useSelector((state) => state.auth);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
-  const [showReviewProposalsOptions, setShowReviewProposalsOptions] =
-    useState(false);
+  const [showReviewProposalsOptions, setShowReviewProposalsOptions] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -50,28 +50,19 @@ const Sidebar = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const isReviewPath =
+    location.pathname.startsWith("/admin/proposals/review") ||
+    location.pathname.startsWith("/admin/data-structures/proposals/review") ||
+    location.pathname.startsWith("/admin/blogs/review");
+
   useEffect(() => {
-    if (
-      location.pathname.startsWith("/admin/proposals/review") ||
-      location.pathname.startsWith("/admin/data-structures/proposals/review")
-    ) {
-      setShowReviewProposalsOptions(true);
-    } else {
-      if (
-        !location.pathname.startsWith("/admin/proposals/review") &&
-        !location.pathname.startsWith("/admin/data-structures/proposals/review")
-      ) {
-        setShowReviewProposalsOptions(false);
-      }
-    }
-  }, [location.pathname]);
+    setShowReviewProposalsOptions(isReviewPath);
+  }, [isReviewPath]);
 
   const handleSidebarToggle = () => setIsSidebarOpen((prev) => !prev);
   const handleOverlayClick = () => setIsSidebarOpen(false);
   const handleLinkClick = () => {
-    if (!isDesktop) {
-      setIsSidebarOpen(false);
-    }
+    if (!isDesktop) setIsSidebarOpen(false);
   };
   const navigate = useNavigate();
   const handleLogout = () => {
@@ -81,6 +72,12 @@ const Sidebar = () => {
   };
 
   const colorSchemes = {
+    reviewBlogs: {
+      bg: "bg-red-50/80 dark:bg-red-900/30",
+      hover: "hover:bg-red-100 dark:hover:bg-red-900/40",
+      active: "bg-gradient-to-r from-red-500 to-pink-600",
+      border: "border-l-red-500",
+    },
     home: {
       bg: "bg-blue-50/80 dark:bg-blue-900/30",
       hover: "hover:bg-blue-100 dark:hover:bg-blue-900/40",
@@ -135,7 +132,6 @@ const Sidebar = () => {
       active: "bg-gradient-to-r from-cyan-500 to-teal-600",
       border: "border-l-cyan-500",
     },
-
     reviewProposalsParent: {
       bg: "bg-orange-50/80 dark:bg-orange-900/30",
       hover: "hover:bg-orange-100 dark:hover:bg-orange-900/40",
@@ -211,11 +207,11 @@ const Sidebar = () => {
 
   const isProposalsReviewParentActive =
     location.pathname.startsWith("/admin/proposals/review") ||
-    location.pathname.startsWith("/admin/data-structures/proposals/review");
+    location.pathname.startsWith("/admin/data-structures/proposals/review") ||
+    location.pathname.startsWith("/admin/blogs/review");
 
   return (
     <>
-      {/* Toggle Button */}
       <button
         onClick={handleSidebarToggle}
         className="fixed z-40 p-3 ml-4 mt-4 rounded-full bg-white dark:bg-gray-800 shadow-lg md:hidden transition-all hover:scale-105 backdrop-blur-sm"
@@ -236,7 +232,6 @@ const Sidebar = () => {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 h-full w-70 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-r border-gray-200 dark:border-gray-800 shadow-xl z-40 transform transition-all duration-300 ease-in-out
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
@@ -244,7 +239,6 @@ const Sidebar = () => {
         aria-label="Sidebar Navigation"
       >
         <div className="flex flex-col h-full p-5 overflow-hidden">
-          {/* Header */}
           <div className="pb-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-2 rounded-xl">
@@ -262,9 +256,7 @@ const Sidebar = () => {
             </button>
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 overflow-y-auto py-6 space-y-2 scroll">
-            {/* Always visible links */}
             <NavLink
               to="/"
               end
@@ -302,17 +294,13 @@ const Sidebar = () => {
 
             <NavLink
               to="/blogs"
-              className={({ isActive }) =>
-                getNavItemClass("blogs", isActive)
-              }
+              className={({ isActive }) => getNavItemClass("blogs", isActive)}
               onClick={handleLinkClick}
             >
               <BookOpen size={20} className="min-w-[20px]" />
               <span className="truncate">Blogs</span>
               <ChevronRight className="ml-auto opacity-70" size={16} />
             </NavLink>
-
-            {/* Profile Link - Always at the top */}
             {token && (
               <NavLink
                 to={`/profile/${user.username}`}
@@ -327,12 +315,12 @@ const Sidebar = () => {
               </NavLink>
             )}
 
-            {/* Admin Section */}
             {token && user?.role === "admin" && (
               <>
                 <div className="px-4 pt-4 pb-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Admin Panel
                 </div>
+
                 <NavLink
                   to="/admin/manage-users"
                   className={({ isActive }) =>
@@ -344,6 +332,7 @@ const Sidebar = () => {
                   <span className="truncate">Manage Users</span>
                   <ChevronRight className="ml-auto opacity-70" size={16} />
                 </NavLink>
+
                 <NavLink
                   to="/admin/manage-algorithms"
                   className={({ isActive }) =>
@@ -355,6 +344,7 @@ const Sidebar = () => {
                   <span className="truncate">Manage Algorithms</span>
                   <ChevronRight className="ml-auto opacity-70" size={16} />
                 </NavLink>
+
                 <NavLink
                   to="/admin/manage-data-structures"
                   className={({ isActive }) =>
@@ -366,6 +356,7 @@ const Sidebar = () => {
                   <span className="truncate">Manage Data Structures</span>
                   <ChevronRight className="ml-auto opacity-70" size={16} />
                 </NavLink>
+
                 <NavLink
                   to="/admin/manage-users-contacts"
                   className={({ isActive }) =>
@@ -378,7 +369,6 @@ const Sidebar = () => {
                   <ChevronRight className="ml-auto opacity-70" size={16} />
                 </NavLink>
 
-                {/* Toggleable "Review Proposals" Section Header */}
                 <div
                   className={`
                     rounded-xl transition-all duration-300
@@ -409,7 +399,6 @@ const Sidebar = () => {
                   </button>
                 </div>
 
-                {/* Conditionally rendered inline links */}
                 {showReviewProposalsOptions && (
                   <>
                     <NavLink
@@ -429,6 +418,7 @@ const Sidebar = () => {
                       />
                       <span className="truncate">Algorithm Proposals</span>
                     </NavLink>
+
                     <NavLink
                       to="/admin/data-structures/proposals/review"
                       className={({ isActive }) =>
@@ -445,6 +435,21 @@ const Sidebar = () => {
                         className="min-w-[16px] opacity-70"
                       />
                       <span className="truncate">Data Structure Proposals</span>
+                    </NavLink>
+
+                    <NavLink
+                      to="/admin/blogs/review"
+                      className={({ isActive }) =>
+                        getNavItemClass("reviewBlogs", isActive, true)
+                      }
+                      onClick={handleLinkClick}
+                    >
+                      <ChevronRight
+                        size={16}
+                        className="min-w-[16px] opacity-70"
+                      />
+                      <FileText size={16} className="min-w-[16px]" />
+                      <span className="truncate">Blog Review</span>
                     </NavLink>
                   </>
                 )}
@@ -463,7 +468,6 @@ const Sidebar = () => {
               </>
             )}
 
-            {/* User Section */}
             {token && user?.role !== "admin" && (
               <>
                 <div className="px-4 pt-4 pb-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -519,7 +523,6 @@ const Sidebar = () => {
               </>
             )}
 
-            {/* Guest Section */}
             {!token && (
               <>
                 <div className="px-4 pt-4 pb-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -551,7 +554,6 @@ const Sidebar = () => {
             )}
           </nav>
 
-          {/* Footer */}
           <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-3 flex-shrink-0">
             <button
               onClick={() => dispatch(toggleTheme())}

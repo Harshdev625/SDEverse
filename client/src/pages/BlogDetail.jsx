@@ -88,6 +88,71 @@ const CodeBlock = ({ node, inline, className, children, ...props }) => {
   );
 };
 
+const Heading = ({ level, children }) => {
+  const Tag = `h${level}`;
+  const base = "font-bold text-gray-900 dark:text-gray-100 mt-8 mb-4";
+  const sizes = {
+    1: "text-4xl sm:text-5xl md:text-6xl",
+    2: "text-3xl sm:text-4xl",
+    3: "text-2xl sm:text-3xl",
+    4: "text-xl sm:text-2xl",
+    5: "text-lg sm:text-xl",
+    6: "text-base sm:text-lg",
+  };
+  return <Tag className={clsx(base, sizes[level])}>{children}</Tag>;
+};
+
+const Paragraph = ({ children }) => (
+  <p className="my-4 text-base leading-relaxed text-gray-700 dark:text-gray-300">{children}</p>
+);
+
+const List = ({ ordered, children }) => {
+  const Tag = ordered ? "ol" : "ul";
+  return (
+    <Tag className={clsx("my-4 space-y-2", ordered ? "list-decimal pl-6" : "list-disc pl-6")}>
+      {children}
+    </Tag>
+  );
+};
+
+const ListItem = ({ children }) => (
+  <li className="text-gray-700 dark:text-gray-300">{children}</li>
+);
+
+const Blockquote = ({ children }) => (
+  <blockquote className="my-6 border-l-4 border-indigo-500 pl-4 italic text-gray-600 dark:text-gray-400">
+    {children}
+  </blockquote>
+);
+
+const Table = ({ children }) => (
+  <div className="my-6 overflow-x-auto">
+    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">{children}</table>
+  </div>
+);
+
+const TableHead = ({ children }) => (
+  <thead className="bg-gray-50 dark:bg-gray-800">
+    <tr>{children}</tr>
+  </thead>
+);
+
+const TableBody = ({ children }) => (
+  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">{children}</tbody>
+);
+
+const TableRow = ({ children }) => <tr>{children}</tr>;
+
+const TableCell = ({ children }) => (
+  <td className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">{children}</td>
+);
+
+const TableHeaderCell = ({ children }) => (
+  <th className="px-3 py-2 text-left text-sm font-medium text-gray-900 dark:text-gray-100">
+    {children}
+  </th>
+);
+
 const BlogDetail = ({ overrideBlog, isPreviewMode = false }) => {
   const { slug } = useParams();
   const dispatch = useDispatch();
@@ -101,10 +166,8 @@ const BlogDetail = ({ overrideBlog, isPreviewMode = false }) => {
   const { user } = useSelector((state) => state.auth);
   const isDark = useDarkMode();
 
-  // Use overrideBlog (preview) OR Redux blog
   const blog = overrideBlog || reduxBlog;
 
-  // Fetch only when NOT in preview
   useEffect(() => {
     if (!isPreviewMode && slug) {
       dispatch(fetchBlogBySlug(slug));
@@ -180,7 +243,6 @@ const BlogDetail = ({ overrideBlog, isPreviewMode = false }) => {
           : "bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50"
       }`}
     >
-      {/* Back button – hidden in preview */}
       {!isPreviewMode && (
         <button
           onClick={() => navigate(-1)}
@@ -192,7 +254,6 @@ const BlogDetail = ({ overrideBlog, isPreviewMode = false }) => {
       )}
 
       <article className="max-w-5xl lg:max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
-        {/* Header Card */}
         <motion.div
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -242,7 +303,6 @@ const BlogDetail = ({ overrideBlog, isPreviewMode = false }) => {
           </div>
         </motion.div>
 
-        {/* Content Card */}
         <motion.div
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -257,35 +317,35 @@ const BlogDetail = ({ overrideBlog, isPreviewMode = false }) => {
             />
           )}
 
-          <div
-            className={clsx(
-              "prose prose-lg max-w-none",
-              "dark:prose-invert",
-              "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
-              "prose-a:text-blue-600 dark:prose-a:text-blue-400",
-              "prose-blockquote:border-l-blue-500",
-              "prose-pre:p-0 prose-pre:my-6",
-              "prose-table:block prose-table:overflow-x-auto",
-              "prose-th:bg-gray-100 dark:prose-th:bg-gray-800 prose-th:border prose-th:px-3 prose-th:py-2",
-              "prose-td:border prose-td:px-3 prose-td:py-2"
-            )}
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm, remarkMath]}
+            rehypePlugins={[rehypeKatex]}
+            components={{
+              code: CodeBlock,
+              h1: ({ children }) => <Heading level={1}>{children}</Heading>,
+              h2: ({ children }) => <Heading level={2}>{children}</Heading>,
+              h3: ({ children }) => <Heading level={3}>{children}</Heading>,
+              h4: ({ children }) => <Heading level={4}>{children}</Heading>,
+              h5: ({ children }) => <Heading level={5}>{children}</Heading>,
+              h6: ({ children }) => <Heading level={6}>{children}</Heading>,
+              p: Paragraph,
+              ul: ({ children }) => <List ordered={false}>{children}</List>,
+              ol: ({ children }) => <List ordered>{children}</List>,
+              li: ListItem,
+              blockquote: Blockquote,
+              table: Table,
+              thead: TableHead,
+              tbody: TableBody,
+              tr: TableRow,
+              td: TableCell,
+              th: TableHeaderCell,
+              hr: () => <hr className="my-12 border-t border-gray-200 dark:border-gray-700" />,
+            }}
           >
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm, remarkMath]}
-              rehypePlugins={[rehypeKatex]}
-              components={{
-                code: CodeBlock,
-                hr: () => (
-                  <hr className="my-12 border-t border-gray-200 dark:border-gray-700" />
-                ),
-              }}
-            >
-              {blog.content}
-            </ReactMarkdown>
-          </div>
+            {blog.content}
+          </ReactMarkdown>
         </motion.div>
 
-        {/* Action Buttons – hidden in preview */}
         {!isPreviewMode && (
           <motion.div
             initial={{ y: 30, opacity: 0 }}
@@ -318,7 +378,6 @@ const BlogDetail = ({ overrideBlog, isPreviewMode = false }) => {
           </motion.div>
         )}
 
-        {/* Comments – hidden in preview */}
         {!isPreviewMode && (
           <motion.div
             initial={{ y: 30, opacity: 0 }}

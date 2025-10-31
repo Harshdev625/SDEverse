@@ -100,9 +100,9 @@ export const getDraftBlogs = async (params = {}) => {
   }
 };
 
-export const publishDraft = async (slug) => {
+export const publishBlog = async (slug) => {
   try {
-    const response = await api.put(`/blogs/admin/${slug}/publish`, {});
+    const response = await api.put(`/blogs/admin/${slug}/publish`);
     return response.data;
   } catch (error) {
     console.error(`Error publishing draft ${slug}:`, error);
@@ -110,7 +110,7 @@ export const publishDraft = async (slug) => {
   }
 };
 
-export const rejectDraft = async (slug) => {
+export const rejectBlog = async (slug) => {
   try {
     const response = await api.delete(`/blogs/admin/${slug}/reject`);
     return response.data;
