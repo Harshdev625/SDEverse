@@ -1,6 +1,5 @@
 import api from "../../utils/api";
 
-// User search for mentions
 export const searchUsers = async (query) => {
   try {
     const response = await api.get(`/users/search?query=${encodeURIComponent(query)}`);
@@ -11,7 +10,6 @@ export const searchUsers = async (query) => {
   }
 };
 
-// Admin functions
 export const fetchAllUsers = async (token, params = {}) => {
   try {
     const response = await api.get("/users", {
@@ -83,7 +81,6 @@ export const fetchAdminAnalytics = async (token) => {
   }
 };
 
-// Profile functions
 export const fetchMyProfile = async (token) => {
   try {
     const response = await api.get("/users/me", {
@@ -101,14 +98,13 @@ export const updateMyProfile = async (profileData, token) => {
     const response = await api.patch("/users/me", profileData, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data.user;
+    return response.data.user;  // backend returns { message, user }
   } catch (error) {
     console.error("Error updating my profile:", error);
     throw error;
   }
 };
 
-// Stats update functions
 export const updateSocialProfiles = async (token) => {
   try {
     const response = await api.get("/users/update-social-stats", {

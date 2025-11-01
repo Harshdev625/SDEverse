@@ -6,7 +6,7 @@ export default function ProfileSection({
   isEditing,
   formData,
   handleChange,
-  imageData,
+  imageData = {},
   urlErrors = {},
 }) {
   const {
