@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as problemSheetAPI from './problemSheetAPI';
 
-// Async thunks
+// Async thunks for fetching data
 export const fetchAllSheets = createAsyncThunk(
   'problemSheets/fetchAll',
   async (_, { rejectWithValue }) => {
@@ -13,36 +13,47 @@ export const fetchAllSheets = createAsyncThunk(
   }
 );
 
-export const createSheet = createAsyncThunk(
-  'problemSheets/create',
-  async (sheetData, { rejectWithValue }) => {
+export const fetchSheetById = createAsyncThunk(
+  'problemSheets/fetchSheetById',
+  async (sheetId, { rejectWithValue }) => {
     try {
-      return await problemSheetAPI.createProblemSheet(sheetData);
+      return await problemSheetAPI.getSheetById(sheetId);
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to create sheet');
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch sheet');
     }
   }
 );
 
-export const updateSheet = createAsyncThunk(
-  'problemSheets/update',
-  async ({ slug, sheetData }, { rejectWithValue }) => {
+export const fetchSheetProblems = createAsyncThunk(
+  'problemSheets/fetchSheetProblems',
+  async ({ sheetId, params }, { rejectWithValue }) => {
     try {
-      return await problemSheetAPI.updateProblemSheet(slug, sheetData);
+      const res = await problemSheetAPI.getSheetProblems(sheetId, params);
+      return res;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to update sheet');
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch problems');
     }
   }
 );
 
-export const deleteSheet = createAsyncThunk(
-  'problemSheets/delete',
-  async (slug, { rejectWithValue }) => {
+export const fetchSheetMetrics = createAsyncThunk(
+  'problemSheets/fetchSheetMetrics',
+  async ({ sheetId, params }, { rejectWithValue }) => {
     try {
-      await problemSheetAPI.deleteProblemSheet(slug);
-      return slug;
+      return await problemSheetAPI.getSheetMetrics(sheetId, params);
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to delete sheet');
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch metrics');
+    }
+  }
+);
+
+export const toggleProblemComplete = createAsyncThunk(
+  'problemSheets/toggleProblemComplete',
+  async ({ problemId, completed }, { rejectWithValue }) => {
+    try {
+      return await problemSheetAPI.markProblemComplete(problemId, completed);
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to update problem');
     }
   }
 );
@@ -82,13 +93,53 @@ export const deleteProblem = createAsyncThunk(
   }
 );
 
+// Sheet management thunks
+export const createSheet = createAsyncThunk(
+  'problemSheets/create',
+  async (sheetData, { rejectWithValue }) => {
+    try {
+      return await problemSheetAPI.createProblemSheet(sheetData);
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to create sheet');
+    }
+  }
+);
+
+export const updateSheet = createAsyncThunk(
+  'problemSheets/update',
+  async ({ slug, sheetData }, { rejectWithValue }) => {
+    try {
+      return await problemSheetAPI.updateProblemSheet(slug, sheetData);
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to update sheet');
+    }
+  }
+);
+
+export const deleteSheet = createAsyncThunk(
+  'problemSheets/delete',
+  async (slug, { rejectWithValue }) => {
+    try {
+      await problemSheetAPI.deleteProblemSheet(slug);
+      return slug;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to delete sheet');
+    }
+  }
+);
+
 const problemSheetSlice = createSlice({
   name: 'problemSheets',
   initialState: {
     sheets: [],
     currentSheet: null,
     problems: [],
+    metrics: null,
+    pagination: null,
     loading: false,
+    sheetLoading: false,
+    problemsLoading: false,
+    metricsLoading: false,
     error: null,
   },
   reducers: {
@@ -97,6 +148,15 @@ const problemSheetSlice = createSlice({
     },
     setCurrentSheet: (state, action) => {
       state.currentSheet = action.payload;
+    },
+    setProblems: (state, action) => {
+      state.problems = action.payload;
+    },
+    clearCurrentSheet: (state) => {
+      state.currentSheet = null;
+      state.problems = [];
+      state.metrics = null;
+      state.pagination = null;
     },
   },
   extraReducers: (builder) => {
@@ -112,6 +172,60 @@ const problemSheetSlice = createSlice({
       })
       .addCase(fetchAllSheets.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch sheet by ID
+      .addCase(fetchSheetById.pending, (state) => {
+        state.sheetLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchSheetById.fulfilled, (state, action) => {
+        state.sheetLoading = false;
+        state.currentSheet = action.payload;
+      })
+      .addCase(fetchSheetById.rejected, (state, action) => {
+        state.sheetLoading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch sheet problems
+      .addCase(fetchSheetProblems.pending, (state) => {
+        state.problemsLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchSheetProblems.fulfilled, (state, action) => {
+        state.problemsLoading = false;
+        state.problems = action.payload.problems || [];
+        state.pagination = action.payload.pagination || null;
+      })
+      .addCase(fetchSheetProblems.rejected, (state, action) => {
+        state.problemsLoading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch sheet metrics
+      .addCase(fetchSheetMetrics.pending, (state) => {
+        state.metricsLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchSheetMetrics.fulfilled, (state, action) => {
+        state.metricsLoading = false;
+        state.metrics = action.payload;
+      })
+      .addCase(fetchSheetMetrics.rejected, (state, action) => {
+        state.metricsLoading = false;
+        state.error = action.payload;
+      })
+
+      // Toggle problem complete
+      .addCase(toggleProblemComplete.fulfilled, (state, action) => {
+        const problem = state.problems.find(p => p._id === action.payload._id);
+        if (problem) {
+          problem.completed = action.payload.completed;
+        }
+      })
+      .addCase(toggleProblemComplete.rejected, (state, action) => {
         state.error = action.payload;
       })
 
@@ -160,21 +274,52 @@ const problemSheetSlice = createSlice({
         state.error = action.payload;
       })
 
-      // Problems management
+      // Create problem
+      .addCase(createProblem.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(createProblem.fulfilled, (state, action) => {
+        state.loading = false;
         state.problems.push(action.payload);
       })
+      .addCase(createProblem.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Update problem
+      .addCase(updateProblem.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(updateProblem.fulfilled, (state, action) => {
+        state.loading = false;
         const index = state.problems.findIndex(prob => prob._id === action.payload._id);
         if (index !== -1) {
           state.problems[index] = action.payload;
         }
       })
+      .addCase(updateProblem.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Delete problem
+      .addCase(deleteProblem.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(deleteProblem.fulfilled, (state, action) => {
+        state.loading = false;
         state.problems = state.problems.filter(prob => prob._id !== action.payload);
+      })
+      .addCase(deleteProblem.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { clearError, setCurrentSheet } = problemSheetSlice.actions;
+export const { clearError, setCurrentSheet, setProblems, clearCurrentSheet } = problemSheetSlice.actions;
 export default problemSheetSlice.reducer;

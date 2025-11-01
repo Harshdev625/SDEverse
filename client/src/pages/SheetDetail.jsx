@@ -7,7 +7,7 @@ import {
   fetchSheetMetrics,
   toggleProblemComplete,
   clearCurrentSheet,
-} from "../features/problemSheet/ProblemSheetSlice.js";
+} from "../features/problemSheet/problemSheetSlice.js";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -26,7 +26,7 @@ const SheetDetail = () => {
   const { sheetId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
 
   const {
     currentSheet,
@@ -37,7 +37,7 @@ const SheetDetail = () => {
     problemsLoading,
     metricsLoading,
     error,
-  } = useSelector((state) => state.problemSheet);
+  } = useSelector((state) => state.problemSheets);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [difficulty, setDifficulty] = useState("all");
@@ -49,7 +49,7 @@ const SheetDetail = () => {
     return () => dispatch(clearCurrentSheet());
   }, [sheetId, dispatch]);
 
-  // Fetch problems and metrics
+  // Fetch problems and metrics (only if authenticated)
   useEffect(() => {
     if (!currentSheet) return;
 
@@ -59,14 +59,20 @@ const SheetDetail = () => {
       difficulty: difficulty !== "all" ? difficulty : undefined,
     };
 
-    dispatch(fetchSheetProblems({ sheetId, params }));
-    dispatch(
-      fetchSheetMetrics({
-        sheetId,
-        params: { difficulty: difficulty !== "all" ? difficulty : undefined },
-      })
-    );
-  }, [sheetId, currentPage, difficulty, currentSheet, dispatch]);
+    // Only fetch problems and metrics if user is logged in
+    if (token) {
+      dispatch(fetchSheetProblems({ sheetId, params }));
+      dispatch(
+        fetchSheetMetrics({
+          sheetId,
+          params: { difficulty: difficulty !== "all" ? difficulty : undefined },
+        })
+      );
+    } else {
+      // Clear these if not authenticated
+      dispatch(clearCurrentSheet());
+    }
+  }, [sheetId, currentPage, difficulty, currentSheet, dispatch, token]);
 
   // Handle filter change
   const handleDifficultyChange = (newDifficulty) => {
@@ -121,13 +127,47 @@ const SheetDetail = () => {
     );
   }
 
-  if (error) {
+  if (error && error !== 'Unauthorized') {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
           {error}
         </div>
       </div>
+    );
+  }
+
+  // If not logged in and sheet couldn't load, show login prompt
+  if (!currentSheet && !token) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl"
+      >
+        <button
+          onClick={() => navigate("/problem-sheets")}
+          className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline mb-4"
+        >
+          <ArrowLeft size={20} />
+          Back to Problem Sheets
+        </button>
+
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-400 dark:border-blue-700 rounded-xl p-12 text-center shadow-sm">
+          <h2 className="text-2xl font-bold text-blue-900 dark:text-blue-300 mb-4">
+            Sign In to View Problem Sheet
+          </h2>
+          <p className="text-blue-700 dark:text-blue-300 mb-6 max-w-md mx-auto">
+            Log in to your account to view problems, track your progress, and solve coding challenges.
+          </p>
+          <button
+            onClick={() => navigate("/login")}
+            className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+          >
+            Go to Login
+          </button>
+        </div>
+      </motion.div>
     );
   }
 
@@ -169,27 +209,44 @@ const SheetDetail = () => {
           </div>
         </div>
 
-        {/* Overall Progress */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-lg font-semibold text-gray-900 dark:text-white">
-              Total Progress
-            </span>
-            <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-              {currentSheet.completedProblems ?? 0} / {currentSheet.totalProblems ?? 0}
-            </span>
+        {/* Overall Progress - Only show if logged in */}
+        {token && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                Total Progress
+              </span>
+              <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                {currentSheet.completedProblems ?? 0} / {currentSheet.totalProblems ?? 0}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+              <div
+                className="bg-gradient-to-r from-blue-500 to-blue-600 h-4 rounded-full transition-all"
+                style={{ width: `${currentSheet.progressPercentage ?? 0}%` }}
+              />
+            </div>
           </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
-            <div
-              className="bg-gradient-to-r from-blue-500 to-blue-600 h-4 rounded-full transition-all"
-              style={{ width: `${currentSheet.progressPercentage ?? 0}%` }}
-            />
+        )}
+
+        {/* Login Prompt - Only show if not logged in */}
+        {!token && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-400 dark:border-blue-700 rounded-xl p-6 shadow-sm">
+            <p className="text-blue-700 dark:text-blue-300">
+              <span className="font-semibold">Sign in to track your progress</span> - Log in to mark problems as complete and view your metrics.
+            </p>
+            <button
+              onClick={() => navigate("/login")}
+              className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Go to Login
+            </button>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Metrics Bar */}
-      {metrics && !metricsLoading && (
+      {/* Metrics Bar - Only show if logged in */}
+      {token && metrics && !metricsLoading && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6 mb-6 border border-blue-200 dark:border-gray-700">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {/* Total Progress */}
@@ -243,25 +300,39 @@ const SheetDetail = () => {
       )}
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        {["all", "easy", "medium", "hard"].map((level) => (
-          <button
-            key={level}
-            onClick={() => handleDifficultyChange(level)}
-            className={`px-6 py-2 rounded-lg font-medium transition-all ${
-              difficulty === level
-                ? "bg-blue-600 text-white shadow-md"
-                : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-            }`}
-          >
-            {level === "all" ? "All" : level.charAt(0).toUpperCase() + level.slice(1)}
-          </button>
-        ))}
-      </div>
+      {token && (
+        <div className="flex flex-wrap gap-3 mb-6">
+          {["all", "easy", "medium", "hard"].map((level) => (
+            <button
+              key={level}
+              onClick={() => handleDifficultyChange(level)}
+              className={`px-6 py-2 rounded-lg font-medium transition-all ${
+                difficulty === level
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+              }`}
+            >
+              {level === "all" ? "All" : level.charAt(0).toUpperCase() + level.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Problems Table */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        {problemsLoading ? (
+        {!token ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
+              Log in to view and track problems
+            </p>
+            <button
+              onClick={() => navigate("/login")}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Login Now
+            </button>
+          </div>
+        ) : problemsLoading ? (
           <div className="flex justify-center items-center py-12">
             <Loader />
           </div>
@@ -418,7 +489,7 @@ const SheetDetail = () => {
       </div>
 
       {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
+      {token && pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-center gap-4 mt-8">
           <button
             onClick={() => handlePageChange(currentPage - 1)}

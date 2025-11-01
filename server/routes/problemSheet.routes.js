@@ -6,6 +6,26 @@ const { validateProblem } = require('../middleware/validateProblem');
 const problemSheetController = require('../controllers/problemSheet.controller');
 const problemController = require('../controllers/problem.controller');
 
+// Public routes
+router.get('/', problemSheetController.getAllSheets);
+router.get('/:sheetId', problemSheetController.getSheetById);
+
+// Protected user routes
+router.get('/:sheetId/problems', protect, problemSheetController.getSheetProblems);
+router.get('/:sheetId/metrics', protect, problemSheetController.getSheetMetrics);
+
+// Problem user routes
+router.post(
+  '/problems/:problemId/complete', 
+  protect, 
+  problemController.markProblemComplete
+);
+router.get(
+  '/problems/:problemId/hints-solution', 
+  protect, 
+  problemController.getHintsSolution
+);
+
 // Admin routes
 // Problem Sheet Management
 router.post(
@@ -48,26 +68,6 @@ router.delete(
   protect, 
   admin,
   problemController.deleteProblem
-);
-
-// Public routes
-router.get('/', problemSheetController.getAllSheets);
-router.get('/:sheetId', problemSheetController.getSheetById);
-
-// Protected user routes
-router.get('/:sheetId/problems', protect, problemSheetController.getSheetProblems);
-router.get('/:sheetId/metrics', protect, problemSheetController.getSheetMetrics);
-
-// Problem user routes
-router.post(
-  '/problems/:problemId/complete', 
-  protect, 
-  problemController.markProblemComplete
-);
-router.get(
-  '/problems/:problemId/hints-solution', 
-  protect, 
-  problemController.getHintsSolution
 );
 
 module.exports = router;

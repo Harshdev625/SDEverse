@@ -11,7 +11,7 @@ import contactReducer from "../features/contact/contactSlice";
 import communityReducer from "../features/community/communitySlice";
 import dataStructureReducer from "../features/dataStructure/dataStructureSlice";
 import dataStructureProposalReducer from "../features/dataStructureProposal/dataStructureProposalSlice";
-import problemSheetReducer from "../features/problemSheet/ProblemSheetSlice";
+import problemSheetReducer from "../features/problemSheet/problemSheetSlice";
 
 const store = configureStore({
   reducer: {
@@ -27,7 +27,7 @@ const store = configureStore({
     community: communityReducer,
     dataStructure: dataStructureReducer,
     dataStructureProposal: dataStructureProposalReducer,
-    problemSheet: problemSheetReducer,
+    problemSheets: problemSheetReducer,
   },
   devTools: import.meta.env.MODE !== "production",
 });

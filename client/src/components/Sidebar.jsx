@@ -92,7 +92,7 @@ const Sidebar = () => {
       active: "bg-gradient-to-r from-purple-500 to-violet-600",
       border: "border-l-purple-500",
     },
-    manageDataStructures: {
+    DataStructures: {
       bg: "bg-teal-50/80 dark:bg-teal-900/30",
       hover: "hover:bg-teal-100 dark:hover:bg-teal-900/40",
       active: "bg-gradient-to-r from-teal-500 to-emerald-600",
