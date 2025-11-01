@@ -88,6 +88,13 @@ const SheetDetail = () => {
     }
 
     try {
+      // Update the local state immediately
+      dispatch({
+        type: 'problemSheets/toggleProblemCompleteOptimistic',
+        payload: { problemId, completed: !currentStatus },
+      });
+
+      // Make the API call
       await dispatch(
         toggleProblemComplete({
           problemId,

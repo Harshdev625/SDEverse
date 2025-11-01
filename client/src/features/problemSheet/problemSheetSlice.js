@@ -19,6 +19,10 @@ export const fetchSheetById = createAsyncThunk(
     try {
       return await problemSheetAPI.getSheetById(sheetId);
     } catch (error) {
+      // Return 401 status without error message to allow guest viewing
+      if (error.response?.status === 401) {
+        return rejectWithValue('Unauthorized');
+      }
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch sheet');
     }
   }
@@ -158,6 +162,13 @@ const problemSheetSlice = createSlice({
       state.metrics = null;
       state.pagination = null;
     },
+    toggleProblemCompleteOptimistic: (state, action) => {
+      const { problemId, completed } = action.payload;
+      const problem = state.problems.find(p => p._id === problemId);
+      if (problem) {
+        problem.completed = completed;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -186,7 +197,10 @@ const problemSheetSlice = createSlice({
       })
       .addCase(fetchSheetById.rejected, (state, action) => {
         state.sheetLoading = false;
-        state.error = action.payload;
+        // Only set error if it's not a 401 (unauthorized)
+        if (action.payload !== 'Unauthorized') {
+          state.error = action.payload;
+        }
       })
 
       // Fetch sheet problems
@@ -321,5 +335,5 @@ const problemSheetSlice = createSlice({
   },
 });
 
-export const { clearError, setCurrentSheet, setProblems, clearCurrentSheet } = problemSheetSlice.actions;
+export const { clearError, setCurrentSheet, setProblems, clearCurrentSheet, toggleProblemCompleteOptimistic } = problemSheetSlice.actions;
 export default problemSheetSlice.reducer;
