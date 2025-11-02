@@ -12,6 +12,11 @@ const problemSheetSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    slug: {
+        type: String,
+        required: true,
+        trim: true
+    },
     icon: {
         type: String,
         default: '📋',

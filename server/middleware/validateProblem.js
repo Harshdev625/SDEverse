@@ -10,31 +10,37 @@ const handleValidationErrors = (req, res, next) => {
 
 const validateProblem = [
   body('title')
+    .optional()
     .notEmpty().withMessage('Title is required')
     .trim()
     .isLength({ min: 3 }).withMessage('Title must be at least 3 characters'),
   
   body('order')
+    .optional()
     .notEmpty().withMessage('Order is required')
     .isInt({ min: 1 }).withMessage('Order must be a positive number'),
     
   body('difficulty')
+    .optional()
     .notEmpty().withMessage('Difficulty is required')
     .isIn(['easy', 'medium', 'hard']).withMessage('Difficulty must be easy, medium, or hard')
     .toLowerCase(),
     
   body('platform')
+    .optional({ checkFalsy: true })
     .notEmpty().withMessage('Platform is required')
     .isIn(['leetcode', 'hackerrank', 'codeforces', 'codechef', 'atcoder', 'other'])
     .withMessage('Invalid platform')
     .toLowerCase(),
 
   body('platformLink')
+    .optional({ checkFalsy: true })
     .notEmpty().withMessage('Platform link is required')
     .trim()
     .matches(/^https?:\/\/.+/).withMessage('Platform link must be a valid URL starting with http:// or https://'),
 
   body('description')
+    .optional()
     .optional()
     .trim()
     .isLength({ min: 10 }).withMessage('Description must be at least 10 characters'),

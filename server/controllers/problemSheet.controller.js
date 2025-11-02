@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const ProblemSheet = require('../models/sheet.model');
 const ProblemProgress = require('../models/userProgress.model');
 const Problem = require('../models/problem.model');
-const { generateUniqueSlug } = require('../utils/generateUniqueSlug');
+const generateUniqueSlug = require('../utils/generateUniqueSlug');
+const useTransactions = process.env.NODE_ENV === 'production';
 
 const problemSheetController = {
   // Admin controls:
@@ -10,10 +11,10 @@ const problemSheetController = {
   createProblemSheet: async (req, res) => {
     try {
       const { name, description, icon } = req.body;
-      const slug = await generateUniqueSlug(name, ProblemSheet);
+      const slug = await generateUniqueSlug(name);
       
       const newSheet = new ProblemSheet({
-        name, slug, description, icon: icon ||'📋',
+        name, description, slug, icon: icon ||'📋',
       });
 
       const saveSheet = await newSheet.save();
@@ -78,43 +79,51 @@ const problemSheetController = {
 
   // Delete Problem Sheet
   deleteProblemSheet: async (req, res) => {
-    const session = await mongoose.startSession();
+    const session = useTransactions ? await mongoose.startSession() : null;
+    
     try {
-      session.startTransaction();
+      if (session) {
+        session.startTransaction();
+      }
+
       const { slug } = req.params;
+      const sessionOption = session ? { session } : {};
 
       const sheet = await ProblemSheet.findOne({ slug }).session(session);
       if (!sheet) {
+        if (session) await session.abortTransaction();
         return res.status(404).json({ error: 'Problem sheet not found' });
       }
 
-      // Delete all associated data in a transaction
-      const [deleteProblems, deleteProgress] = await Promise.all([
-        Problem.deleteMany({ sheetId: sheet._id }).session(session),
-        ProblemProgress.deleteMany({ sheetId: sheet._id }).session(session),
-        sheet.deleteOne({ session })
-      ]);
+      // Delete all associated data
+      const deleteProblems = await Problem.deleteMany({ sheetId: sheet._id }, sessionOption);
+      const deleteProgress = await ProblemProgress.deleteMany({ sheetId: sheet._id }, sessionOption);
+      const deleteSheet = await ProblemSheet.deleteOne({ _id: sheet._id }, sessionOption);
 
-      if (!deleteProblems || !deleteProgress) {
-        await session.abortTransaction();
+      if (!deleteSheet || deleteSheet.deletedCount === 0) {
+        if (session) await session.abortTransaction();
         return res.status(502).json({
-          error: 'Failed to delete associated data.'
+          error: 'Failed to delete sheet.'
         });
       }
 
-      await session.commitTransaction();
-
-      if (!deleteSheet) {
-        res.status(502).json({
-          error: 'Sheet not deleted.'
-        });
+      if (session) {
+        await session.commitTransaction();
       }
 
       res.status(200).json({
-        message: 'Problem sheet and all associated data deleted successfully.'
+        message: 'Problem sheet and all associated data deleted successfully.',
+        deletedData: {
+          sheet: deleteSheet.deletedCount,
+          problems: deleteProblems.deletedCount,
+          progress: deleteProgress.deletedCount
+        }
       });
     } catch (error) {
+      if (session) await session.abortTransaction();
       res.status(500).json({ error: error.message });
+    } finally {
+      if (session) await session.endSession();
     }
   },
 
