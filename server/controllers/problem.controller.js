@@ -135,10 +135,10 @@ const problemController = {
       await progress.save();
 
       res.status(200).json({
-        data: {
-          problemId,
-          completed,
-        },
+        problemId,
+        completed,
+        completedAt: progress.completedAt,
+        _id: problemId,
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
