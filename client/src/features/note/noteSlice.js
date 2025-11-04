@@ -49,9 +49,9 @@ export const removeNote = createAsyncThunk(
 
 export const fetchMyNotes = createAsyncThunk(
   'note/fetchMyNotes',
-  async ({ page = 1, limit = 9 } = {}, { rejectWithValue }) => {
+  async ({ page = 1, limit = 9, q = '', parentType = '' } = {}, { rejectWithValue }) => {
     try {
-      const response = await getMyNotes(page, limit);
+      const response = await getMyNotes(page, limit, q, parentType);
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);

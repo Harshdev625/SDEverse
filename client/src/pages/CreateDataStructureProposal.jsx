@@ -72,8 +72,6 @@ const CreateDataStructureProposal = () => {
       toast.success("Data Structure proposal submitted successfully!");
       navigate(-1);
     } catch (err) {
-      console.error("Data Structure proposal creation failed:", err);
-
       const errorMessage =
         err.message || "Something went wrong during submission.";
       toast.error(errorMessage);

@@ -117,7 +117,6 @@ const CreateProposal = () => {
       );
       navigate("/proposals");
     } catch (err) {
-      console.error("Submission failed", err);
       toast.error("Failed to submit proposal. Please try again.", {
         position: "top-right",
         autoClose: 3000,

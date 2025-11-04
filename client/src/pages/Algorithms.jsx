@@ -134,7 +134,6 @@ const AlgorithmFilters = ({
       params.category = selectedCategory;
     }
 
-    console.log("Sending filters:", params);
     dispatch(fetchAlgorithmsForList(params));
 
     const hasFilters =

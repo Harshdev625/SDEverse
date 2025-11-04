@@ -14,6 +14,7 @@ const communityRoutes = require("./routes/community.routes");
 const dataStructureRoutes = require("./routes/dataStructure.routes");
 const dataStructureProposalRoutes = require("./routes/dataStructureProposal.routes");
 const noteRoutes = require('./routes/note.routes');
+const bookmarkRoutes = require('./routes/bookmark.routes');
 const contactRoutes = require("./routes/contact.routes");
 const blogRoutes = require("./routes/blog.routes");
 
@@ -39,6 +40,7 @@ app.use("/api/community", communityRoutes);
 app.use("/api/data-structures", dataStructureRoutes);
 app.use("/api/data-structure-proposals", dataStructureProposalRoutes);
 app.use("/api/notes", noteRoutes);
+app.use("/api/bookmarks", bookmarkRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/blogs", blogRoutes);
 

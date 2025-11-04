@@ -13,6 +13,7 @@ import dataStructureReducer from "../features/dataStructure/dataStructureSlice";
 import dataStructureProposalReducer from "../features/dataStructureProposal/dataStructureProposalSlice";
 import blogReducer from "../features/blog/blogSlice";
 import noteReducer from "../features/note/noteSlice";
+import bookmarkReducer from "../features/bookmark/bookmarkSlice";
 
 const store = configureStore({
   reducer: {
@@ -30,6 +31,7 @@ const store = configureStore({
     dataStructureProposal: dataStructureProposalReducer,
     blog: blogReducer,
     note: noteReducer,
+    bookmark: bookmarkReducer,
   },
   devTools: import.meta.env.MODE !== "production",
 });

@@ -8,7 +8,7 @@ import {
   refreshSocialStats,
   refreshCompetitiveStats,
 } from "../features/user/userSlice";
-import { Facebook, Instagram, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import ProfileForm from "./ProfileForm";
 
 function formatKey(key) {
@@ -24,7 +24,6 @@ const PLATFORM_DOMAINS = {
   twitter: "twitter.com",
   facebook: "facebook.com",
   instagram: "instagram.com",
-
   leetcode: "leetcode.com",
   codechef: "codechef.com",
   codeforces: "codeforces.com",
@@ -62,8 +61,8 @@ export default function Profile() {
   const [imagePreview, setImagePreview] = useState(null);
   const [bannerPreview, setBannerPreview] = useState(null);
   const [uploadedImageBase64, setUploadedImageBase64] = useState(null);
-
   const [uploadedBannerBase64, setUploadedBannerBase64] = useState(null);
+  const [activeTab, setActiveTab] = useState("profile");
 
   const imageData = {
     imagePreview,
@@ -76,24 +75,8 @@ export default function Profile() {
     setUploadedBannerBase64,
   };
 
-  useEffect(() => {
-    // If route has username and it matches the logged-in user, load myProfile
-    if (username) {
-      if (authUser && authUser.username === username) {
-        dispatch(getMyProfile());
-      } else {
-        // Viewing another user's profile
-        dispatch(getUserByUsername(username));
-      }
-    } else {
-      // Viewing own profile
-      dispatch(getMyProfile());
-    }
-  }, [dispatch, username, authUser]);
-
-  useEffect(() => {
-    const isViewingOtherUser = username && !(authUser && authUser.username === username);
-    const profileData = isViewingOtherUser ? selectedUser : myProfile;
+  // Helper function to initialize form state
+  const initializeFormData = (profileData) => {
     if (profileData) {
       setFormData({
         fullName: profileData.fullName || "",
@@ -106,6 +89,8 @@ export default function Profile() {
         competitiveProfiles: profileData.competitiveProfiles || {},
         socialStats: profileData.socialStats || {},
         competitiveStats: profileData.competitiveStats || {},
+        projects: profileData.projects || [],
+        experiences: profileData.experiences || [],
       });
       setLastRefreshed({
         competitive: profileData.lastCompetitiveRefresh || null,
@@ -114,12 +99,33 @@ export default function Profile() {
       setHasChanges(false);
       setUrlErrors({});
     }
-  }, [myProfile, selectedUser, username, authUser]);
+  };
+
+  useEffect(() => {
+    if (username) {
+      if (authUser && authUser.username === username) {
+        dispatch(getMyProfile());
+      } else {
+        dispatch(getUserByUsername(username));
+      }
+    } else {
+      dispatch(getMyProfile());
+    }
+  }, [dispatch, username, authUser]);
+
+
+  // *** THIS IS THE FIX ***
+  // The useEffect that initializes the form should ONLY depend on the source data.
+  // It should NOT depend on `formData` itself.
+  useEffect(() => {
+    const isViewingOtherUser = username && !(authUser && authUser.username === username);
+    const profileData = isViewingOtherUser ? selectedUser : myProfile;
+    initializeFormData(profileData);
+  }, [myProfile, selectedUser, username, authUser]); // <-- Dependency array fixed
 
   const isValidUrl = (val) => {
     if (!val) return true;
     const trimmedVal = val.trim();
-
     try {
       const url = new URL(
         trimmedVal.startsWith("http") ? trimmedVal : `https://${trimmedVal}`
@@ -135,37 +141,23 @@ export default function Profile() {
     const trimmedValue = value ? value.trim() : "";
 
     if (trimmedValue && !isValidUrl(trimmedValue)) {
-      errorMsg =
-        "Please enter a valid URL structure (e.g., https://example.com or example.com).";
-    }
-
-    if (
-      !errorMsg &&
+      errorMsg = "Please enter a valid URL structure (e.g., https://example.com).";
+    } else if (
       trimmedValue &&
-      (name.startsWith("socialLinks.") ||
-        name.startsWith("competitiveProfiles."))
+      (name.startsWith("socialLinks.") || name.startsWith("competitiveProfiles."))
     ) {
-      const parts = name.split(".");
-      if (parts.length === 2) {
-        const platform = parts[1];
-        const requiredDomain = PLATFORM_DOMAINS[platform];
-
-        if (requiredDomain) {
-          try {
-            const url = new URL(
-              trimmedValue.startsWith("http")
-                ? trimmedValue
-                : `https://${trimmedValue}`
-            );
-
-            if (!url.hostname.endsWith(requiredDomain)) {
-              errorMsg = `This link must be a valid ${formatKey(
-                platform
-              )} profile URL (must contain ${requiredDomain}).`;
-            }
-          } catch {
-            errorMsg = "Invalid URL structure.";
+      const platform = name.split(".")[1];
+      const requiredDomain = PLATFORM_DOMAINS[platform];
+      if (requiredDomain) {
+        try {
+          const url = new URL(
+            trimmedValue.startsWith("http") ? trimmedValue : `https://${trimmedValue}`
+          );
+          if (!url.hostname.endsWith(requiredDomain)) {
+            errorMsg = `URL must be a valid ${formatKey(platform)} profile (e.g., ${requiredDomain}).`;
           }
+        } catch {
+          errorMsg = "Invalid URL structure.";
         }
       }
     }
@@ -179,17 +171,10 @@ export default function Profile() {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setHasChanges(true);
 
-    const isUrlField =
-      name === "avatarUrl" ||
-      name === "website" ||
-      name === "bannerUrl" ||
-      name.startsWith("socialLinks.") ||
-      name.startsWith("competitiveProfiles.");
-
-    const newValue = value;
+    const newValue = type === "checkbox" ? checked : value;
 
     if (name.includes(".")) {
       const [section, key] = name.split(".");
@@ -204,6 +189,11 @@ export default function Profile() {
       setFormData((prev) => ({ ...prev, [name]: newValue }));
     }
 
+    const isUrlField =
+      name === "website" ||
+      name.startsWith("socialLinks.") ||
+      name.startsWith("competitiveProfiles.") ||
+      (name.startsWith("projects[") && name.endsWith("].url"));
     if (isUrlField) {
       validateAndSetError(name, newValue);
     }
@@ -216,29 +206,19 @@ export default function Profile() {
       if (!trimmedValue) return;
 
       if (!isValidUrl(trimmedValue)) {
-        errors[k] =
-          "Please enter a valid URL structure (e.g., https://example.com).";
+        errors[k] = "Please enter a valid URL structure (e.g., https://example.com).";
         return;
       }
-
-      if (
-        k.startsWith("socialLinks.") ||
-        k.startsWith("competitiveProfiles.")
-      ) {
+      if (k.startsWith("socialLinks.") || k.startsWith("competitiveProfiles.")) {
         const platform = k.split(".")[1];
         const requiredDomain = PLATFORM_DOMAINS[platform];
-
         if (requiredDomain) {
           try {
             const url = new URL(
-              trimmedValue.startsWith("http")
-                ? trimmedValue
-                : `https://${trimmedValue}`
+              trimmedValue.startsWith("http") ? trimmedValue : `https://${trimmedValue}`
             );
             if (!url.hostname.endsWith(requiredDomain)) {
-              errors[k] = `The link must be a valid ${formatKey(
-                platform
-              )} profile URL (must contain ${requiredDomain}).`;
+              errors[k] = `URL must be a valid ${formatKey(platform)} profile.`;
             }
           } catch {
             errors[k] = "Invalid URL format.";
@@ -247,115 +227,82 @@ export default function Profile() {
       }
     };
 
-    check("avatarUrl", data.avatarUrl);
     check("website", data.website);
-
-    if (data.socialLinks) {
-      Object.entries(data.socialLinks).forEach(([key, val]) =>
-        check(`socialLinks.${key}`, val)
-      );
+    if(data.socialLinks) {
+      Object.entries(data.socialLinks).forEach(([k, v]) => check(`socialLinks.${k}`, v));
     }
-    if (data.competitiveProfiles) {
-      Object.entries(data.competitiveProfiles).forEach(([key, val]) =>
-        check(`competitiveProfiles.${key}`, val)
-      );
+    if(data.competitiveProfiles) {
+      Object.entries(data.competitiveProfiles).forEach(([k, v]) => check(`competitiveProfiles.${k}`, v));
+    }
+    if (data.projects) {
+      data.projects.forEach((p, i) => check(`projects[${i}].url`, p.url));
     }
 
     return errors;
   };
 
-  const getAvatarValue = () => {
-    return uploadedImageBase64 || formData.avatarUrl;
-  };
-  const getBannerValue = () => {
-    return uploadedBannerBase64 || formData.bannerUrl;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const avatarValue = getAvatarValue();
-    const bannerValue = getBannerValue();
-
     const validationErrors = validateAllUrlsBeforeSubmit(formData);
     if (Object.keys(validationErrors).length > 0) {
       setUrlErrors(validationErrors);
-
       return;
     }
 
     const dataToSubmit = {
       ...formData,
-      avatarUrl: avatarValue,
-      bannerUrl: bannerValue,
+      avatarUrl: uploadedImageBase64 || formData.avatarUrl,
+      bannerUrl: uploadedBannerBase64 || formData.bannerUrl,
     };
 
-    if (dataToSubmit.avatarUrl && !dataToSubmit.avatarUrl.startsWith("data:")) {
-      dataToSubmit.avatarUrl = ensureProtocol(dataToSubmit.avatarUrl);
-    }
-    if (dataToSubmit.bannerUrl && !dataToSubmit.bannerUrl.startsWith("data:")) {
-      dataToSubmit.bannerUrl = ensureProtocol(dataToSubmit.bannerUrl);
-    }
-
-    dataToSubmit.website = ensureProtocol(dataToSubmit.website);
-
-    if (dataToSubmit.socialLinks) {
-      dataToSubmit.socialLinks = Object.fromEntries(
-        Object.entries(dataToSubmit.socialLinks).map(([key, val]) => [
-          key,
-          ensureProtocol(val),
-        ])
-      );
-    }
-    if (dataToSubmit.competitiveProfiles) {
-      dataToSubmit.competitiveProfiles = Object.fromEntries(
-        Object.entries(dataToSubmit.competitiveProfiles).map(([key, val]) => [
-          key,
-          ensureProtocol(val),
-        ])
-      );
+    // Ensure all URLs have protocols
+    const fieldsToProtocol = ["website"];
+    fieldsToProtocol.forEach(field => {
+      dataToSubmit[field] = ensureProtocol(dataToSubmit[field]);
+    });
+    ['socialLinks', 'competitiveProfiles'].forEach(section => {
+      if (dataToSubmit[section]) {
+        dataToSubmit[section] = Object.fromEntries(
+          Object.entries(dataToSubmit[section]).map(([k, v]) => [k, ensureProtocol(v)])
+        );
+      }
+    });
+    if (dataToSubmit.projects) {
+      dataToSubmit.projects = dataToSubmit.projects.map(p => ({ ...p, url: ensureProtocol(p.url) }));
     }
 
     try {
       setActionError(null);
       const res = await dispatch(patchMyProfile(dataToSubmit));
       if (res?.error) throw new Error(res.error?.message || res.payload || 'Update failed');
+      
       const res2 = await dispatch(getMyProfile());
       if (res2?.error) throw new Error(res2.error?.message || res2.payload || 'Fetch profile failed');
+      
+      initializeFormData(res2.payload);
+      
+      setIsEditing(false);
+      setHasChanges(false);
+      setUrlErrors({});
+      setImagePreview(null);
+      setBannerPreview(null);
+      setUploadedImageBase64(null);
+      setUploadedBannerBase64(null);
+
     } catch (err) {
       setActionError(err.message || 'Failed to update profile');
-      return; // keep editing so user can fix
     }
+  };
 
+  const handleCancel = () => {
+    initializeFormData(myProfile);
     setIsEditing(false);
     setHasChanges(false);
     setUrlErrors({});
-
     setImagePreview(null);
     setBannerPreview(null);
     setUploadedImageBase64(null);
     setUploadedBannerBase64(null);
-  };
-
-  const handleCancel = () => {
-    if (myProfile) {
-      setFormData({
-        fullName: myProfile.fullName || "",
-        bio: myProfile.bio || "",
-        avatarUrl: myProfile.avatarUrl || "",
-        bannerUrl: myProfile.bannerUrl || "",
-        location: myProfile.location || "",
-        website: myProfile.website || "",
-        socialLinks: myProfile.socialLinks || {},
-        competitiveProfiles: myProfile.competitiveProfiles || {},
-        socialStats: myProfile.socialStats || {},
-        competitiveStats: myProfile.competitiveStats || {},
-      });
-    }
-    setImagePreview(null);
-    setBannerPreview(null);
-    setIsEditing(false);
-    setHasChanges(false);
-    setUrlErrors({});
   };
 
   const handleRefresh = async (type) => {
@@ -365,8 +312,14 @@ export default function Profile() {
       const thunk = type === "competitive" ? refreshCompetitiveStats() : refreshSocialStats();
       const res = await dispatch(thunk);
       if (res?.error) throw new Error(res.error?.message || res.payload || 'Refresh failed');
-      const res2 = await dispatch(getMyProfile());
+      
+      const res2 = await dispatch(getMyProfile()); // Refetch profile
       if (res2?.error) throw new Error(res2.error?.message || res2.payload || 'Fetch profile failed');
+      
+      initializeFormData(res2.payload); 
+      
+    } catch (err) {
+        setActionError(err.message || 'Failed to refresh stats');
     } finally {
       setRefreshing({ type: null });
     }
@@ -374,14 +327,12 @@ export default function Profile() {
 
   const isLoading = status.fetchProfile === "loading" || status.fetchSelectedUser === "loading";
   const isViewingOtherUser = username && !(authUser && authUser.username === username);
-  
+
   if (isLoading || !formData) {
     return (
       <div
         className={`flex items-center justify-center min-h-screen ${
-          themeMode === "dark"
-            ? "bg-gray-950 text-gray-200"
-            : "bg-gray-50 text-gray-800"
+          themeMode === "dark" ? "bg-gray-950 text-gray-200" : "bg-gray-50 text-gray-800"
         }`}
       >
         <Loader2 className="animate-spin text-blue-500 mr-3" size={48} />
@@ -392,27 +343,29 @@ export default function Profile() {
 
   return (
     <div
-      className={`min-h-screen py-8 px-4 sm:px-6 lg:px-8 ${
-        themeMode === "dark"
-          ? "bg-gray-950 text-gray-100"
+      className={`min-h-screen w-full ${
+        themeMode === "dark" 
+          ? "bg-gray-950 text-gray-100" 
           : "bg-gray-50 text-gray-900"
       }`}
     >
       <ProfileForm
         formData={formData}
-        isEditing={isEditing && !isViewingOtherUser}
-        hasChanges={hasChanges}
+        imageData={imageData}
         refreshing={refreshing}
         lastRefreshed={lastRefreshed}
+        actionError={actionError}
         urlErrors={urlErrors}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        isEditing={isEditing}
+        hasChanges={hasChanges}
+        readonly={isViewingOtherUser}
         onChange={handleChange}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
-        onEditToggle={() => !isViewingOtherUser && setIsEditing(!isEditing)}
+        onEditToggle={() => setIsEditing(!isEditing)}
         onRefresh={handleRefresh}
-        imageData={imageData}
-        actionError={actionError}
-        readonly={isViewingOtherUser}
       />
     </div>
   );

@@ -1,6 +1,26 @@
-import { Pencil } from "lucide-react";
+import { User, BarChart2, BookMarked, StickyNote } from "lucide-react";
+import { motion as Motion } from "framer-motion";
 import ProfileSection from "./ProfileSection";
 import LinksSection from "./LinksSection";
+import NotesPanel from "./NotesPanel";
+import BookmarksPanel from "./BookmarksPanel";
+
+const TabButton = ({ label, icon, isActive, onClick }) => {
+  return (
+    <Motion.button
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+      className={`relative flex items-center gap-2 px-8 py-4 font-medium transition-all duration-200 flex-1 sm:flex-none ${
+          isActive
+            ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
+        }`}
+    >
+      <span>{icon}</span>
+      <span className="hidden sm:inline">{label}</span>
+    </Motion.button>
+  );
+};
 
 export default function ProfileForm({
   formData,
@@ -17,99 +37,114 @@ export default function ProfileForm({
   imageData,
   readonly = false,
   actionError = null,
+  activeTab,
+  onTabChange,
 }) {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10 rounded-2xl shadow-xl p-6 sm:p-8 lg:p-12 border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 overflow-visible">
+    <div className="w-full max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <Motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm"
+      >
+        <div className="flex">
+          <TabButton
+            label="Profile"
+            icon={<User size={20} />}
+            isActive={activeTab === "profile"}
+            onClick={() => onTabChange("profile")}
+          />
+          <TabButton
+            label="Stats"
+            icon={<BarChart2 size={20} />}
+            isActive={activeTab === "stats"}
+            onClick={() => onTabChange("stats")}
+          />
+          <TabButton
+            label="Bookmarks"
+            icon={<BookMarked size={20} />}
+            isActive={activeTab === "bookmarks"}
+            onClick={() => onTabChange("bookmarks")}
+          />
+          <TabButton
+            label="Notes"
+            icon={<StickyNote size={20} />}
+            isActive={activeTab === "notes"}
+            onClick={() => onTabChange("notes")}
+          />
+        </div>
+      </Motion.div>
+      
       {actionError && (
-        <div className="w-full rounded-md bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-700 p-3 text-red-700 dark:text-red-300">
-          <strong className="block font-semibold">Error</strong>
-          <p className="text-sm mt-1">{actionError}</p>
-        </div>
-      )}
-      {/* Header */}
-      {!readonly && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pt-4 pb-8 border-b border-gray-200 dark:border-gray-700 overflow-visible">
-          <h1 className="relative z-10 mt-1 mb-2 leading-tight text-4xl sm:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500 drop-shadow-lg text-center sm:text-left">
-            My Profile
-          </h1>
-
-          {!isEditing ? (
-            <button
-              onClick={onEditToggle}
-              className="flex items-center gap-3 px-7 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out text-lg"
-            >
-              <Pencil size={22} />
-              Edit Profile
-            </button>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <button
-                onClick={onCancel}
-                className="px-7 py-3 font-medium rounded-full border text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out shadow-md text-lg"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={onSubmit}
-                disabled={
-                  !hasChanges ||
-                  (urlErrors && Object.keys(urlErrors).length > 0)
-                }
-                className={`px-7 py-3 font-semibold rounded-full transition-all duration-300 ease-in-out shadow-md text-lg ${
-                  hasChanges
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-lg transform hover:scale-105"
-                    : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed opacity-70"
-                }`}
-              >
-                Save Changes
-              </button>
-            </div>
-          )}
-        </div>
+        <Motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full rounded-xl bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-700 p-4 text-red-700 dark:text-red-300"
+        >
+          <strong className="block font-semibold text-base mb-1">⚠️ Error</strong>
+          <p className="text-sm">{actionError}</p>
+        </Motion.div>
       )}
 
-      {/* Profile Details */}
-      <section className="space-y-8">
-        <ProfileSection
-          isEditing={isEditing && !readonly}
-          formData={formData}
-          handleChange={onChange}
-          urlErrors={urlErrors}
-          imageData={imageData}
-        />
-      </section>
+      <Motion.div 
+        key={activeTab}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.3 }}
+        className="flex-1"
+      >
+        {activeTab === "profile" && (
+          <ProfileSection
+            formData={formData}
+            isEditing={isEditing}
+            hasChanges={hasChanges}
+            onChange={onChange}
+            onSubmit={onSubmit}
+            onCancel={onCancel}
+            onEditToggle={onEditToggle}
+            urlErrors={urlErrors}
+            imageData={imageData}
+            readonly={readonly}
+          />
+        )}
 
-      {/* Competitive Links */}
-      <section className="space-y-8">
-        <LinksSection
-          title="Competitive Links"
-          links={formData.competitiveProfiles}
-          stats={formData.competitiveStats}
-          isEditing={isEditing && !readonly}
-          readonly={readonly}
-          handleChange={onChange}
-          urlErrors={urlErrors}
-          refreshing={refreshing.type === "competitive"}
-          onRefresh={() => onRefresh("competitive")}
-          lastUpdated={lastRefreshed.competitive}
-        />
-      </section>
+        {activeTab === "stats" && (
+          <div className="space-y-6">
+            <LinksSection
+              title="Competitive Stats"
+              links={formData.competitiveProfiles}
+              stats={formData.competitiveStats}
+              readonly={readonly}
+              handleChange={onChange}
+              urlErrors={urlErrors}
+              refreshing={refreshing.type === "competitive"}
+              onRefresh={() => onRefresh("competitive")}
+              lastUpdated={lastRefreshed.competitive}
+            />
+            <LinksSection
+              title="Social Stats"
+              links={formData.socialLinks}
+              stats={formData.socialStats}
+              readonly={readonly}
+              handleChange={onChange}
+              urlErrors={urlErrors}
+              refreshing={refreshing.type === "social"}
+              onRefresh={() => onRefresh("social")}
+              lastUpdated={lastRefreshed.social}
+            />
+          </div>
+        )}
 
-      {/* Social Links */}
-      <section className="space-y-8">
-        <LinksSection
-          title="Social Links"
-          links={formData.socialLinks}
-          stats={formData.socialStats}
-          isEditing={isEditing && !readonly}
-          readonly={readonly}
-          handleChange={onChange}
-          urlErrors={urlErrors}
-          refreshing={refreshing.type === "social"}
-          onRefresh={() => onRefresh("social")}
-          lastUpdated={lastRefreshed.social}
-        />
-      </section>
+        {activeTab === "bookmarks" && (
+          <BookmarksPanel />
+        )}
+        
+        {activeTab === "notes" && (
+          <NotesPanel />
+        )}
+      </Motion.div>
     </div>
   );
 }

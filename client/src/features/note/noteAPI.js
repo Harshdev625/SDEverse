@@ -30,9 +30,11 @@ export const deleteNoteByParent = async (parentType, parentId) => {
   }
 };
 
-export const getMyNotes = async (page = 1, limit = 9) => {
+export const getMyNotes = async (page = 1, limit = 12, q = '', parentType = '') => {
   try {
-    const res = await api.get(`/notes/my?page=${page}&limit=${limit}`);
+    const qParam = q ? `&q=${encodeURIComponent(q)}` : '';
+    const parentParam = parentType ? `&parentType=${encodeURIComponent(parentType)}` : '';
+    const res = await api.get(`/notes/my?page=${page}&limit=${limit}${qParam}${parentParam}`);
     return res.data;
   } catch (error) {
     console.error('Error fetching my notes:', error);

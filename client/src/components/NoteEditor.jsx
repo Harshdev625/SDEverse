@@ -25,7 +25,7 @@ const useDarkMode = () => {
 };
 
 // Theme-aware code block for Markdown
-const CodeBlock = ({ node, inline, className, children, ...props }) => {
+const CodeBlock = ({ inline, className, children, ...props }) => {
   const dark = useDarkMode();
   const match = /language-(\w+)/.exec(className || '');
   return !inline && match ? (
@@ -82,11 +82,14 @@ const EditorToggle = ({ isPreview, onToggle }) => (
   </div>
 );
 
-const NoteEditor = ({ parentType, parentId }) => {
+const NoteEditor = ({ parentType: propParentType = '', parentId: propParentId = null, showFloatingButton = true }) => {
   const dispatch = useDispatch();
   const { note, loading } = useSelector((state) => state.note || {});
   const dark = useDarkMode();
 
+  // internal parentType/parentId to support opening via global event
+  const [currentParentType, setCurrentParentType] = useState(propParentType);
+  const [currentParentId, setCurrentParentId] = useState(propParentId);
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState('');
   const [originalContent, setOriginalContent] = useState('');
@@ -98,8 +101,8 @@ const NoteEditor = ({ parentType, parentId }) => {
 
   // Data Fetching
   useEffect(() => {
-    if (parentType && parentId) {
-      dispatch(fetchNoteByParent({ parentType, parentId }))
+    if (currentParentType && currentParentId) {
+      dispatch(fetchNoteByParent({ parentType: currentParentType, parentId: currentParentId }))
         .unwrap()
         .then((payload) => {
           const noteContent = payload?.content || '';
@@ -108,12 +111,11 @@ const NoteEditor = ({ parentType, parentId }) => {
         })
         .catch(() => {});
     }
-  }, [dispatch, parentType, parentId]);
+  }, [dispatch, currentParentType, currentParentId]);
 
   useEffect(() => {
-    if (open && parentType && parentId) {
-      setPreview(true);
-      dispatch(fetchNoteByParent({ parentType, parentId }))
+    if (open && currentParentType && currentParentId) {
+      dispatch(fetchNoteByParent({ parentType: currentParentType, parentId: currentParentId }))
         .unwrap()
         .then((payload) => {
           const noteContent = payload?.content || '';
@@ -122,12 +124,12 @@ const NoteEditor = ({ parentType, parentId }) => {
         })
         .catch(() => {});
     }
-  }, [open, dispatch, parentType, parentId]);
+  }, [open, dispatch, currentParentType, currentParentId]);
 
   // Handlers
   const handleSave = async () => {
     try {
-      await dispatch(saveNote({ parentType, parentId, content })).unwrap();
+      await dispatch(saveNote({ parentType: currentParentType, parentId: currentParentId, content })).unwrap();
       setOriginalContent(content);
       setPreview(true);
     } catch (err) {
@@ -138,7 +140,7 @@ const NoteEditor = ({ parentType, parentId }) => {
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this note?")) return;
     try {
-      await dispatch(removeNote({ parentType, parentId }));
+      await dispatch(removeNote({ parentType: currentParentType, parentId: currentParentId }));
       setContent('');
       setOriginalContent('');
       setPreview(true);
@@ -185,6 +187,23 @@ const NoteEditor = ({ parentType, parentId }) => {
   }, [isResizing, handleMouseMove, handleMouseUp]);
 
   const hasNote = Boolean(note && note._id);
+
+  // Listen for global open events
+  useEffect(() => {
+    const handler = (e) => {
+      const detail = (e && e.detail) || {};
+      const nextParentType = detail.parentType || propParentType || '';
+      const nextParentId = detail.parentId || propParentId || null;
+      if (nextParentType && nextParentId) {
+        setCurrentParentType(nextParentType);
+        setCurrentParentId(nextParentId);
+        setPreview(true);
+        setOpen(true);
+      }
+    };
+    window.addEventListener('sdeverse:open-note-editor', handler);
+    return () => window.removeEventListener('sdeverse:open-note-editor', handler);
+  }, [propParentType, propParentId]);
 
   // Main Content Renderer
   const renderContent = (isMobile = false) => {
@@ -320,17 +339,19 @@ const NoteEditor = ({ parentType, parentId }) => {
   return (
     <>
       {/* Floating Button */}
-      <motion.button
-        aria-label="Open notes"
-        title="Notes"
-        onClick={() => setOpen(true)}
-        className="fixed right-4 top-1/2 -translate-y-1/2 z-40 bg-gradient-to-br from-indigo-600 to-blue-600 text-white p-3 rounded-full shadow-2xl flex items-center justify-center"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <FileText size={18} />
-        {hasNote && <span className="absolute -top-1 -right-1 inline-flex h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-white" aria-hidden="true" />}
-      </motion.button>
+      {showFloatingButton && (
+        <motion.button
+          aria-label="Open notes"
+          title="Notes"
+          onClick={() => { setPreview(true); setOpen(true); }}
+          className="fixed right-4 top-1/2 -translate-y-1/2 z-40 bg-gradient-to-br from-indigo-600 to-blue-600 text-white p-3 rounded-full shadow-2xl flex items-center justify-center"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <FileText size={18} />
+          {hasNote && <span className="absolute -top-1 -right-1 inline-flex h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-white" aria-hidden="true" />}
+        </motion.button>
+      )}
 
       {/* Desktop Drawer */}
       <AnimatePresence>
