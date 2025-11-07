@@ -8,44 +8,48 @@ import { setTheme } from "./features/theme/themeSlice";
 import Layout from "./components/Layout";
 import Loader from "./components/Loader";
 
-import Home from "./pages/Home";
-import Algorithms from "./pages/Algorithms";
-import AlgorithmDetail from "./pages/AlgorithmDetails";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ForgotPassword from "./pages/ForgotPassword";
-import MoreInfoPage from "./pages/MoreInfoPage";
-import Profile from "./pages/Profile";
-import Feedback from "./pages/Feedback";
-import CommunityGuidelines from "./pages/CommunityGuidelines";
+import Home from "./pages/public/Home";
+import Login from "./pages/public/Login";
+import Register from "./pages/public/Register";
+import ForgotPassword from "./pages/public/ForgotPassword";
+import Contact from "./pages/public/Contact";
+import CommunityGuidelines from "./pages/public/CommunityGuidelines";
+import FaqPage from './pages/public/FaqPage';
 
-import DataStructures from "./pages/DataStructures";
-import DataStructureDetail from "./pages/DataStructureDetail";
-import CreateDataStructureProposal from "./pages/CreateDataStructureProposal";
-import EditDataStructureProposal from "./pages/EditDataStructureProposal";
+import Algorithms from "./pages/algorithms/Algorithms";
+import AlgorithmDetail from "./pages/algorithms/AlgorithmDetails";
+import CreateProposal from "./pages/algorithms/CreateProposal";
+import EditProposal from "./pages/algorithms/EditProposal";
+import MyProposals from "./pages/algorithms/MyProposals";
 
-import CreateProposal from "./pages/CreateProposal";
-import EditProposal from "./pages/EditProposal";
-import MyProposals from "./pages/MyProposals";
+import DataStructures from "./pages/dataStructures/DataStructures";
+import DataStructureDetail from "./pages/dataStructures/DataStructureDetail";
+import CreateDataStructureProposal from "./pages/dataStructures/CreateDataStructureProposal";
+import EditDataStructureProposal from "./pages/dataStructures/EditDataStructureProposal";
+
+import Profile from "./pages/profile/Profile";
+import MoreInfoPage from "./pages/profile/MoreInfoPage";
+
+import Feedback from "./pages/shared/Feedback";
 
 import AdminRoute from "./components/AdminRoute";
-import AdminAlgorithms from "./pages/AdminAlgorithms";
-import AdminProposalReview from "./pages/AdminProposalReview";
-import AdminUsersPage from "./pages/AdminUsersPage";
-import AdminAnalytics from "./pages/AdminAnalytics";
-import AdminDataStructures from "./pages/AdminDataStructures";
-import AdminDataStructureProposalReview from "./pages/AdminDataStructureProposalReview";
+import AdminAlgorithms from "./pages/admin/AdminAlgorithms";
+import AdminProposalReview from "./pages/admin/AdminProposalReview";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminDataStructures from "./pages/admin/AdminDataStructures";
+import AdminDataStructureProposalReview from "./pages/admin/AdminDataStructureProposalReview";
+import AdminUsersContact from "./pages/admin/AdminUsersContact";
+
 import { getMe } from "./features/auth/authSlice";
 import { toast } from "react-toastify";
-import Contact from "./pages/Contact";
-import AdminUsersContact from "./pages/AdminUsersContact";
-import FaqPage from './pages/FaqPage';
-import Blogs from "./pages/Blogs";
-import BlogDetail from "./pages/BlogDetail";
-import CreateBlog from "./pages/CreateBlog";
-import EditBlog from "./pages/EditBlog";
-import MyBlogs from "./pages/MyBlogs";
-import AdminBlogReview from "./pages/AdminBlogReview";
+
+import Blogs from "./pages/blogs/Blogs";
+import BlogDetail from "./pages/blogs/BlogDetail";
+import CreateBlog from "./pages/blogs/CreateBlog";
+import EditBlog from "./pages/blogs/EditBlog";
+import MyBlogs from "./pages/blogs/MyBlogs";
+import AdminBlogReview from "./pages/admin/AdminBlogReview";
 
 const router = createBrowserRouter([
   {

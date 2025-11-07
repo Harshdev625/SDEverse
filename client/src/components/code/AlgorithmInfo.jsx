@@ -3,15 +3,13 @@ import remarkMath from "remark-math";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import {
+  oneDark,
+  oneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 import "katex/dist/katex.min.css";
 import { useSelector } from "react-redux";
 
-/**
- * Ensures blank lines before lists for correct Markdown rendering
- * @param {string} markdown - The markdown content
- * @returns {string} - The formatted markdown
- */
 const ensureBlankLineBeforeLists = (markdown) => {
   const lines = markdown.split("\n");
   const fixedLines = [];
@@ -25,7 +23,7 @@ const ensureBlankLineBeforeLists = (markdown) => {
     const isPrevCodeBlockDelimiter = previous.trim().startsWith("```");
 
     if (isListItem && !isPrevEmpty && !isPrevCodeBlockDelimiter) {
-      fixedLines.push(""); // Insert a blank line before the list if needed
+      fixedLines.push("");
     }
 
     fixedLines.push(current);
@@ -34,9 +32,6 @@ const ensureBlankLineBeforeLists = (markdown) => {
   return fixedLines.join("\n");
 };
 
-/**
- * Custom markdown components for ReactMarkdown
- */
 const markdownComponents = (themeMode) => ({
   code({ inline, className, children, ...props }) {
     const match = /language-(\w+)/.exec(className || "");
@@ -65,17 +60,26 @@ const markdownComponents = (themeMode) => ({
     );
   },
   h1: ({ children, ...props }) => (
-    <h1 className="text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-white" {...props}>
+    <h1
+      className="text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-white"
+      {...props}
+    >
       {children}
     </h1>
   ),
   h2: ({ children, ...props }) => (
-    <h2 className="text-2xl font-semibold mt-7 mb-3 text-gray-900 dark:text-white" {...props}>
+    <h2
+      className="text-2xl font-semibold mt-7 mb-3 text-gray-900 dark:text-white"
+      {...props}
+    >
       {children}
     </h2>
   ),
   h3: ({ children, ...props }) => (
-    <h3 className="text-xl font-semibold mt-6 mb-2 text-gray-900 dark:text-white" {...props}>
+    <h3
+      className="text-xl font-semibold mt-6 mb-2 text-gray-900 dark:text-white"
+      {...props}
+    >
       {children}
     </h3>
   ),
@@ -105,34 +109,41 @@ const markdownComponents = (themeMode) => ({
     </a>
   ),
   blockquote: ({ children, ...props }) => (
-    <blockquote className="border-l-4 border-gray-300 pl-4 py-2 italic text-gray-600 dark:text-gray-400 my-4" {...props}>
+    <blockquote
+      className="border-l-4 border-gray-300 pl-4 py-2 italic text-gray-600 dark:text-gray-400 my-4"
+      {...props}
+    >
       {children}
     </blockquote>
   ),
   table: ({ children, ...props }) => (
     <div className="overflow-x-auto my-4">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700" {...props}>
+      <table
+        className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700"
+        {...props}
+      >
         {children}
       </table>
     </div>
   ),
   th: ({ children, ...props }) => (
-    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-100 dark:bg-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700" {...props}>
+    <th
+      className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-100 dark:bg-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700"
+      {...props}
+    >
       {children}
     </th>
   ),
   td: ({ children, ...props }) => (
-    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700" {...props}>
+    <td
+      className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700"
+      {...props}
+    >
       {children}
     </td>
   ),
 });
 
-/**
- * Markdown rendering component with syntax highlighting and math support
- * @param {Object} props
- * @param {string} props.content - The markdown content to render
- */
 const MarkdownContentRenderer = ({ content }) => {
   const themeMode = useSelector((state) => state.theme.mode);
 
@@ -147,24 +158,27 @@ const MarkdownContentRenderer = ({ content }) => {
       <ReactMarkdown
         remarkPlugins={[
           [remarkMath, { singleDollarTextMath: false }],
-          remarkGfm
+          remarkGfm,
         ]}
         rehypePlugins={[
-          [rehypeKatex, {
-            throwOnError: false,
-            errorColor: '#cc0000',
-            displayMode: true,
-            fleqn: false,
-            macros: {
-              "\\RR": "\\mathbb{R}",
-              "\\NN": "\\mathbb{N}",
-              "\\ZZ": "\\mathbb{Z}",
-              "\\QQ": "\\mathbb{Q}",
-              "\\CC": "\\mathbb{C}"
+          [
+            rehypeKatex,
+            {
+              throwOnError: false,
+              errorColor: "#cc0000",
+              displayMode: true,
+              fleqn: false,
+              macros: {
+                "\\RR": "\\mathbb{R}",
+                "\\NN": "\\mathbb{N}",
+                "\\ZZ": "\\mathbb{Z}",
+                "\\QQ": "\\mathbb{Q}",
+                "\\CC": "\\mathbb{C}",
+              },
+              trust: true,
+              strict: false,
             },
-            trust: true,
-            strict: false
-          }]
+          ],
         ]}
         components={markdownComponents(themeMode)}
       >
@@ -174,12 +188,6 @@ const MarkdownContentRenderer = ({ content }) => {
   );
 };
 
-/**
- * Section wrapper for algorithm content blocks
- * @param {Object} props
- * @param {string} props.title - The title of the section
- * @param {string} props.content - The content to render
- */
 const AlgorithmContentBlock = ({ title, content }) => (
   <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-8 last:mb-0">
     <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 pb-3 mb-5 border-b border-gray-200 dark:border-gray-700">
@@ -193,16 +201,17 @@ const AlgorithmContentBlock = ({ title, content }) => (
   </div>
 );
 
-/**
- * Main component for displaying algorithm information
- * @param {Object} props
- * @param {Object} props.algorithm - The algorithm object containing problemStatement, intuition, explanation
- */
 const AlgorithmInfo = ({ algorithm }) => (
   <div className="space-y-8">
-    <AlgorithmContentBlock title="Problem Statement" content={algorithm.problemStatement} />
+    <AlgorithmContentBlock
+      title="Problem Statement"
+      content={algorithm.problemStatement}
+    />
     <AlgorithmContentBlock title="Intuition" content={algorithm.intuition} />
-    <AlgorithmContentBlock title="Explanation" content={algorithm.explanation} />
+    <AlgorithmContentBlock
+      title="Explanation"
+      content={algorithm.explanation}
+    />
   </div>
 );
 

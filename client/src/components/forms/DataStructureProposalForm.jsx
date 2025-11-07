@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import MonacoEditor from "@monaco-editor/react";
 import { Plus, Trash2, XCircle, Info } from "lucide-react";
-import DataStructurePreview from "../../pages/DataStructurePreview";
+import DataStructurePreview from "../../components/preview/DataStructurePreview";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import clsx from "clsx";
