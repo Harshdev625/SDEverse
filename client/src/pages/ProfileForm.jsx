@@ -1,9 +1,10 @@
-import { User, BarChart2, BookMarked, StickyNote } from "lucide-react";
+import { User, BarChart2, BookMarked, StickyNote, Archive } from "lucide-react";
 import { motion as Motion } from "framer-motion";
 import ProfileSection from "./ProfileSection";
 import LinksSection from "./LinksSection";
 import NotesPanel from "./NotesPanel";
 import BookmarksPanel from "./BookmarksPanel";
+import StorePanel from "./StorePanel";
 
 const TabButton = ({ label, icon, isActive, onClick }) => {
   return (
@@ -66,6 +67,12 @@ export default function ProfileForm({
             icon={<BookMarked size={20} />}
             isActive={activeTab === "bookmarks"}
             onClick={() => onTabChange("bookmarks")}
+          />
+          <TabButton
+            label="Store"
+            icon={<Archive size={20} />}
+            isActive={activeTab === "store"}
+            onClick={() => onTabChange("store")}
           />
           <TabButton
             label="Notes"
@@ -141,7 +148,11 @@ export default function ProfileForm({
           <BookmarksPanel />
         )}
         
-        {activeTab === "notes" && (
+              {activeTab === "store" && (
+                <StorePanel />
+              )}
+
+              {activeTab === "notes" && (
           <NotesPanel />
         )}
       </Motion.div>

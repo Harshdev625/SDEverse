@@ -1,21 +1,23 @@
-import { ExternalLink, Loader2, RefreshCw, Sparkles, Link2, Code2 } from 'lucide-react';
+import { ExternalLink, Loader2, RefreshCw, Sparkles, Link2, Code2, ChevronRight } from 'lucide-react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SiGithub, SiLinkedin, SiX, SiFacebook, SiInstagram, SiLeetcode, SiCodeforces, SiCodechef, SiSpoj } from 'react-icons/si';
 import { formatDistanceToNow } from 'date-fns';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useMemo, useCallback } from 'react';
 
 const platformConfig = {
-  github: { Icon: SiGithub, bar: 'from-gray-500 to-gray-700' },
-  linkedin: { Icon: SiLinkedin, bar: 'from-blue-500 to-blue-700' },
-  twitter: { Icon: SiX, bar: 'from-sky-400 to-sky-600' },
-  facebook: { Icon: SiFacebook, bar: 'from-blue-600 to-blue-800' },
-  instagram: { Icon: SiInstagram, bar: 'from-pink-500 to-pink-700' },
-  leetcode: { Icon: SiLeetcode, bar: 'from-yellow-400 to-amber-600' },
-  codeforces: { Icon: SiCodeforces, bar: 'from-red-500 to-red-700' },
-  codechef: { Icon: SiCodechef, bar: 'from-orange-500 to-orange-700' },
-  atcoder: { Icon: Code2, bar: 'from-purple-500 to-purple-700' },
-  spoj: { Icon: SiSpoj, bar: 'from-green-500 to-emerald-700' },
-  default: { Icon: Link2, bar: 'from-gray-400 to-gray-600' },
+  github: { Icon: SiGithub, bar: 'from-gray-500 to-gray-700', hasDetails: true },
+  linkedin: { Icon: SiLinkedin, bar: 'from-blue-500 to-blue-700', hasDetails: false },
+  twitter: { Icon: SiX, bar: 'from-sky-400 to-sky-600', hasDetails: false },
+  facebook: { Icon: SiFacebook, bar: 'from-blue-600 to-blue-800', hasDetails: false },
+  instagram: { Icon: SiInstagram, bar: 'from-pink-500 to-pink-700', hasDetails: false },
+  leetcode: { Icon: SiLeetcode, bar: 'from-yellow-400 to-amber-600', hasDetails: true },
+  codeforces: { Icon: SiCodeforces, bar: 'from-red-500 to-red-700', hasDetails: true },
+  codechef: { Icon: SiCodechef, bar: 'from-orange-500 to-orange-700', hasDetails: true },
+  atcoder: { Icon: Code2, bar: 'from-purple-500 to-purple-700', hasDetails: false },
+  spoj: { Icon: SiSpoj, bar: 'from-green-500 to-emerald-700', hasDetails: false },
+  default: { Icon: Link2, bar: 'from-gray-400 to-gray-600', hasDetails: false },
 };
 
 const getConfig = (p) => platformConfig[p.toLowerCase()] ?? platformConfig.default;
@@ -59,6 +61,7 @@ export default function LinksSection({
   }, [stats]);
 
   const handleRefresh = useCallback(() => onRefresh?.(), [onRefresh]);
+  const navigate = useNavigate();
 
   return (
     <Motion.section
@@ -103,7 +106,7 @@ export default function LinksSection({
       </div>
 
       <div className="mt-4 space-y-3">
-        <AnimatePresence mode="wait">
+  <AnimatePresence>
           {platforms.length === 0 ? (
             <Motion.p
               key="empty"
@@ -118,7 +121,8 @@ export default function LinksSection({
             platforms.map((platform, i) => {
               const link = links[platform];
               const visible = visibleStats[platform] ?? [];
-              const { Icon, bar } = getConfig(platform);
+              const config = getConfig(platform);
+              const { Icon, bar } = config;
               if (!link) return null;
 
               return (
@@ -129,7 +133,7 @@ export default function LinksSection({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ delay: i * 0.05, type: 'spring', stiffness: 300 }}
-                  className="group relative p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all"
+                  className="group relative p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-all"
                 >
                   <div
                     className={cn(
@@ -138,29 +142,44 @@ export default function LinksSection({
                     )}
                   />
 
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 pl-2">
+                  <div className="flex items-center justify-between gap-3 mb-3 pl-2">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2 bg-white dark:bg-gray-700 rounded-lg">
+                      <div className="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
                         <Icon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                       </div>
                       <div>
                         <h3 className="text-sm font-semibold capitalize text-gray-900 dark:text-white">
                           {formatKey(platform)}
                         </h3>
-                        <a
-                          href={link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
-                        >
-                          Visit <ExternalLink className="w-3 h-3" />
-                        </a>
                       </div>
+                    </div>
+
+                    {/* Action Buttons on the Right */}
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 rounded-lg transition-all"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Visit</span>
+                      </a>
+
+                      {config.hasDetails && (
+                        <button
+                          onClick={() => navigate(`/moreinfo/${platform.toLowerCase()}`)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all shadow-sm hover:shadow-md"
+                        >
+                          <span className="hidden sm:inline">View Details</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   </div>
 
                   {visible.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 pl-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 pl-2">
                       {visible.map(([k, v]) => (
                         <div
                           key={k}
