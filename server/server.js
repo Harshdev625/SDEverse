@@ -18,7 +18,6 @@ const bookmarkRoutes = require('./routes/bookmark.routes');
 const linkGroupRoutes = require('./routes/linkGroup.routes');
 const contactRoutes = require("./routes/contact.routes");
 const blogRoutes = require("./routes/blog.routes");
-const contactRoutes = require("./routes/contact.routes");
 const problemSheetRoutes = require('./routes/problemSheet.routes')
 
 const { notFound, errorHandler } = require("./middleware/error.middleware");
