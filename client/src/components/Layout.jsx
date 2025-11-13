@@ -2,21 +2,20 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
-import ScrollToTop from "./ScrollToTop";
+import QuickActions from "./QuickActions";
+import NoteEditor from "./NoteEditor";
 
 const Layout = () => {
   const themeMode = useSelector((state) => state.theme.mode);
   const location = useLocation();
 
-  const showScrollToTopRoutes = [
+  const showQuickActionsRoutes = [
     '/algorithms',
     '/data-structures',
-    '/algorithm-details',
-    '/data-structure-detail',
-    '/admin/analytics'
+    '/blogs'
   ];
 
-  const shouldShowScrollToTop = showScrollToTopRoutes.some(route =>
+  const shouldShowQuickActions = showQuickActionsRoutes.some(route =>
     location.pathname.startsWith(route)
   );
  
@@ -41,7 +40,9 @@ const Layout = () => {
         <div>
           <Footer />
         </div>
-        {shouldShowScrollToTop && <ScrollToTop />}
+  {shouldShowQuickActions && <QuickActions />}
+  {/* Global NoteEditor listener (hidden floating button) */}
+  <NoteEditor showFloatingButton={false} />
       </div>
     </div>
   );

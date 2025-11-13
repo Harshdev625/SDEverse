@@ -18,16 +18,13 @@ const ContactForm = () => {
     message: "",
   });
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Email validation
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -47,25 +44,28 @@ const ContactForm = () => {
       return;
     }
 
-    // Dispatch Redux action
-     dispatch(clearContactStatus());
+    dispatch(clearContactStatus());
     dispatch(sendContact(formData));
   };
 
-  // Watch for status updates
   useEffect(() => {
     if (success) {
       toast.success("Your message has been sent successfully!", {
         autoClose: 3000,
       });
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        subject: "",
-        message: "",
-      });
-      dispatch(clearContactStatus());
+
+      const timer = setTimeout(() => {
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
+        dispatch(clearContactStatus());
+      }, 100);
+
+      return () => clearTimeout(timer);
     }
 
     if (error) {
@@ -78,7 +78,6 @@ const ContactForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Row 1: First Name & Last Name */}
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -111,7 +110,6 @@ const ContactForm = () => {
         </div>
       </div>
 
-      {/* Email */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Email <span className="text-red-500">*</span>
@@ -128,7 +126,6 @@ const ContactForm = () => {
         />
       </div>
 
-      {/* Subject */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Subject <span className="text-red-500">*</span>
@@ -144,7 +141,6 @@ const ContactForm = () => {
         />
       </div>
 
-      {/* Message */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Message <span className="text-red-500">*</span>
@@ -161,7 +157,6 @@ const ContactForm = () => {
         />
       </div>
 
-      {/* Submit Button */}
       <button
         type="submit"
         disabled={loading}

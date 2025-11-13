@@ -11,7 +11,7 @@ const commentSchema = new mongoose.Schema(
   {
     parentType: {
       type: String,
-      enum: ["Algorithm", "Proposal","DataStructure","DataStructureProposal"],
+      enum: ["Algorithm", "Proposal","DataStructure","DataStructureProposal","Blog"],
       required: true,
     },
     parentId: {

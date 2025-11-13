@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { searchUsers } from "../features/user/userAPI";
 
-const MentionInput = ({ 
-  value, 
-  onChange, 
-  placeholder = "Write a comment...", 
+const MentionInput = ({
+  value,
+  onChange,
+  placeholder = "Write a comment...",
   className = "",
   rows = 4,
-  ...props 
+  ...props
 }) => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -28,32 +28,28 @@ const MentionInput = ({
     }
   };
 
-  // Debounce fetching suggestions
   useEffect(() => {
     const timeout = setTimeout(() => {
-      // Only fetch suggestions if user has actually typed something
-      if (hasUserTyped) {
-        fetchSuggestions(query);
-      }
-    }, query === "" ? 0 : 300); // No delay for empty query (immediate @sdeverse)
+      if (hasUserTyped) fetchSuggestions(query);
+    }, query === "" ? 0 : 300);
     return () => clearTimeout(timeout);
   }, [query, hasUserTyped]);
 
-  // Detect @mentions
   useEffect(() => {
     const match = value.match(/@([a-zA-Z0-9_]*)$/);
-    if (match) {
-      const queryText = match[1];
-      setQuery(queryText);
-      setHasUserTyped(true); // User has typed something
-    } else {
-      setQuery("");
-      setShowSuggestions(false);
-      setHasUserTyped(false); // Reset when no @ mention
-    }
+    requestAnimationFrame(() => {
+      if (match) {
+        const queryText = match[1];
+        setQuery(queryText);
+        setHasUserTyped(true);
+      } else {
+        setQuery("");
+        setShowSuggestions(false);
+        setHasUserTyped(false);
+      }
+    });
   }, [value]);
 
-  // Handle clicks outside to close suggestions
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -64,36 +60,22 @@ const MentionInput = ({
         setShowSuggestions(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  function handleSelect(username) {
+  const handleSelect = (username) => {
     const newText = value.replace(/@([a-zA-Z0-9_]*)$/, `@${username} `);
     onChange(newText);
     setShowSuggestions(false);
-    
-    // Focus back to textarea
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-      }
-    }, 0);
-  }
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  };
 
-  function handleKeyDown(e) {
-    if (showSuggestions && suggestions.length > 0) {
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        // Handle arrow navigation if needed
-      } else if (e.key === "Escape") {
-        setShowSuggestions(false);
-      }
+  const handleKeyDown = (e) => {
+    if (showSuggestions && suggestions.length > 0 && e.key === "Escape") {
+      setShowSuggestions(false);
     }
-  }
+  };
 
   return (
     <div className="relative w-full">
@@ -106,9 +88,10 @@ const MentionInput = ({
         placeholder={placeholder}
         rows={rows}
         spellCheck={false}
+        aria-label="Mention input"
         {...props}
       />
-      
+
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionRef}
@@ -119,6 +102,9 @@ const MentionInput = ({
               key={user._id}
               onClick={() => handleSelect(user.username)}
               className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center gap-2 border-b border-gray-200 dark:border-gray-600 last:border-b-0"
+              role="button"
+              tabIndex={0}
+              aria-label={`Mention ${user.username}`}
             >
               <img
                 src={user.avatarUrl || "/default-avatar.png"}

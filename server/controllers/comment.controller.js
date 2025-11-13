@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const Comment = require("../models/comment.model");
 const Algorithm = require("../models/algorithm.model");
 const Proposal = require("../models/proposal.model");
+const Blog = require("../models/blog.model");
 const User = require("../models/user.model");
 const Notification = require("../models/notification.model");
 
@@ -23,6 +24,8 @@ const getParentModel = (parentType) => {
       return DataStructure;
     case "DataStructureProposal":
       return DataStructureProposal;
+    case "Blog":
+      return Blog;
     default:
       throw new Error("Invalid parent type provided.");
   }
@@ -37,6 +40,9 @@ const getParentAuthorId = (parentType, parentDoc) => {
   if (parentType === "Proposal" || parentType === "DataStructureProposal") {
     return parentDoc.contributor;
   }
+  if (parentType === "Blog") {
+    return parentDoc.author;
+  }
   return null;
 };
 
@@ -48,6 +54,7 @@ const addComment = asyncHandler(async (req, res) => {
     "Proposal",
     "DataStructure",
     "DataStructureProposal",
+    "Blog",
   ];
   if (!allowedParentTypes.includes(parentType)) {
     res.status(400);
@@ -149,6 +156,7 @@ const getCommentsByParent = asyncHandler(async (req, res) => {
     "Proposal",
     "DataStructure",
     "DataStructureProposal",
+    "Blog",
   ];
   if (!allowedParentTypes.includes(parentType)) {
     res.status(400);

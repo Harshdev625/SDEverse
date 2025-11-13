@@ -4,7 +4,6 @@ const Algorithm = require("../models/algorithm.model");
 const Proposal = require("../models/proposal.model");
 const Comment = require("../models/comment.model");
 const Feedback = require("../models/feedback.model");
-
 const {
   extractUsernameFromUrl,
   fetchLeetCodeStats,
@@ -15,12 +14,10 @@ const {
   fetchAllCompetitiveStats,
   getDefaultStats,
 } = require("../utils/profileFetchers");
-
 const {
   extractSocialUsernameFromUrl,
   fetchSocialStats,
 } = require("../utils/socialProfileFetchers");
-
 const cloudinary = require("../config/cloudinary");
 
 const socialStatsFieldsMap = {
@@ -45,11 +42,7 @@ const getAdminAnalytics = async (req, res) => {
     const daysAgo7 = new Date(now);
     daysAgo7.setDate(now.getDate() - 7);
 
-    const getDailyCounts = async (
-      Model,
-      dateField = "createdAt",
-      match = {}
-    ) => {
+    const getDailyCounts = async (Model, dateField = "createdAt", match = {}) => {
       return await Model.aggregate([
         {
           $match: {
@@ -90,6 +83,8 @@ const getAdminAnalytics = async (req, res) => {
       popularCategories,
       userActivityBreakdown,
       feedbackBySeverity,
+      avgProjectsPerUser,
+      avgExperiencesPerUser,
     ] = await Promise.all([
       User.countDocuments(),
       User.countDocuments({ role: "admin" }),
@@ -97,49 +92,36 @@ const getAdminAnalytics = async (req, res) => {
       Proposal.countDocuments(),
       Comment.countDocuments(),
       Feedback.countDocuments(),
-
       (async () => {
         const activeUserIdsSet = new Set();
-
         const collectUserIds = async (Model, userField = "createdBy") => {
           const docs = await Model.find({
             createdAt: { $gte: daysAgo30, $lte: now },
           })
             .select(userField)
             .lean();
-
           docs.forEach((doc) => {
             const id = doc[userField] || doc.user;
             if (id) activeUserIdsSet.add(id.toString());
           });
         };
-
         await Promise.all([
           collectUserIds(Algorithm, "createdBy"),
           collectUserIds(Proposal, "contributor"),
           collectUserIds(Comment, "user"),
         ]);
-
         return activeUserIdsSet.size;
       })(),
-
       User.aggregate([{ $group: { _id: "$role", count: { $sum: 1 } } }]),
-
-      Algorithm.aggregate([
-        { $group: { _id: "$difficulty", count: { $sum: 1 } } },
-      ]),
-
+      Algorithm.aggregate([{ $group: { _id: "$difficulty", count: { $sum: 1 } } }]),
       Algorithm.aggregate([
         { $unwind: "$category" },
         { $group: { _id: "$category", count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 5 },
       ]),
-
       Proposal.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
-
       Feedback.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
-
       Algorithm.aggregate([
         {
           $match: {
@@ -163,14 +145,12 @@ const getAdminAnalytics = async (req, res) => {
         { $limit: 5 },
         { $project: { title: 1, recentViews: 1 } },
       ]),
-
       Algorithm.aggregate([
         { $unwind: "$category" },
         { $group: { _id: "$category", count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 5 },
       ]),
-
       (async () => {
         const [
           algorithmContributors,
@@ -181,17 +161,15 @@ const getAdminAnalytics = async (req, res) => {
           Proposal.distinct("contributor", { createdAt: { $gte: daysAgo30 } }),
           Comment.distinct("user", { createdAt: { $gte: daysAgo30 } }),
         ]);
-
         return {
           algorithmContributors: algorithmContributors.length,
           proposalContributors: proposalContributors.length,
           commentContributors: commentContributors.length,
         };
       })(),
-
-      Feedback.aggregate([
-        { $group: { _id: "$severity", count: { $sum: 1 } } },
-      ]),
+      Feedback.aggregate([{ $group: { _id: "$severity", count: { $sum: 1 } } }]),
+      User.aggregate([{ $group: { _id: null, avg: { $avg: { $size: "$projects" } } } }]).then(r => r[0]?.avg.toFixed(2) || 0),
+      User.aggregate([{ $group: { _id: null, avg: { $avg: { $size: "$experiences" } } } }]).then(r => r[0]?.avg.toFixed(2) || 0),
     ]);
 
     const [
@@ -206,26 +184,13 @@ const getAdminAnalytics = async (req, res) => {
       getDailyCounts(Comment),
     ]);
 
-    const avgAlgorithmsPerUser =
-      totalUsers > 0 ? (totalAlgorithms / totalUsers).toFixed(2) : 0;
-    const avgProposalsPerUser =
-      totalUsers > 0 ? (totalProposals / totalUsers).toFixed(2) : 0;
-    const avgCommentsPerUser =
-      totalUsers > 0 ? (totalComments / totalUsers).toFixed(2) : 0;
-
-    const resolvedFeedback =
-      feedbackByStatus.find((f) => f._id === "resolved")?.count || 0;
-    const feedbackResolutionRate =
-      totalFeedback > 0
-        ? Math.round((resolvedFeedback / totalFeedback) * 100)
-        : 0;
-
-    const approvedProposals =
-      proposalsByStatus.find((p) => p._id === "approved")?.count || 0;
-    const proposalApprovalRate =
-      totalProposals > 0
-        ? Math.round((approvedProposals / totalProposals) * 100)
-        : 0;
+    const avgAlgorithmsPerUser = totalUsers > 0 ? (totalAlgorithms / totalUsers).toFixed(2) : 0;
+    const avgProposalsPerUser = totalUsers > 0 ? (totalProposals / totalUsers).toFixed(2) : 0;
+    const avgCommentsPerUser = totalUsers > 0 ? (totalComments / totalUsers).toFixed(2) : 0;
+    const resolvedFeedback = feedbackByStatus.find((f) => f._id === "resolved")?.count || 0;
+    const feedbackResolutionRate = totalFeedback > 0 ? Math.round((resolvedFeedback / totalFeedback) * 100) : 0;
+    const approvedProposals = proposalsByStatus.find((p) => p._id === "approved")?.count || 0;
+    const proposalApprovalRate = totalProposals > 0 ? Math.round((approvedProposals / totalProposals) * 100) : 0;
 
     res.status(200).json({
       platformMetrics: {
@@ -248,6 +213,8 @@ const getAdminAnalytics = async (req, res) => {
         avgProposalsPerUser,
         avgCommentsPerUser,
         userActivityBreakdown,
+        avgProjectsPerUser,
+        avgExperiencesPerUser,
       },
       feedbackInsights: {
         feedbackByStatus,
@@ -280,38 +247,23 @@ const updateSingleCompetitiveStat = asyncHandler(async (req, res) => {
   try {
     const { platform } = req.params;
     const user = await User.findById(req.user._id);
-
     if (!user) {
       res.status(404);
       throw new Error("User not found");
     }
-
-    const validPlatforms = [
-      "leetcode",
-      "codeforces",
-      "codechef",
-      "atcoder",
-      "spoj",
-    ];
+    const validPlatforms = ["leetcode", "codeforces", "codechef", "atcoder", "spoj"];
     if (!validPlatforms.includes(platform)) {
       res.status(400);
       throw new Error("Invalid platform");
     }
-
     const url = user.competitiveProfiles[platform];
     if (!url) {
-      return res.status(400).json({
-        error: `No ${platform} profile URL found for this user`,
-      });
+      return res.status(400).json({ error: `No ${platform} profile URL found for this user` });
     }
-
     const username = extractUsernameFromUrl(platform, url);
     if (!username) {
-      return res.status(400).json({
-        error: `Could not extract username from ${platform} URL`,
-      });
+      return res.status(400).json({ error: `Could not extract username from ${platform} URL` });
     }
-
     let stats;
     switch (platform) {
       case "leetcode":
@@ -330,35 +282,19 @@ const updateSingleCompetitiveStat = asyncHandler(async (req, res) => {
         stats = await fetchSpojStats(username);
         break;
     }
-
     if (!stats) {
-      stats = {
-        summary: getDefaultStats(platform),
-        moreInfo: {},
-        profileUrl: "",
-      };
+      stats = { summary: getDefaultStats(platform), moreInfo: {}, profileUrl: "" };
     }
-
     user.competitiveStats[platform] = stats.summary;
     await user.save();
-
     return res.status(200).json({
       message: `${platform} stats updated`,
       platform,
       competitiveStats: user.competitiveStats,
-      extraStats: {
-        [platform]: {
-          summary: stats.summary,
-          moreInfo: stats.moreInfo,
-          profileUrl: stats.profileUrl,
-        },
-      },
+      extraStats: { [platform]: { summary: stats.summary, moreInfo: stats.moreInfo, profileUrl: stats.profileUrl } },
     });
   } catch (error) {
-    console.error(
-      `updateSingleCompetitiveStat error (${req.params.platform}):`,
-      error
-    );
+    console.error(`updateSingleCompetitiveStat error (${req.params.platform}):`, error);
     return res.status(500).json({ error: "Server error" });
   }
 });
@@ -366,86 +302,57 @@ const updateSingleCompetitiveStat = asyncHandler(async (req, res) => {
 const updateSingleSocialStat = asyncHandler(async (req, res) => {
   try {
     const { platform } = req.params;
-    const userId = req.user.id;
-    const user = await User.findById(userId);
-
+    const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      res.status(404);
+      throw new Error("User not found");
     }
-
-    const validPlatforms = [
-      "github",
-      "linkedin",
-      "twitter",
-      "facebook",
-      "instagram",
-    ];
+    const validPlatforms = ["github", "linkedin", "twitter", "facebook", "instagram"];
     if (!validPlatforms.includes(platform)) {
-      return res.status(400).json({
-        error: "Invalid platform",
-        validPlatforms: validPlatforms.join(", "),
-      });
+      res.status(400);
+      throw new Error("Invalid platform");
     }
-
-    const socialLinks = user.socialLinks || {};
-    const url = socialLinks[platform];
-
+    const url = user.socialLinks[platform];
     if (!url) {
-      return res.status(400).json({
-        error: `No ${platform} profile URL found for this user`,
-      });
+      return res.status(400).json({ error: `No ${platform} profile URL found` });
     }
-
     const username = extractSocialUsernameFromUrl(platform, url);
     if (!username) {
-      return res.status(400).json({
-        error: `Could not extract username from ${platform} URL`,
-      });
+      return res.status(400).json({ error: `Could not extract username from ${platform} URL` });
     }
-
-    let stats;
-    try {
-      stats = await fetchSocialStats(platform, username);
-    } catch (err) {
-      console.error(`Error fetching ${platform} stats:`, err.message);
-
-      stats = {
-        summary: `${platform} stats unavailable`,
-        moreInfo: {},
-        profileUrl: url,
-      };
+    const stats = await fetchSocialStats(platform, username);
+    if (!stats || !stats.moreInfo) {
+      return res.status(400).json({ error: `Failed to fetch ${platform} stats` });
     }
-
     const summary = {};
-    const fields = socialStatsFieldsMap[platform] || [];
-
-    fields.forEach((field) => {
-      if (stats.moreInfo[field] !== undefined) {
-        summary[field] = stats.moreInfo[field];
+    const fieldsMapping = socialStatsFieldsMap[platform] || [];
+    fieldsMapping.forEach((mapping) => {
+      let sourceField, targetField;
+      if (typeof mapping === "string") {
+        sourceField = mapping;
+        targetField = mapping;
+      } else {
+        sourceField = mapping.sourcePath;
+        targetField = mapping.targetField;
       }
+      const value = sourceField.split(".").reduce((acc, part) => acc && acc[part], stats.moreInfo);
+      if (value !== undefined) summary[targetField] = value;
     });
-
-    summary.updatedAt = new Date();
-
-    user.socialStats[platform] = summary;
-    await user.save();
-
-    return res.status(200).json({
-      message: `${platform} stats updated successfully`,
-      platform,
-      socialStats: user.socialStats,
-      extraSocialStats: { [platform]: stats.moreInfo },
+    user.socialStats[platform] = {
+      ...user.socialStats[platform],
+      ...summary,
+      updatedAt: stats.moreInfo.updatedAt || new Date(),
       profileUrl: url,
+    };
+    await user.save();
+    return res.status(200).json({
+      message: `${platform} stats updated`,
+      socialStats: user.socialStats,
+      extraSocialStats: { [platform]: stats },
     });
   } catch (error) {
-    console.error(
-      `updateSingleSocialStat error (${req.params.platform}):`,
-      error
-    );
-    return res.status(500).json({
-      error: "Server error",
-      details: error.message,
-    });
+    console.error(`updateSingleSocialStat error (${req.params.platform}):`, error);
+    return res.status(500).json({ error: "Server error" });
   }
 });
 
@@ -456,25 +363,17 @@ const updateAllCompetitiveStats = asyncHandler(async (req, res) => {
       res.status(404);
       throw new Error("User not found");
     }
-
-    const allStatsWithExtra = await fetchAllCompetitiveStats(
-      user.competitiveProfiles
-    );
-
-    const platforms = ["leetcode", "codeforces", "codechef", "atcoder", "spoj"];
-    for (const platform of platforms) {
+    const allStatsWithExtra = await fetchAllCompetitiveStats(user.competitiveProfiles);
+    for (const platform in allStatsWithExtra) {
       if (allStatsWithExtra[platform]?.summary) {
         const existingUpdatedAt = user.competitiveStats[platform]?.updatedAt;
-
         user.competitiveStats[platform] = {
           ...allStatsWithExtra[platform].summary,
           updatedAt: existingUpdatedAt || new Date(),
         };
       }
     }
-
     await user.save();
-
     return res.status(200).json({
       message: "Competitive stats update complete",
       competitiveStats: user.competitiveStats,
@@ -486,82 +385,55 @@ const updateAllCompetitiveStats = asyncHandler(async (req, res) => {
   }
 });
 
-// --- MODIFIED: updateSocialProfiles to correctly use socialStatsFieldsMap ---
 const updateSocialProfiles = asyncHandler(async (req, res) => {
   try {
     const userId = req.user.id;
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
-
     const socialLinks = user.socialLinks || {};
     const platforms = Object.keys(socialLinks);
-
     for (const platform of platforms) {
       const url = socialLinks[platform];
       if (!url) continue;
-
       const username = extractSocialUsernameFromUrl(platform, url);
-      if (!username) {
-        console.warn(
-          `Could not extract username for ${platform} from URL: ${url}`
-        );
-        continue;
-      }
-
+      if (!username) continue;
       try {
         const stats = await fetchSocialStats(platform, username);
         if (stats && stats.moreInfo) {
           const summary = {};
-          // The crucial line to fix: use fieldsMapping instead of fields
           const fieldsMapping = socialStatsFieldsMap[platform] || [];
-
           fieldsMapping.forEach((mapping) => {
             let sourceField;
             let targetField;
-
             if (typeof mapping === "string") {
               sourceField = mapping;
               targetField = mapping;
             } else {
-              // It's an object { sourcePath, targetField }
               sourceField = mapping.sourcePath;
               targetField = mapping.targetField;
             }
-
-            // Safely get nested value
             const value = sourceField.split(".").reduce((acc, part) => {
               return acc && typeof acc === "object" ? acc[part] : undefined;
             }, stats.moreInfo);
-
             if (value !== undefined) {
               summary[targetField] = value;
             }
           });
-
           const fetchedUpdatedAt = stats.moreInfo.updatedAt || new Date();
-
-          // Ensure user.socialStats[platform] is initialized if it doesn't exist
           user.socialStats = user.socialStats || {};
           user.socialStats[platform] = user.socialStats[platform] || {};
-
-          // Update platform stats
           user.socialStats[platform] = {
-            ...user.socialStats[platform], // Keep existing fields if not explicitly updated
+            ...user.socialStats[platform],
             ...summary,
             updatedAt: fetchedUpdatedAt,
             profileUrl: url,
           };
         }
       } catch (err) {
-        console.error(
-          `Error fetching stats for ${platform} (${username}):`,
-          err.message
-        );
+        console.error(`Error fetching stats for ${platform} (${username}):`, err.message);
       }
     }
-
     await user.save();
-
     return res.status(200).json({
       message: "Social stats updated",
       socialStats: user.socialStats,
@@ -575,27 +447,21 @@ const updateSocialProfiles = asyncHandler(async (req, res) => {
 const getAllUsers = async (req, res) => {
   try {
     const { search = "", page = 1, limit = 10, role } = req.query;
-
     const query = {};
-
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },
       ];
     }
-
     if (role) {
       query.role = role.toLowerCase();
     }
-
     const skip = (parseInt(page) - 1) * parseInt(limit);
-
     const [users, total] = await Promise.all([
       User.find(query).skip(skip).limit(parseInt(limit)),
       User.countDocuments(query),
     ]);
-
     res.json({
       users,
       total,
@@ -640,16 +506,13 @@ const updateUserRole = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("User not found");
   }
-
   const { role } = req.body;
   if (!["user", "admin"].includes(role)) {
     res.status(400);
     throw new Error("Invalid role");
   }
-
   user.role = role;
   await user.save();
-
   res.json({ message: `User role updated to ${role}` });
 });
 
@@ -676,118 +539,77 @@ const updateMyProfile = asyncHandler(async (req, res) => {
     "bio",
     "competitiveProfiles",
     "socialLinks",
+    "projects",
+    "experiences",
   ];
 
-  // Handle image upload or direct URL
-  let imageUrl = user.avatarUrl;
-  let image = req.body.avatarUrl;
-  let bannerUrl = req.body.bannerUrl;
+  let avatarUrl = user.avatarUrl;
+  const avatar = req.body.avatarUrl;
+  const isBase64 = (str) => typeof str === "string" && /^data:/.test(str.trim());
 
-  // Normalize possible data URI prefixes and detect base64 data correctly.
-  // Valid base64 data URIs start with 'data:' (optionally prefixed by protocol if submitted wrong).
-  const isBase64Data = (str) => {
-    if (!str || typeof str !== "string") return false;
-    // strip any accidental leading protocol artifacts
-    const trimmed = str.trim();
-    if (trimmed.startsWith("http://data:") || trimmed.startsWith("https://data:")) {
-      return true;
-    }
-    if (trimmed.startsWith("data:")) return true;
-    return false;
-  };
-
-  if (image) {
-    // If the client sent a data URI (base64), upload it to Cloudinary
+  if (avatar) {
     try {
-      if (isBase64Data(image)) {
-        // remove accidental protocol if present
-        const cleaned = image.replace(/^https?:\/\//, "");
-        const uploadResponse = await cloudinary.uploader.upload(cleaned, {
+      if (isBase64(avatar)) {
+        const upload = await cloudinary.uploader.upload(avatar, {
           folder: "profile_avatars",
         });
-        imageUrl = uploadResponse.secure_url;
-      } else if (image.startsWith("http://") || image.startsWith("https://")) {
-        // image is already a valid URL
-        imageUrl = image;
-      } else {
-        // If it's neither a URL nor a data URI, assume it's already a URL-ish string and set it
-        imageUrl = image;
+        avatarUrl = upload.secure_url;
+      } else if (/^https?:\/\//.test(avatar)) {
+        avatarUrl = avatar;
       }
     } catch (err) {
-      console.error("Error uploading avatar to cloudinary:", err.message || err);
-      // keep existing avatarUrl on failure
+      console.error("Avatar upload error:", err);
     }
   }
 
-  if (bannerUrl) {
+  let bannerUrl = user.bannerUrl;
+  const banner = req.body.bannerUrl;
+  if (banner && isBase64(banner)) {
     try {
-      if (isBase64Data(bannerUrl)) {
-        const cleaned = bannerUrl.replace(/^https?:\/\//, "");
-        const uploadResponse = await cloudinary.uploader.upload(cleaned, {
-          folder: "profile_banners",
-        });
-        bannerUrl = uploadResponse.secure_url;
-      } else if (bannerUrl.startsWith("http://") || bannerUrl.startsWith("https://")) {
-        // leave as-is
-      } else {
-        // leave as-is
-      }
+      const upload = await cloudinary.uploader.upload(banner, {
+        folder: "profile_banners",
+      });
+      bannerUrl = upload.secure_url;
     } catch (err) {
-      console.error("Error uploading banner to cloudinary:", err.message || err);
-      // keep existing banner on failure
+      console.error("Banner upload error:", err);
     }
   }
-  user.avatarUrl = imageUrl;
-  user.bannerUrl = bannerUrl;
 
   updatableFields.forEach((field) => {
     if (req.body[field] !== undefined) {
+      if ((field === "projects" || field === "experiences") && !Array.isArray(req.body[field])) {
+        throw new Error(`${field} must be an array`);
+      }
       user[field] = req.body[field];
     }
   });
 
-  await user.save();
-  const updatedUser = user.toObject();
-  delete updatedUser.password;
+  user.avatarUrl = avatarUrl;
+  user.bannerUrl = bannerUrl;
 
-  res.json({ message: "Profile updated", user: updatedUser });
+  await user.save();
+
+  const updated = user.toObject();
+  delete updated.password;
+  res.json({ message: "Profile updated", user: updated });
 });
 
 const searchUsers = asyncHandler(async (req, res) => {
   try {
     const { query } = req.query;
-    
-    // Hardcoded @sdeverse suggestion (not in database)
-    const sdeverseSuggestion = {
-      _id: "sdeverse-admin",
-      username: "sdeverse",
-      avatarUrl: "/default-avatar.png"
-    };
-
-    // Handle empty query - show @sdeverse first (when user types @)
+    const sdeverseSuggestion = { _id: "sdeverse-admin", username: "sdeverse", avatarUrl: "/default-avatar.png" };
     if (!query || query.trim() === "") {
       return res.json([sdeverseSuggestion]);
     }
-
     const results = [];
-    
-    // Only show @sdeverse if query starts with 's'
     if (query.toLowerCase().startsWith('s')) {
       results.push(sdeverseSuggestion);
     }
-
-    // Find other users matching the query (exclude admin users)
     const otherUsers = await User.find(
-      { 
-        username: { $regex: query, $options: "i" },
-        role: { $ne: "admin" } // Exclude admin users from suggestions
-      },
+      { username: { $regex: query, $options: "i" }, role: { $ne: "admin" } },
       { username: 1, _id: 1, avatarUrl: 1 }
-    ).limit(4); // Limit to 4 since we might add sdeverse
-
-    // Add other matching users
+    ).limit(4);
     results.push(...otherUsers);
-
     res.json(results);
   } catch (error) {
     console.error("Error fetching user suggestions:", error);

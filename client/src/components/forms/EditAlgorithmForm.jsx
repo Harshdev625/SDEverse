@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Trash2, Plus, ChevronDown } from "lucide-react";
 import MonacoEditor from "@monaco-editor/react";
-import AlgorithmPreview from "../../pages/AlgorithmPreview";
+import AlgorithmPreview from "../../components/preview/AlgorithmPreview";
 import { useSelector } from "react-redux";
 
 const EditAlgorithmForm = ({ algorithm = {}, onSave, onCancel, categories }) => {

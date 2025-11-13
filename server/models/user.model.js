@@ -19,14 +19,11 @@ const userSchema = new mongoose.Schema(
     },
     password: { type: String, required: true },
     bio: { type: String, trim: true, default: "" },
-
     fullName: { type: String, trim: true, default: "" },
     avatarUrl: { type: String, trim: true, default: "" },
     bannerUrl: { type: String, trim: true, default: "" },
-
     location: { type: String, trim: true, default: "" },
     website: { type: String, trim: true, default: "" },
-
     competitiveProfiles: {
       leetcode: { type: String, trim: true, default: "" },
       codeforces: { type: String, trim: true, default: "" },
@@ -34,7 +31,6 @@ const userSchema = new mongoose.Schema(
       atcoder: { type: String, trim: true, default: "" },
       spoj: { type: String, trim: true, default: "" },
     },
-
     competitiveStats: {
       codeforces: {
         currentRating: { type: Number, default: 0 },
@@ -72,7 +68,6 @@ const userSchema = new mongoose.Schema(
         updatedAt: { type: Date, default: null },
       },
     },
-
     socialLinks: {
       github: { type: String, trim: true, default: "" },
       linkedin: { type: String, trim: true, default: "" },
@@ -80,7 +75,6 @@ const userSchema = new mongoose.Schema(
       facebook: { type: String, trim: true, default: "" },
       instagram: { type: String, trim: true, default: "" },
     },
-
     socialStats: {
       github: {
         publicRepos: { type: Number, default: 0 },
@@ -114,7 +108,28 @@ const userSchema = new mongoose.Schema(
         updatedAt: { type: Date, default: null },
       },
     },
-
+    projects: [
+      {
+        title: { type: String, trim: true, required: true },
+        description: { type: String, trim: true, default: "" },
+        url: { type: String, trim: true, default: "" },
+        technologies: [{ type: String, trim: true }],
+        startDate: { type: Date, default: null },
+        endDate: { type: Date, default: null },
+        isOngoing: { type: Boolean, default: false },
+      },
+    ],
+    experiences: [
+      {
+        company: { type: String, trim: true, required: true },
+        role: { type: String, trim: true, required: true },
+        description: { type: String, trim: true, default: "" },
+        location: { type: String, trim: true, default: "" },
+        startDate: { type: Date, required: true },
+        endDate: { type: Date, default: null },
+        isCurrent: { type: Boolean, default: false },
+      },
+    ],
     totalProposals: { type: Number, default: 0 },
     totalReviews: { type: Number, default: 0 },
     role: { type: String, enum: ["user", "admin"], default: "user" },

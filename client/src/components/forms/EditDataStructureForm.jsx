@@ -4,7 +4,7 @@ import MonacoEditor from "@monaco-editor/react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import DataStructurePreview from "../../pages/DataStructurePreview";
+import DataStructurePreview from "../../components/preview/DataStructurePreview";
 import { fetchDataStructureCategories, updateExistingDataStructure } from "../../features/dataStructure/dataStructureSlice";
 
 const DATA_STRUCTURE_TYPES = ["Linear", "Non-Linear", "Hierarchical", "Graph", "Other"];

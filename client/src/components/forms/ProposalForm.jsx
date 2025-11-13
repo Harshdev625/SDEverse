@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Trash2, Plus, ChevronDown, Info } from "lucide-react";
 import MonacoEditor from "@monaco-editor/react";
-import AlgorithmPreview from "../../pages/AlgorithmPreview"; // Ensure this path is correct
+import AlgorithmPreview from "../../components/preview/AlgorithmPreview";
 import clsx from "clsx";
 import { useSelector } from "react-redux";
 

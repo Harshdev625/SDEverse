@@ -11,6 +11,10 @@ import contactReducer from "../features/contact/contactSlice";
 import communityReducer from "../features/community/communitySlice";
 import dataStructureReducer from "../features/dataStructure/dataStructureSlice";
 import dataStructureProposalReducer from "../features/dataStructureProposal/dataStructureProposalSlice";
+import blogReducer from "../features/blog/blogSlice";
+import noteReducer from "../features/note/noteSlice";
+import bookmarkReducer from "../features/bookmark/bookmarkSlice";
+import linkGroupReducer from "../features/linkGroup/linkGroupSlice";
 import problemSheetReducer from "../features/problemSheet/problemSheetSlice";
 
 const store = configureStore({
@@ -27,6 +31,10 @@ const store = configureStore({
     community: communityReducer,
     dataStructure: dataStructureReducer,
     dataStructureProposal: dataStructureProposalReducer,
+    blog: blogReducer,
+    note: noteReducer,
+    bookmark: bookmarkReducer,
+    linkGroup: linkGroupReducer,
     problemSheets: problemSheetReducer,
   },
   devTools: import.meta.env.MODE !== "production",

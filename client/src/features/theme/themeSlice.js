@@ -2,12 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const storedTheme = localStorage.getItem("theme") || "light";
 const injectScrollbarTheme = () => {
-  if (document.getElementById("scrollbar-theme-style")) return; // prevent duplicates
+  if (document.getElementById("scrollbar-theme-style")) return;
 
   const style = document.createElement("style");
   style.id = "scrollbar-theme-style";
   style.innerHTML = `
-    /* Dark theme scrollbar */
+   
     .dark ::-webkit-scrollbar {
       width: 8px;
     }
@@ -21,8 +21,6 @@ const injectScrollbarTheme = () => {
     .dark ::-webkit-scrollbar-thumb:hover {
       background-color: #64748b;
     }
-
-    /* Firefox (dark mode only) */
     .dark {
       scrollbar-width: thin;
       scrollbar-color: #475569 #1e293b;
@@ -31,7 +29,6 @@ const injectScrollbarTheme = () => {
   document.head.appendChild(style);
 };
 
-// ✅ Apply theme class and scrollbar styles when initialized
 if (storedTheme === "dark") {
   document.documentElement.classList.add("dark");
   injectScrollbarTheme();
@@ -47,26 +44,24 @@ const themeSlice = createSlice({
     toggleTheme: (state) => {
       state.mode = state.mode === "dark" ? "light" : "dark";
       localStorage.setItem("theme", state.mode);
-      // console.log("Toggling theme to:", state.mode);
+
       if (state.mode === "dark") {
         document.documentElement.classList.add("dark");
       } else {
         document.documentElement.classList.remove("dark");
       }
       injectScrollbarTheme();
-      // console.log("Document classes:", document.documentElement.className);
     },
     setTheme: (state, action) => {
       state.mode = action.payload;
       localStorage.setItem("theme", state.mode);
-      // console.log("Setting theme to:", state.mode);
+
       if (state.mode === "dark") {
         document.documentElement.classList.add("dark");
       } else {
         document.documentElement.classList.remove("dark");
       }
       injectScrollbarTheme();
-      // console.log("Document classes:", document.documentElement.className);
     },
   },
 });
