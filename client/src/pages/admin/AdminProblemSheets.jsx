@@ -5,11 +5,11 @@ import {
   createSheet, 
   updateSheet, 
   deleteSheet 
-} from '../features/problemSheet/problemSheetSlice';
+} from '../../features/problemSheet/problemSheetSlice';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
-import Loader from '../components/Loader';
+import Loader from '../../components/Loader';
 
 const AdminProblemSheets = () => {
   const dispatch = useDispatch();

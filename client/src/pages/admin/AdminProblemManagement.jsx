@@ -7,12 +7,12 @@ import {
   deleteProblem,
   setCurrentSheet,
   setProblems,
-} from '../features/problemSheet/problemSheetSlice';
-import * as problemSheetAPI from '../features/problemSheet/problemSheetAPI';
+} from '../../features/problemSheet/problemSheetSlice';
+import * as problemSheetAPI from '../../features/problemSheet/problemSheetAPI';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
-import Loader from '../components/Loader';
+import Loader from '../../components/Loader';
 
 const PLATFORMS = ['leetcode', 'hackerrank', 'codeforces', 'codechef', 'atcoder', 'other'];
 const DIFFICULTIES = ['easy', 'medium', 'hard'];

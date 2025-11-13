@@ -7,7 +7,7 @@ import {
   fetchSheetMetrics,
   toggleProblemComplete,
   clearCurrentSheet,
-} from "../features/problemSheet/problemSheetSlice.js";
+} from "../../features/problemSheet/problemSheetSlice.js";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -18,8 +18,8 @@ import {
   ChevronRight,
   ExternalLink,
 } from "lucide-react";
-import ProblemSolutionDropdown from "../components/problemSheets/ProblemSolutionDropdown.jsx";
-import Loader from "../components/Loader";
+import ProblemSolutionDropdown from "../../components/problemSheets/ProblemSolutionDropdown.jsx";
+import Loader from "../../components/Loader.jsx";
 import { toast } from "react-toastify";
 
 const SheetDetail = () => {

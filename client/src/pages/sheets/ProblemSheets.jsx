@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchAllSheets } from "../features/problemSheet/problemSheetSlice";
+import { fetchAllSheets } from "../../features/problemSheet/problemSheetSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
-import Loader from "../components/Loader";
+import Loader from "../../components/Loader";
 
 const ProblemSheets = () => {
   const dispatch = useDispatch();
