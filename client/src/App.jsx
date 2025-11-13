@@ -40,6 +40,8 @@ import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminDataStructures from "./pages/admin/AdminDataStructures";
 import AdminDataStructureProposalReview from "./pages/admin/AdminDataStructureProposalReview";
 import AdminUsersContact from "./pages/admin/AdminUsersContact";
+import AdminProblemSheets from "./pages/admin/AdminProblemSheets";
+import AdminProblemManagement from "./pages/admin/AdminProblemManagement";
 
 import { getMe } from "./features/auth/authSlice";
 import { toast } from "react-toastify";
@@ -51,10 +53,8 @@ import EditBlog from "./pages/blogs/EditBlog";
 import MyBlogs from "./pages/blogs/MyBlogs";
 import AdminBlogReview from "./pages/admin/AdminBlogReview";
 
-import ProblemSheets from "./pages/ProblemSheets";
-import SheetDetail from "./pages/SheetDetail";
-import AdminProblemSheets from "./pages/AdminProblemSheets";
-import AdminProblemManagement from "./pages/AdminProblemManagement";
+import ProblemSheets from "./pages/sheets/ProblemSheets";
+import SheetDetail from "./pages/sheets/SheetDetail";
 
 const router = createBrowserRouter([
   {
