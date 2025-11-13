@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, Fragment, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   fetchAllSheets, 
@@ -6,13 +7,14 @@ import {
   updateSheet, 
   deleteSheet 
 } from '../../features/problemSheet/problemSheetSlice';
-import { MdEdit, MdDelete, MdSearch, MdClear } from 'react-icons/md';
+import { MdEdit, MdDelete, MdSearch, MdClear, MdArrowForward } from 'react-icons/md';
 import { toast } from 'react-toastify';
 import Loader from '../../components/Loader';
 import clsx from 'clsx';
 
 const AdminProblemSheets = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { sheets, loading, error } = useSelector((state) => state.problemSheets);
   
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -114,7 +116,8 @@ const AdminProblemSheets = () => {
       .catch(() => toast.error('Failed to update problem sheet'));
   }, [dispatch, editingSheet, formData]);
 
-  const handleDelete = useCallback((slug) => {
+  const handleDelete = useCallback((e, slug) => {
+    e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this problem sheet and all its problems?')) {
       dispatch(deleteSheet(slug))
         .unwrap()
@@ -123,7 +126,8 @@ const AdminProblemSheets = () => {
     }
   }, [dispatch]);
 
-  const startEdit = (sheet) => {
+  const startEdit = (e, sheet) => {
+    e.stopPropagation();
     setEditingSheet(sheet);
     setFormData({
       name: sheet.name,
@@ -137,6 +141,10 @@ const AdminProblemSheets = () => {
   const resetForm = () => {
     setFormData({ name: '', description: '', icon: '📋', isActive: true });
     setFormErrors({});
+  };
+
+  const handleRowClick = (sheetId) => {
+    navigate(`/admin/manage-problems/${sheetId}`);
   };
 
   if (loading && !sheets.length) {
@@ -249,7 +257,10 @@ const AdminProblemSheets = () => {
             ) : (
               filteredSheets.map((sheet) => (
                 <Fragment key={sheet._id}>
-                  <tr className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                  <tr 
+                    onClick={() => handleRowClick(sheet._id)}
+                    className="border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700 transition cursor-pointer group"
+                  >
                     <td className="px-6 py-4 text-2xl">{sheet.icon}</td>
                     <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
                       {sheet.name}
@@ -269,18 +280,28 @@ const AdminProblemSheets = () => {
                     </td>
                     <td className="px-6 py-4 text-right space-x-4">
                       <button
-                        onClick={() => startEdit(sheet)}
+                        onClick={(e) => startEdit(e, sheet)}
                         className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition"
                         title="Edit"
                       >
                         <MdEdit size={18} />
                       </button>
                       <button
-                        onClick={() => handleDelete(sheet.slug)}
+                        onClick={(e) => handleDelete(e, sheet.slug)}
                         className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
                         title="Delete"
                       >
                         <MdDelete size={18} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRowClick(sheet._id);
+                        }}
+                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition opacity-0 group-hover:opacity-100"
+                        title="Manage Problems"
+                      >
+                        <MdArrowForward size={18} />
                       </button>
                     </td>
                   </tr>
