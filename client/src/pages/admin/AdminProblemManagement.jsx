@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, Fragment } from 'react';
+import React, { useEffect, useState, useCallback, Fragment, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -8,7 +8,7 @@ import {
   updateProblem,
   deleteProblem,
 } from '../../features/problemSheet/problemSheetSlice';
-import { MdEdit, MdDelete, MdArrowBack } from 'react-icons/md';
+import { MdEdit, MdDelete, MdArrowBack, MdSearch, MdClear } from 'react-icons/md';
 import { toast } from 'react-toastify';
 import Loader from '../../components/Loader';
 import clsx from 'clsx';
@@ -26,6 +26,7 @@ const AdminProblemManagement = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProblem, setEditingProblem] = useState(null);
   const [formErrors, setFormErrors] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -47,12 +48,33 @@ const AdminProblemManagement = () => {
     },
   });
 
+  // Filter problems based on search query
+  const filteredProblems = useMemo(() => {
+    if (!searchQuery.trim()) return problems;
+    
+    return problems.filter(problem => {
+      const title = problem.title || '';
+      const description = problem.description || '';
+      const query = searchQuery.toLowerCase();
+      
+      return (
+        title.toLowerCase().includes(query) ||
+        description.toLowerCase().includes(query)
+      );
+    });
+  }, [problems, searchQuery]);
+
   useEffect(() => {
     if (sheetId) {
       dispatch(fetchSheetById(sheetId));
       dispatch(fetchSheetProblems({ sheetId, params: {} }));
     }
   }, [sheetId, dispatch]);
+
+  // Reset search when component unmounts or sheet changes
+  useEffect(() => {
+    return () => setSearchQuery('');
+  }, [sheetId]);
 
   const validateForm = useCallback(() => {
     const errors = {};
@@ -305,19 +327,19 @@ const AdminProblemManagement = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate('/admin/problem-sheets')}
+            onClick={() => navigate(-1)}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            title="Back"
+            title="Back to Problem Sheets"
           >
             <MdArrowBack size={24} className="text-gray-600 dark:text-gray-400" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               {currentSheet?.icon} {currentSheet?.name}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">{currentSheet?.description}</p>
             <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-              {problems.length} problem{problems.length !== 1 ? 's' : ''}
+              {searchQuery ? `${filteredProblems.length} of ${problems.length}` : problems.length} problem{problems.length !== 1 ? 's' : ''}
             </p>
           </div>
         </div>
@@ -330,6 +352,34 @@ const AdminProblemManagement = () => {
         >
           + Add Problem
         </button>
+      </div>
+
+      {/* Search Bar */}
+      <div className="space-y-4 bg-white dark:bg-gray-800 p-4 rounded-xl">
+        <div className="relative">
+          <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search problems by title or description..."
+            className={clsx(
+              'w-full pl-10 pr-10 py-2 rounded-xl border transition-colors',
+              'bg-white dark:bg-gray-900 text-gray-800 dark:text-white',
+              'border-gray-300 dark:border-gray-700',
+              'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+            )}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              title="Clear search"
+            >
+              <MdClear size={20} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Error Message */}
@@ -353,14 +403,16 @@ const AdminProblemManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {problems.length === 0 ? (
+            {filteredProblems.length === 0 ? (
               <tr>
                 <td colSpan="6" className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  No problems yet. Click "Add Problem" to create one.
+                  {searchQuery 
+                    ? 'No problems match your search.'
+                    : 'No problems yet. Click "Add Problem" to create one.'}
                 </td>
               </tr>
             ) : (
-              problems.map((problem) => (
+              filteredProblems.map((problem) => (
                 <Fragment key={problem._id}>
                   <tr className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                     <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
