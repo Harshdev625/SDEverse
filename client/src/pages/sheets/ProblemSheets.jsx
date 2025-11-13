@@ -10,6 +10,8 @@ const ProblemSheets = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { sheets, loading: sheetsLoading, error } = useSelector((state) => state.problemSheets);
+  const user = useSelector((state) => state.auth.user);
+  const isAdmin = user?.role === "admin";
   const [expandedSheet, setExpandedSheet] = useState(null);
 
   useEffect(() => {
@@ -37,6 +39,8 @@ const ProblemSheets = () => {
       </div>
     );
   }
+
+  const visibleSheets = isAdmin ? sheets : sheets.filter(sheet => sheet.isActive);
 
   return (
     <motion.div
@@ -76,7 +80,7 @@ const ProblemSheets = () => {
 
       {/* Sheets List */}
       <div className="space-y-6">
-        {sheets.length === 0 ? (
+        {visibleSheets.length === 0 ? (
           <div className="text-center py-10">
             <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
             <p className="text-gray-500 dark:text-gray-400 text-lg">
@@ -84,15 +88,15 @@ const ProblemSheets = () => {
             </p>
           </div>
         ) : (
-          sheets.map((sheet) => (
+          visibleSheets.map((sheet) => (
             <div
-              key={sheet._id} // <-- FIX #1: Use sheet._id for the key prop
+              key={sheet._id} 
               className="border rounded-xl overflow-hidden shadow-sm transition-all border-gray-200 dark:border-gray-700"
             >
               {/* Sheet Header */}
               <button
-                onClick={() => toggleSheet(sheet._id)} // <-- FIX #2: Use sheet._id
-                aria-expanded={expandedSheet === sheet._id} // <-- FIX #3: Use sheet._id
+                onClick={() => toggleSheet(sheet._id)}
+                aria-expanded={expandedSheet === sheet._id} 
                 aria-label={`${expandedSheet === sheet._id ? 'Collapse' : 'Expand'} ${sheet.name} details`} // <-- FIX #4: Use sheet._id
                 className="w-full flex justify-between items-center p-6 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
@@ -110,14 +114,14 @@ const ProblemSheets = () => {
                 <ChevronDown
                   size={24}
                   className={`transition-transform ${
-                    expandedSheet === sheet._id ? "rotate-180" : "" // <-- FIX #5: Use sheet._id
+                    expandedSheet === sheet._id ? "rotate-180" : "" 
                   } text-gray-500 dark:text-gray-400`}
                 />
               </button>
 
               {/* Sheet Description & Suites */}
               <AnimatePresence>
-                {expandedSheet === sheet._id && ( // <-- FIX #6: Use sheet._id
+                {expandedSheet === sheet._id && ( 
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
@@ -147,7 +151,7 @@ const ProblemSheets = () => {
 
                       {/* View Sheet Button */}
                       <button
-                        onClick={() => navigate(`/problem-sheets/${sheet._id}`)} // <-- FIX #7: Use sheet._id for navigation
+                        onClick={() => navigate(`/problem-sheets/${sheet._id}`)} 
                         className="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md"
                       >
                         View Problem Suites
