@@ -77,7 +77,7 @@ const router = createBrowserRouter([
         index: true,
         element: <Home />,
       },
-       {
+      {
         path: "contact",
         element: <Contact />,
       },
@@ -162,7 +162,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "admin/manage-problem-sheets/:sheetId",
+        path: "admin/manage-problems/:sheetId",
         element: (
           <AdminRoute>
             <AdminProblemManagement />
