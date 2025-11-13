@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, Fragment } from 'react';
+import { useEffect, useState, useCallback, Fragment, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   fetchAllSheets, 
@@ -6,7 +6,7 @@ import {
   updateSheet, 
   deleteSheet 
 } from '../../features/problemSheet/problemSheetSlice';
-import { MdEdit, MdDelete } from 'react-icons/md';
+import { MdEdit, MdDelete, MdSearch, MdClear } from 'react-icons/md';
 import { toast } from 'react-toastify';
 import Loader from '../../components/Loader';
 import clsx from 'clsx';
@@ -17,6 +17,8 @@ const AdminProblemSheets = () => {
   
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingSheet, setEditingSheet] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -24,6 +26,18 @@ const AdminProblemSheets = () => {
     isActive: true
   });
   const [formErrors, setFormErrors] = useState({});
+
+  // Filter sheets based on search and status
+  const filteredSheets = useMemo(() => {
+    return sheets.filter(sheet => {
+      const matchesSearch = sheet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           sheet.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || 
+                           (statusFilter === 'active' && sheet.isActive) ||
+                           (statusFilter === 'inactive' && !sheet.isActive);
+      return matchesSearch && matchesStatus;
+    });
+  }, [sheets, searchQuery, statusFilter]);
 
   useEffect(() => {
     dispatch(fetchAllSheets());
@@ -149,6 +163,61 @@ const AdminProblemSheets = () => {
         </button>
       </div>
 
+      {/* Search and Filter */}
+      <div className="space-y-4 bg-white dark:bg-gray-800 p-4 rounded-xl">
+        <div className="relative">
+          <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by name or description..."
+            className={clsx(
+              'w-full pl-10 pr-10 py-2 rounded-xl border transition-colors',
+              'bg-white dark:bg-gray-900 text-gray-800 dark:text-white',
+              'border-gray-300 dark:border-gray-700',
+              'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+            )}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              title="Clear search"
+            >
+              <MdClear size={20} />
+            </button>
+          )}
+        </div>
+
+        {/* Status Filter Buttons */}
+        <div className="flex flex-wrap gap-2">
+          {['all', 'active', 'inactive'].map((status) => (
+            <button
+              key={status}
+              onClick={() => setStatusFilter(status)}
+              className={clsx(
+                'px-4 py-2 rounded-lg text-sm font-medium transition-colors border',
+                statusFilter === status
+                  ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-600 dark:border-blue-600'
+                  : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-400'
+              )}
+            >
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* Results Info */}
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          {searchQuery || statusFilter !== 'all' ? (
+            <>Showing <span className="font-medium">{filteredSheets.length}</span> of <span className="font-medium">{sheets.length}</span> sheets</>
+          ) : (
+            <>Total: <span className="font-medium">{sheets.length}</span> sheets</>
+          )}
+        </div>
+      </div>
+
       {/* Error Message */}
       {error && (
         <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-xl">
@@ -157,7 +226,7 @@ const AdminProblemSheets = () => {
       )}
 
       {/* Sheet Table */}
-      <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow">
+      <div className="w-full overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow">
         <table className="min-w-full text-sm text-left text-gray-600 dark:text-gray-300">
           <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white text-xs uppercase">
             <tr>
@@ -169,14 +238,16 @@ const AdminProblemSheets = () => {
             </tr>
           </thead>
           <tbody>
-            {sheets.length === 0 ? (
+            {filteredSheets.length === 0 ? (
               <tr>
-                <td colSpan="5" className="text-center py-8 text-gray-500">
-                  No problem sheets found. Click "New Sheet" to create one.
+                <td colSpan="5" className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  {searchQuery || statusFilter !== 'all' 
+                    ? 'No problem sheets match your search or filter.'
+                    : 'No problem sheets found. Click "New Sheet" to create one.'}
                 </td>
               </tr>
             ) : (
-              sheets.map((sheet) => (
+              filteredSheets.map((sheet) => (
                 <Fragment key={sheet._id}>
                   <tr className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                     <td className="px-6 py-4 text-2xl">{sheet.icon}</td>
