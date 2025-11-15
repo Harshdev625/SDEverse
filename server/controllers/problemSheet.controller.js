@@ -143,8 +143,8 @@ const problemSheetController = {
     try {
       const userId = req.user?._id;
 
-      const sheets = await ProblemSheet.find({ isActive: true })
-        .select('name slug description icon totalProblems createdAt')
+      const sheets = await ProblemSheet.find()
+        .select('name slug description icon totalProblems createdAt isActive')
         .lean();
 
       // If user is logged in, fetch their progress
