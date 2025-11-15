@@ -3,13 +3,20 @@ import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../../features/auth/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { motion as Motion } from "framer-motion";
-import { Loader2, Eye, EyeOff, ArrowLeft, Check, X } from "lucide-react";
+import { Loader2, Eye, EyeOff, ArrowLeft, Check, X, LucideCalculator } from "lucide-react";
 import SDEverse from "../../assets/sdeverse.png";
 import { toast } from "react-toastify";
+import { MdDarkMode } from "react-icons/md";
+import { MdLightMode } from "react-icons/md";
 
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [toggleMode, setToggleMode] = useState(()=>{
+    const savedTheme = localStorage.getItem('register-theme')
+ 
+    return savedTheme === 'dark'
+  })
   const { loading, error, user } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -68,7 +75,13 @@ const Register = () => {
 
     return errors;
   };
-
+  useEffect(() => {
+    if (toggleMode) {
+      localStorage.setItem('register-theme' ,'dark')
+    } else {
+      localStorage.setItem('register-theme' ,'light')
+    } 
+  }, [toggleMode]);
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -82,6 +95,9 @@ const Register = () => {
     dispatch(registerUser(formData));
     
   };
+  const handleModeChange = () => {
+    setToggleMode(!toggleMode)
+  }
 
   const formatErrorMessage = (error) => {
     if (!error) return "";
@@ -120,9 +136,12 @@ const Register = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4"
+      className={`min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 dark:bg-none dark:bg-black ${toggleMode ? 'dark' : ''}`}
     >
-      <div className="absolute inset-0 z-0 overflow-hidden">
+      <button onClick={handleModeChange} className="absolute top-4 right-4 w-[50px] h-[50px] flex items-center justify-center z-20">
+        {!toggleMode ? <MdDarkMode className="text-3xl" /> : <MdLightMode className="text-3xl text-white" />}
+      </button>
+      <div className="absolute inset-0 z-0 overflow-hidden dark:bg-black">
         <div className="absolute -top-1/4 -right-1/4 w-[500px] h-[500px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
         <div className="absolute top-1/3 -left-1/4 w-[500px] h-[500px] bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-1/4 right-1/4 w-[500px] h-[500px] bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
@@ -132,9 +151,9 @@ const Register = () => {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="relative z-10 max-w-md w-full bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 border border-white/30"
+        className="relative z-10 max-w-md w-full bg-white/80 dark:bg-[#191A18] backdrop-blur-lg rounded-2xl shadow-xl p-8 border border-white/30"
       >
-        <Link to="/" className="p-1 rounded-sm border w-6 text-indigo-700 flex items-center hover:bg-indigo-700 hover:text-white ">
+        <Link to="/" className="p-1 rounded-sm border w-6 text-indigo-700 flex items-center hover:bg-indigo-700 hover:text-white dark:bg-transparent dark:text-white dark:hover:bg-white dark:hover:text-[#191A18]">
          <ArrowLeft className="w-5 h-5" />
         </Link>
         <div className="text-center mb-8">
@@ -149,10 +168,10 @@ const Register = () => {
               className="w-20 h-20 mx-auto object-contain"
             />
           </Motion.div>
-          <h2 className="text-3xl font-bold text-indigo-700 mb-2">
+          <h2 className="text-3xl font-bold text-indigo-700 mb-2 dark:text-[#2C2CD4]">
             Create your SDEverse account
           </h2>
-          <p className="text-gray-600">Start your coding journey today</p>
+          <p className="text-gray-600 dark:text-white/80">Start your coding journey today</p>
         </div>
 
         {error && (
@@ -168,7 +187,7 @@ const Register = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-white/80">
               Username
             </label>
             <div className="relative">
@@ -178,15 +197,15 @@ const Register = () => {
                 value={formData.username}
                 onChange={handleChange}
                 required
-                className={`w-full px-4 py-3 bg-white rounded-lg border ${
-                  validationErrors.username ? "border-red-500" : "border-gray-300"
+                className={`w-full px-4 py-3 bg-white rounded-lg border dark:bg-[#697565] dark:placeholder-gray-100 ${
+                  validationErrors.username ? "border-red-500" : "border-gray-300 "
                 } focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition`}
                 placeholder="Enter your username"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-400"
+                  className="h-5 w-5 text-gray-400 dark:text-gray-800"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -207,7 +226,7 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-white/80">
               Email
             </label>
             <div className="relative">
@@ -217,7 +236,7 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className={`w-full px-4 py-3 bg-white rounded-lg border ${
+                className={`w-full px-4 py-3 bg-white rounded-lg border dark:bg-[#697565] dark:placeholder-gray-100 ${
                   validationErrors.email ? "border-red-500" : "border-gray-300"
                 } focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition`}
                 placeholder="your.email@example.com"
@@ -225,7 +244,7 @@ const Register = () => {
               <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-400"
+                  className="h-5 w-5 text-gray-400 dark:text-gray-800"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -245,7 +264,7 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-white/80">
               Password
             </label>
             <div className="relative">
@@ -255,7 +274,7 @@ const Register = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className={`w-full px-4 py-3 bg-white rounded-lg border ${
+                className={`w-full px-4 py-3 bg-white rounded-lg border dark:bg-[#697565] dark:placeholder-gray-100 ${
                   validationErrors.password ? "border-red-500" : "border-gray-300"
                 } focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition`}
                 placeholder="••••••••"
@@ -266,9 +285,9 @@ const Register = () => {
                 className="absolute inset-y-0 right-0 flex items-center pr-3"
               >
                 {showPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-400" />
+                  <EyeOff className="h-5 w-5 text-gray-400 dark:text-gray-800" />
                 ) : (
-                  <Eye className="h-5 w-5 text-gray-400" />
+                  <Eye className="h-5 w-5 text-gray-400 dark:text-gray-800" />
                 )}
               </button>
             </div>
@@ -340,11 +359,11 @@ const Register = () => {
         </form>
 
         <div className="mt-8 text-center">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-white/80">
             Already have an account?{" "}
             <a
               href="/login"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-blue-500"
             >
               Sign in
             </a>
