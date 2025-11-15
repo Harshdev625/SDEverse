@@ -133,7 +133,7 @@ const AdminProblemSheets = () => {
       name: sheet.name,
       description: sheet.description,
       icon: sheet.icon,
-      isActive: sheet.isActive
+      isActive: sheet.isActive ?? true
     });
     setFormErrors({});
   };

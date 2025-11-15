@@ -48,15 +48,23 @@ const problemSheetController = {
         return res.status(404).json({ error: 'Problem sheet not found' });
       };
 
-      sheet.description = description;
-      sheet.icon = icon || sheet.icon;
-      sheet.isActive = isActive;
-
       // regenerate slug if name changed
       if (name && name !== sheet.name) {
         sheet.name = name;
         sheet.slug = await generateUniqueSlug(name, ProblemSheet); 
       };
+
+      if (description) {
+        sheet.description = description;
+      }
+
+      if (icon) {
+        sheet.icon = icon || sheet.icon;
+      }
+
+      if (isActive !== undefined && isActive !== null) {
+        sheet.isActive = isActive;
+      }
 
       const updateSheet = await sheet.save();
 
