@@ -32,7 +32,7 @@
     "express": "^5.1.0",
     "express-async-handler": "^1.2.0",
     "express-validator": "^7.3.0",
-    "jsdom": "^27.1.0",
+    "jsdom": "^27.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.4",
     "node-cron": "^4.2.1",
