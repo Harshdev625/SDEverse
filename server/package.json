@@ -40,6 +40,6 @@
     "slugify": "^1.6.6"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.11"
   }
 }
