@@ -18,6 +18,7 @@ const bookmarkRoutes = require('./routes/bookmark.routes');
 const linkGroupRoutes = require('./routes/linkGroup.routes');
 const contactRoutes = require("./routes/contact.routes");
 const blogRoutes = require("./routes/blog.routes");
+const problemSheetRoutes = require('./routes/problemSheet.routes')
 
 const { notFound, errorHandler } = require("./middleware/error.middleware");
 
@@ -45,6 +46,8 @@ app.use("/api/bookmarks", bookmarkRoutes);
 app.use('/api/link-groups', linkGroupRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/blogs", blogRoutes);
+app.use('/api/problem-sheets', problemSheetRoutes);
+
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });

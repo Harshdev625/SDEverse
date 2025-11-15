@@ -40,6 +40,8 @@ import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminDataStructures from "./pages/admin/AdminDataStructures";
 import AdminDataStructureProposalReview from "./pages/admin/AdminDataStructureProposalReview";
 import AdminUsersContact from "./pages/admin/AdminUsersContact";
+import AdminProblemSheets from "./pages/admin/AdminProblemSheets";
+import AdminProblemManagement from "./pages/admin/AdminProblemManagement";
 
 import { getMe } from "./features/auth/authSlice";
 import { toast } from "react-toastify";
@@ -50,6 +52,9 @@ import CreateBlog from "./pages/blogs/CreateBlog";
 import EditBlog from "./pages/blogs/EditBlog";
 import MyBlogs from "./pages/blogs/MyBlogs";
 import AdminBlogReview from "./pages/admin/AdminBlogReview";
+
+import ProblemSheets from "./pages/sheets/ProblemSheets";
+import SheetDetail from "./pages/sheets/SheetDetail";
 
 const router = createBrowserRouter([
   {
@@ -72,7 +77,7 @@ const router = createBrowserRouter([
         index: true,
         element: <Home />,
       },
-       {
+      {
         path: "contact",
         element: <Contact />,
       },
@@ -133,10 +138,34 @@ const router = createBrowserRouter([
         element: <CommunityGuidelines />,
       },
       {
+        path: "problem-sheets",
+        element: <ProblemSheets />,
+      },
+      {
+        path: "problem-sheets/:sheetId",
+        element: <SheetDetail />,
+      },
+      {
         path: "admin/manage-algorithms",
         element: (
           <AdminRoute>
             <AdminAlgorithms />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "admin/manage-problem-sheets",
+        element: (
+          <AdminRoute>
+            <AdminProblemSheets />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "admin/manage-problems/:sheetId",
+        element: (
+          <AdminRoute>
+            <AdminProblemManagement />
           </AdminRoute>
         ),
       },
