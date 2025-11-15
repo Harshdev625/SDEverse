@@ -1,12 +1,22 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as problemSheetAPI from './problemSheetAPI';
 
-// Async thunks for fetching data
-export const fetchAllSheets = createAsyncThunk(
-  'problemSheets/fetchAll',
+export const fetchPublicSheets = createAsyncThunk(
+  'problemSheets/fetchPublic',
   async (_, { rejectWithValue }) => {
     try {
       return await problemSheetAPI.getAllSheets();
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch sheets');
+    }
+  }
+);
+
+export const fetchAllSheetsAdmin = createAsyncThunk(
+  'problemSheets/fetchAllAdmin',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await problemSheetAPI.getAllSheetsAdmin();
     } catch (error) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch sheets');
     }
@@ -19,7 +29,6 @@ export const fetchSheetById = createAsyncThunk(
     try {
       return await problemSheetAPI.getSheetById(sheetId);
     } catch (error) {
-      // Return 401 status without error message to allow guest viewing
       if (error.response?.status === 401) {
         return rejectWithValue('Unauthorized');
       }
@@ -172,16 +181,29 @@ const problemSheetSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch all sheets
-      .addCase(fetchAllSheets.pending, (state) => {
+      .addCase(fetchPublicSheets.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchAllSheets.fulfilled, (state, action) => {
+      .addCase(fetchPublicSheets.fulfilled, (state, action) => {
         state.loading = false;
         state.sheets = action.payload;
       })
-      .addCase(fetchAllSheets.rejected, (state, action) => {
+      .addCase(fetchPublicSheets.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch all sheets for admin
+      .addCase(fetchAllSheetsAdmin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllSheetsAdmin.fulfilled, (state, action) => {
+        state.loading = false;
+        state.sheets = action.payload;
+      })
+      .addCase(fetchAllSheetsAdmin.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
@@ -197,7 +219,6 @@ const problemSheetSlice = createSlice({
       })
       .addCase(fetchSheetById.rejected, (state, action) => {
         state.sheetLoading = false;
-        // Only set error if it's not a 401 (unauthorized)
         if (action.payload !== 'Unauthorized') {
           state.error = action.payload;
         }

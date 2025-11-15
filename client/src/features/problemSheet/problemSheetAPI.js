@@ -5,6 +5,11 @@ export const getAllSheets = async () => {
     return res.data; 
 };
 
+export const getAllSheetsAdmin = async () => {
+    const res = await api.get('/problem-sheets/admin/all');
+    return res.data;
+};
+
 export const getSheetById = async (sheetId) => {
     const res = await api.get(`/problem-sheets/${sheetId}`);
     return res.data;

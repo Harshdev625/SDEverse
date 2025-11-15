@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, Fragment, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
-  fetchAllSheets, 
+  fetchAllSheetsAdmin, 
   createSheet, 
   updateSheet, 
   deleteSheet 
@@ -42,7 +42,7 @@ const AdminProblemSheets = () => {
   }, [sheets, searchQuery, statusFilter]);
 
   useEffect(() => {
-    dispatch(fetchAllSheets());
+    dispatch(fetchAllSheetsAdmin());
   }, [dispatch]);
 
   const validateForm = () => {

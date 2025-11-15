@@ -7,6 +7,45 @@ const useTransactions = process.env.NODE_ENV === 'production';
 
 const problemSheetController = {
   // Admin controls:
+  // Get all sheets
+  getAllSheetsAdmin: async (req, res) => {
+    try {
+      const userId = req.user?._id;
+
+      const sheets = await ProblemSheet.find()
+        .select('name slug description icon totalProblems createdAt isActive')
+        .lean();
+
+      if (userId) {
+        const sheetIds = sheets.map(s => s._id);
+        const progress = await ProblemProgress.aggregate([
+          { $match: { sheetId: { $in: sheetIds }, userId } },
+          { $group: {
+              _id: '$sheetId',
+              completedCount: { $sum: { $cond: ['$completed', 1, 0] } }
+            }
+          }
+        ]);
+
+        const progressMap = {};
+        progress.forEach(p => {
+          progressMap[p._id] = p.completedCount;
+        });
+
+        sheets.forEach(sheet => {
+          sheet.completedProblems = progressMap[sheet._id] || 0;
+          sheet.progressPercentage = sheet.completedProblems > 0
+          ? (sheet.completedProblems / sheet.totalProblems) * 100
+          : 0;
+        });
+      }
+
+      res.status(200).json(sheets);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+  
   // Create Problem Sheet
   createProblemSheet: async (req, res) => {
     try {
@@ -138,12 +177,12 @@ const problemSheetController = {
   // ============================================================
 
   // User controls:
-  // Get all sheets
+  // Get active sheets
   getAllSheets: async (req, res) => {
     try {
       const userId = req.user?._id;
 
-      const sheets = await ProblemSheet.find()
+      const sheets = await ProblemSheet.find({ isActive: true })
         .select('name slug description icon totalProblems createdAt isActive')
         .lean();
 
@@ -184,7 +223,14 @@ const problemSheetController = {
       const { sheetId } = req.params;
       const userId = req.user?._id;
 
-      const sheet = await ProblemSheet.findById(sheetId).lean();
+      // Support both slug and ID
+      let sheet;
+      if (mongoose.Types.ObjectId.isValid(sheetId)) {
+        sheet = await ProblemSheet.findById(sheetId).lean();
+      } else {
+        sheet = await ProblemSheet.findOne({ slug: sheetId }).lean();
+      }
+      
       if (!sheet) {
         return res.status(404).json({ error: 'Sheet not found' });
       }
@@ -227,10 +273,22 @@ const problemSheetController = {
         return res.status(400).json({ error: 'Invalid pagination parameters' });
       }
 
+      // Find sheet by ID or slug
+      let sheet;
+      if (mongoose.Types.ObjectId.isValid(sheetId)) {
+        sheet = await ProblemSheet.findById(sheetId).select('_id').lean();
+      } else {
+        sheet = await ProblemSheet.findOne({ slug: sheetId }).select('_id').lean();
+      }
+
+      if (!sheet) {
+        return res.status(404).json({ error: 'Sheet not found' });
+      }
+
       const skip = (pageNum - 1) * limitNum;
 
       // Build filter
-      const filter = { sheetId: new mongoose.Types.ObjectId(sheetId) };
+      const filter = { sheetId: sheet._id };
       if (difficulty && difficulty !== 'all') {
         filter.difficulty = difficulty;
       }

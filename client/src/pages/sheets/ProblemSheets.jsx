@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchAllSheets } from "../../features/problemSheet/problemSheetSlice";
+import { fetchPublicSheets } from "../../features/problemSheet/problemSheetSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 import Loader from "../../components/Loader";
@@ -15,7 +15,7 @@ const ProblemSheets = () => {
   const [expandedSheet, setExpandedSheet] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchAllSheets());
+    dispatch(fetchPublicSheets());
   }, [dispatch]);
 
   const toggleSheet = (sheetId) => {

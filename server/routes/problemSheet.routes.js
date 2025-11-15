@@ -6,74 +6,78 @@ const { validateProblem } = require('../middleware/validateProblem');
 const problemSheetController = require('../controllers/problemSheet.controller');
 const problemController = require('../controllers/problem.controller');
 
-// Public routes
+// ============= PUBLIC ROUTES =============
+// These return only ACTIVE sheets for regular users
 router.get('/', problemSheetController.getAllSheets);
+router.get('/:sheetId', problemSheetController.getSheetById);
 
-// Problem Management 
+// ============= PROTECTED ADMIN ROUTES =============
+// Get all sheets for admin (includes inactive sheets)
+router.get(
+  '/admin/all',
+  protect,
+  admin,
+  problemSheetController.getAllSheetsAdmin
+);
+
+// ============= PROTECTED USER ROUTES =============
+router.get('/:sheetId/problems', protect, problemSheetController.getSheetProblems);
+router.get('/:sheetId/metrics', protect, problemSheetController.getSheetMetrics);
+
+// ============= PROBLEM USER ROUTES =============
 router.post(
-  '/:sheetId/problems', 
-  protect, 
-  admin, 
+  '/problems/:problemId/complete',
+  protect,
+  problemController.markProblemComplete
+);
+router.get(
+  '/problems/:problemId/hints-solution',
+  protect,
+  problemController.getHintsSolution
+);
+
+// ============= PROBLEM MANAGEMENT (ADMIN) =============
+router.post(
+  '/:sheetId/problems',
+  protect,
+  admin,
   validateProblem,
   problemController.createProblem
 );
-
 router.put(
-  '/problems/:problemId', 
-  protect, 
-  admin, 
+  '/problems/:problemId',
+  protect,
+  admin,
   validateProblem,
   problemController.updateProblem
 );
-
 router.delete(
-  '/problems/:problemId', 
-  protect, 
+  '/problems/:problemId',
+  protect,
   admin,
   problemController.deleteProblem
 );
 
+// ============= SHEET MANAGEMENT (ADMIN) =============
 router.post(
-  '/problems/:problemId/complete', 
-  protect, 
-  problemController.markProblemComplete
-);
-
-router.get(
-  '/problems/:problemId/hints-solution', 
-  protect, 
-  problemController.getHintsSolution
-);
-
-// Protected user routes
-router.get('/:sheetId/problems', protect, problemSheetController.getSheetProblems);
-router.get('/:sheetId/metrics', protect, problemSheetController.getSheetMetrics);
-
-// Admin routes - Problem Sheet Management
-router.post(
-  '/', 
-  protect, 
-  admin, 
+  '/',
+  protect,
+  admin,
   validateProblemSheet,
   problemSheetController.createProblemSheet
 );
-
 router.put(
-  '/:slug', 
-  protect, 
-  admin, 
+  '/:slug',
+  protect,
+  admin,
   validateProblemSheet,
   problemSheetController.updateProblemSheet
 );
-
 router.delete(
-  '/:slug', 
-  protect, 
+  '/:slug',
+  protect,
   admin,
   problemSheetController.deleteProblemSheet
 );
-
-// General sheet retrieval 
-router.get('/:sheetId', problemSheetController.getSheetById);
 
 module.exports = router;
