@@ -90,10 +90,10 @@ const Sidebar = () => {
       active: "bg-gradient-to-r from-purple-500 to-violet-600",
       border: "border-l-purple-500",
     },
-    dataStructures: {
+    DataStructures: {
       bg: "bg-teal-50/80 dark:bg-teal-900/30",
       hover: "hover:bg-teal-100 dark:hover:bg-teal-900/40",
-      active: "bg-gradient-to-r from-teal-500 to-cyan-600",
+      active: "bg-gradient-to-r from-teal-500 to-emerald-600",
       border: "border-l-teal-500",
     },
     blogs: {
@@ -101,6 +101,18 @@ const Sidebar = () => {
       hover: "hover:bg-orange-100 dark:hover:bg-orange-900/40",
       active: "bg-gradient-to-r from-orange-500 to-red-600",
       border: "border-l-orange-500",
+    },
+    manageProblemSheets: {
+      bg: "bg-indigo-50/80 dark:bg-indigo-900/30",
+      hover: "hover:bg-indigo-100 dark:hover:bg-indigo-900/40",
+      active: "bg-gradient-to-r from-indigo-500 to-blue-600",
+      border: "border-l-indigo-500",
+    },
+    problemSheets: {
+      bg: "bg-green-50/80 dark:bg-green-900/30",
+      hover: "hover:bg-green-100 dark:hover:bg-green-900/40",
+      active: "bg-gradient-to-r from-green-500 to-emerald-600",
+      border: "border-l-green-500",
     },
     profile: {
       bg: "bg-amber-50/80 dark:bg-amber-900/30",
@@ -293,6 +305,18 @@ const Sidebar = () => {
             </NavLink>
 
             <NavLink
+              to="/problem-sheets"
+              className={({ isActive }) =>
+                getNavItemClass("problemSheets", isActive)
+              }
+              onClick={handleLinkClick}
+            >
+              <FileCheck size={20} className="min-w-[20px]" />
+              <span className="truncate">Problem Sheets</span>
+              <ChevronRight className="ml-auto opacity-70" size={16} />
+            </NavLink>
+
+            <NavLink
               to="/blogs"
               className={({ isActive }) => getNavItemClass("blogs", isActive)}
               onClick={handleLinkClick}
@@ -357,6 +381,17 @@ const Sidebar = () => {
                   <ChevronRight className="ml-auto opacity-70" size={16} />
                 </NavLink>
 
+                <NavLink
+                  to="/admin/manage-problem-sheets"
+                  className={({ isActive }) =>
+                    getNavItemClass("manageProblemSheets", isActive)
+                  }
+                  onClick={handleLinkClick}
+                >
+                  <ClipboardList size={20} className="min-w-[20px]" />
+                  <span className="truncate">Manage Problem Sheets</span>
+                  <ChevronRight className="ml-auto opacity-70" size={16} />
+                </NavLink>
                 <NavLink
                   to="/admin/manage-users-contacts"
                   className={({ isActive }) =>

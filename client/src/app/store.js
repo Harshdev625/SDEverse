@@ -15,6 +15,7 @@ import blogReducer from "../features/blog/blogSlice";
 import noteReducer from "../features/note/noteSlice";
 import bookmarkReducer from "../features/bookmark/bookmarkSlice";
 import linkGroupReducer from "../features/linkGroup/linkGroupSlice";
+import problemSheetReducer from "../features/problemSheet/problemSheetSlice";
 
 const store = configureStore({
   reducer: {
@@ -34,6 +35,7 @@ const store = configureStore({
     note: noteReducer,
     bookmark: bookmarkReducer,
     linkGroup: linkGroupReducer,
+    problemSheets: problemSheetReducer,
   },
   devTools: import.meta.env.MODE !== "production",
 });
