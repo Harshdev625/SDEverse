@@ -15,6 +15,7 @@ import ForgotPassword from "./pages/public/ForgotPassword";
 import Contact from "./pages/public/Contact";
 import CommunityGuidelines from "./pages/public/CommunityGuidelines";
 import FaqPage from './pages/public/FaqPage';
+import LoginSuccess from "./pages/public/LoginSuccess";
 
 import Algorithms from "./pages/algorithms/Algorithms";
 import AlgorithmDetail from "./pages/algorithms/AlgorithmDetails";
@@ -44,7 +45,6 @@ import AdminProblemSheets from "./pages/admin/AdminProblemSheets";
 import AdminProblemManagement from "./pages/admin/AdminProblemManagement";
 
 import { getMe } from "./features/auth/authSlice";
-import { toast } from "react-toastify";
 
 import Blogs from "./pages/blogs/Blogs";
 import BlogDetail from "./pages/blogs/BlogDetail";
@@ -57,197 +57,77 @@ import ProblemSheets from "./pages/sheets/ProblemSheets";
 import SheetDetail from "./pages/sheets/SheetDetail";
 
 const router = createBrowserRouter([
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/register",
-    element: <Register />,
-  },
-  {
-    path: "/forgot-password",
-    element: <ForgotPassword />,
-  },
+  { path: "/login", element: <Login /> },
+  { path: "/register", element: <Register /> },
+  { path: "/forgot-password", element: <ForgotPassword /> },
+  { path: "/login-success", element: <LoginSuccess /> },
   {
     path: "/",
     element: <Layout />,
     children: [
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: "contact",
-        element: <Contact />,
-      },
-      {
-        path: "feedback",
-        element: <Feedback />,
-      },
-      {
-        path: "moreinfo/:platform",
-        element: <MoreInfoPage />,
-      },
-      {
-        path: "profile/:username",
-        element: <Profile />,
-      },
-      {
-        path: "algorithms",
-        element: <Algorithms />,
-      },
-      {
-        path: "algorithms/:slug",
-        element: <AlgorithmDetail />,
-      },
-      {
-        path: "algorithms/proposals/new",
-        element: <CreateProposal />,
-      },
-      {
-        path: "algorithms/proposals/:slug/edit",
-        element: <EditProposal />,
-      },
-      {
-        path: "algorithms/:slug/contribute",
-        element: <CreateProposal />,
-      },
-      {
-        path: "data-structures",
-        element: <DataStructures />,
-      },
-      {
-        path: "data-structures/:slug",
-        element: <DataStructureDetail />,
-      },
-      {
-        path: "data-structures/proposals/new",
-        element: <CreateDataStructureProposal />,
-      },
-      {
-        path: "data-structures/proposals/:slug/edit",
-        element: <EditDataStructureProposal />,
-      },
-      {
-        path: "proposals",
-        element: <MyProposals />,
-      },
-      {
-        path: "community-guidelines",
-        element: <CommunityGuidelines />,
-      },
-      {
-        path: "problem-sheets",
-        element: <ProblemSheets />,
-      },
-      {
-        path: "problem-sheets/:sheetId",
-        element: <SheetDetail />,
-      },
+      { index: true, element: <Home /> },
+      { path: "contact", element: <Contact /> },
+      { path: "feedback", element: <Feedback /> },
+      { path: "moreinfo/:platform", element: <MoreInfoPage /> },
+      { path: "profile/:username", element: <Profile /> },
+      { path: "algorithms", element: <Algorithms /> },
+      { path: "algorithms/:slug", element: <AlgorithmDetail /> },
+      { path: "algorithms/proposals/new", element: <CreateProposal /> },
+      { path: "algorithms/proposals/:slug/edit", element: <EditProposal /> },
+      { path: "algorithms/:slug/contribute", element: <CreateProposal /> },
+      { path: "data-structures", element: <DataStructures /> },
+      { path: "data-structures/:slug", element: <DataStructureDetail /> },
+      { path: "data-structures/proposals/new", element: <CreateDataStructureProposal /> },
+      { path: "data-structures/proposals/:slug/edit", element: <EditDataStructureProposal /> },
+      { path: "proposals", element: <MyProposals /> },
+      { path: "community-guidelines", element: <CommunityGuidelines /> },
+      { path: "problem-sheets", element: <ProblemSheets /> },
+      { path: "problem-sheets/:sheetId", element: <SheetDetail /> },
       {
         path: "admin/manage-algorithms",
-        element: (
-          <AdminRoute>
-            <AdminAlgorithms />
-          </AdminRoute>
-        ),
+        element: (<AdminRoute><AdminAlgorithms /></AdminRoute>),
       },
       {
         path: "admin/manage-problem-sheets",
-        element: (
-          <AdminRoute>
-            <AdminProblemSheets />
-          </AdminRoute>
-        ),
+        element: (<AdminRoute><AdminProblemSheets /></AdminRoute>),
       },
       {
         path: "admin/manage-problems/:sheetId",
-        element: (
-          <AdminRoute>
-            <AdminProblemManagement />
-          </AdminRoute>
-        ),
+        element: (<AdminRoute><AdminProblemManagement /></AdminRoute>),
       },
       {
         path: "admin/manage-data-structures",
-        element: (
-          <AdminRoute>
-            <AdminDataStructures />
-          </AdminRoute>
-        ),
+        element: (<AdminRoute><AdminDataStructures /></AdminRoute>),
       },
       {
         path: "admin/manage-users-contacts",
-        element: (
-          <AdminRoute>
-            <AdminUsersContact />
-          </AdminRoute>
-        ),
+        element: (<AdminRoute><AdminUsersContact /></AdminRoute>),
       },
       {
         path: "admin/proposals/review",
-        element: (
-          <AdminRoute>
-            <AdminProposalReview />
-          </AdminRoute>
-        ),
+        element: (<AdminRoute><AdminProposalReview /></AdminRoute>),
       },
       {
         path: "admin/data-structures/proposals/review",
-        element: (
-          <AdminRoute>
-            <AdminDataStructureProposalReview />
-          </AdminRoute>
-        ),
+        element: (<AdminRoute><AdminDataStructureProposalReview /></AdminRoute>),
       },
       {
         path: "admin/manage-users",
-        element: (
-          <AdminRoute>
-            <AdminUsersPage />
-          </AdminRoute>
-        ),
+        element: (<AdminRoute><AdminUsersPage /></AdminRoute>),
       },
       {
         path: "admin/analytics",
-        element: (
-          <AdminRoute>
-            <AdminAnalytics />
-          </AdminRoute>
-        ),
+        element: (<AdminRoute><AdminAnalytics /></AdminRoute>),
       },
-      {
-        path: "faq",
-        element: <FaqPage />,
-      },
-      {
-        path: "blogs",
-        element: <Blogs />,
-      },
-      {
-        path: "blogs/new",
-        element: <CreateBlog />,
-      },
-      {
-        path: "my-posts",
-        element: <MyBlogs />,
-      },
-      {
-        path: "blogs/:slug",
-        element: <BlogDetail />,
-      },
-      {
-        path: "blogs/:slug/edit",
-        element: <EditBlog />,
-      },
+      { path: "faq", element: <FaqPage /> },
+      { path: "blogs", element: <Blogs /> },
+      { path: "blogs/new", element: <CreateBlog /> },
+      { path: "my-posts", element: <MyBlogs /> },
+      { path: "blogs/:slug", element: <BlogDetail /> },
+      { path: "blogs/:slug/edit", element: <EditBlog /> },
       {
         path: "admin/blogs/review",
-        element: (
-          <AdminRoute>
-            <AdminBlogReview />
-          </AdminRoute>
-        ),
+        element: (<AdminRoute><AdminBlogReview /></AdminRoute>),
       },
     ],
   },
@@ -258,9 +138,7 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Initialize theme on app startup
     const storedTheme = localStorage.getItem("theme") || "light";
-    // console.log("Initializing theme with:", storedTheme);
     dispatch(setTheme(storedTheme));
 
     const fetchUser = async () => {
@@ -270,11 +148,7 @@ function App() {
           await dispatch(getMe(token)).unwrap();
         } catch (error) {
           console.error("User authentication failed:", error);
-          toast.error("Failed to authenticate user. Please log in again.", {
-            position: "top-right",
-            autoClose: 3000,
-            theme: "colored",
-          });
+          localStorage.removeItem('token');
         }
       }
       setIsLoading(false);

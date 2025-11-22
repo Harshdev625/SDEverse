@@ -1,157 +1,139 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { loginUserAPI, registerUserAPI, getMeAPI, forgotPasswordAPI, validateOTPAPI, resetPasswordAPI} from "./authAPI";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
 
-const tokenFromStorage = localStorage.getItem("token");
-
-const initialState = {
-  user: null,
-  token: tokenFromStorage || null,
-  loading: false,
-  error: null,
-  resetSuccess: false,
-  otpSent: false,
-  otpValidated: false,
-};
-
-export const registerUser = createAsyncThunk(
-  "auth/register",
-  async (userData, thunkAPI) => {
-    try {
-      const data = await registerUserAPI(userData);
-      return data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Registration failed"
-      );
-    }
-  }
-);
+const API_URL = 'http://localhost:5000/api';
 
 export const loginUser = createAsyncThunk(
-  "auth/login",
-  async (userData, thunkAPI) => {
+  'auth/login',
+  async (credentials, { rejectWithValue }) => {
     try {
-      const data = await loginUserAPI(userData);
-      return data;
+      const response = await axios.post(`${API_URL}/auth/login`, credentials);
+      localStorage.setItem('token', response.data.token);
+      return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Login failed"
-      );
+      return rejectWithValue(error.response?.data || 'Login failed');
     }
   }
 );
 
-export const getMe = createAsyncThunk("auth/getMe", async (token, thunkAPI) => {
-  try {
-    const data = await getMeAPI(token);
-    return data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(
-      error.response?.data?.message || "Get user failed"
-    );
+export const registerUser = createAsyncThunk(
+  'auth/register',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/auth/register`, userData);
+      localStorage.setItem('token', response.data.token);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Registration failed');
+    }
   }
-});
+);
+
+export const getMe = createAsyncThunk(
+  'auth/getMe',
+  async (token, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to fetch user');
+    }
+  }
+);
 
 export const forgotPassword = createAsyncThunk(
-  "auth/forgotPassword",
-  async (emailData, thunkAPI) => {
+  'auth/forgotPassword',
+  async (email, { rejectWithValue }) => {
     try {
-      const data = await forgotPasswordAPI(emailData);
-      return data;
+      const response = await axios.post(`${API_URL}/auth/forgot-password`, { email });
+      return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Forgot password request failed"
-      );
+      return rejectWithValue(error.response?.data || 'Failed to send reset email');
     }
   }
 );
 
 export const validateOTP = createAsyncThunk(
-  "auth/validateOTP",
-  async (otpData, thunkAPI) => {
+  'auth/validateOTP',
+  async (data, { rejectWithValue }) => {
     try {
-      const data = await validateOTPAPI(otpData);
-      return data;
+      const response = await axios.post(`${API_URL}/auth/validate-otp`, data);
+      return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Invalid or expired OTP"
-      );
+      return rejectWithValue(error.response?.data || 'Invalid OTP');
     }
   }
-);  
+);
 
 export const resetPassword = createAsyncThunk(
-  "auth/resetPassword",
-  async (resetData, thunkAPI) => {
+  'auth/resetPassword',
+  async (data, { rejectWithValue }) => {
     try {
-      const data = await resetPasswordAPI(resetData);
-      return data;
+      const response = await axios.post(`${API_URL}/auth/reset-password`, data);
+      return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Password reset failed"
-      );
+      return rejectWithValue(error.response?.data || 'Failed to reset password');
     }
   }
-);  
+);
 
 const authSlice = createSlice({
-  name: "auth",
-  initialState,
+  name: 'auth',
+  initialState: {
+    user: null,
+    token: localStorage.getItem('token') || null,
+    loading: false,
+    error: null,
+    resetSuccess: false,
+  },
   reducers: {
+    setCredentials: (state, action) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.error = null;
+      state.loading = false;
+    },
     logout: (state) => {
       state.user = null;
       state.token = null;
-      state.loading = false;
+      localStorage.removeItem('token');
+    },
+    clearError: (state) => {
       state.error = null;
-      state.resetSuccess = false;
-      state.otpSent = false;
-      state.otpValidated = false;
-      localStorage.removeItem("token");
     },
     clearResetSuccess: (state) => {
       state.resetSuccess = false;
-      state.otpSent = false;
-      state.otpValidated = false;
-      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(registerUser.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(registerUser.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = {
-          _id: action.payload._id,
-          username: action.payload.username,
-          email: action.payload.email,
-          role: action.payload.role,
-        };
-        state.token = action.payload.token;
-        localStorage.setItem("token", action.payload.token);
-      })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = {
-          _id: action.payload._id,
-          username: action.payload.username,
-          email: action.payload.email,
-          role: action.payload.role,
-        };
+        state.user = action.payload.user;
         state.token = action.payload.token;
-        localStorage.setItem("token", action.payload.token);
+        state.loading = false;
+        state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(registerUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
@@ -159,70 +141,61 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
+      .addCase(getMe.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.loading = false;
+        state.error = null;
+      })
       .addCase(getMe.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        state.user = null;
-        state.token = null;
-        localStorage.removeItem("token");
-      })
-      .addCase(getMe.fulfilled, (state, action) => {
-        state.user = {
-          _id: action.payload._id,
-          username: action.payload.username,
-          email: action.payload.email,
-          role: action.payload.role,
-        };
       })
       .addCase(forgotPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
-        state.otpSent = false;
-        state.otpValidated = false;
       })
       .addCase(forgotPassword.fulfilled, (state) => {
         state.loading = false;
         state.error = null;
-        state.otpSent = true;
       })
       .addCase(forgotPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        state.otpSent = false;
       })
       .addCase(validateOTP.pending, (state) => {
         state.loading = true;
         state.error = null;
-        state.otpValidated = false;
       })
       .addCase(validateOTP.fulfilled, (state) => {
         state.loading = false;
         state.error = null;
-        state.otpValidated = true;
       })
       .addCase(validateOTP.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        state.otpValidated = false;
       })
       .addCase(resetPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
-        state.resetSuccess = false;
       })
       .addCase(resetPassword.fulfilled, (state) => {
         state.loading = false;
-        state.error = null;
         state.resetSuccess = true;
+        state.error = null;
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        state.resetSuccess = false;
       });
   },
 });
-export const selectCurrentUser = (state) => state.auth.user;
 
-export const { logout, clearResetSuccess } = authSlice.actions;
+export const { setCredentials, logout, clearError, clearResetSuccess } = authSlice.actions;
+
+// Selectors
+export const selectCurrentUser = (state) => state.auth.user;
+export const selectAuthToken = (state) => state.auth.token;
+export const selectAuthLoading = (state) => state.auth.loading;
+export const selectAuthError = (state) => state.auth.error;
+
 export default authSlice.reducer;

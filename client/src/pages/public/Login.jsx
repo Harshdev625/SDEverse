@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../features/auth/authSlice";
 import { Link, useNavigate } from "react-router-dom";
-import { motion as Motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import SDEverse from "../../assets/sdeverse.png";
+
+const GOOGLE_AUTH_URL = "http://localhost:5000/auth/google";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -37,7 +39,7 @@ const Login = () => {
   }, [error]);
 
   return (
-    <Motion.div
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -49,27 +51,27 @@ const Login = () => {
         <div className="absolute -bottom-1/4 left-1/4 w-[500px] h-[500px] bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
       </div>
 
-      <Motion.div
+      <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
         className="relative z-10 max-w-md w-full bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 border border-white/30"
       >
         <Link to="/" className="p-1 rounded-sm border w-6 text-indigo-700 flex items-center hover:bg-indigo-700 hover:text-white ">
-         <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" />
         </Link>
 
         <div className="text-center mb-8">
-          <Motion.div
+          <motion.div
             whileHover={{ scale: 1.05 }}
             className="mx-auto mb-4"
           >
-          <img
-            src={SDEverse}
-            alt="SDEverse Logo"
-            className="w-20 h-20 mx-auto object-contain"
-          />
-          </Motion.div>
+            <img
+              src={SDEverse}
+              alt="SDEverse Logo"
+              className="w-20 h-20 mx-auto object-contain"
+            />
+          </motion.div>
           <h2 className="text-3xl font-bold text-indigo-700 mb-2">
             Welcome back to SDEverse
           </h2>
@@ -77,13 +79,13 @@ const Login = () => {
         </div>
 
         {error && (
-          <Motion.div
+          <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 p-3 bg-red-50 text-red-700 rounded-lg text-sm"
           >
             {error.message || error}
-          </Motion.div>
+          </motion.div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -156,7 +158,7 @@ const Login = () => {
             </div>
           </div>
 
-          <Motion.button
+          <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
@@ -171,8 +173,36 @@ const Login = () => {
             ) : (
               "Login to your account"
             )}
-          </Motion.button>
+          </motion.button>
         </form>
+
+        {/* Google Login Button */}
+        <div className="my-6">
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white/80 text-gray-500">Or continue with</span>
+            </div>
+          </div>
+          
+          <a href={GOOGLE_AUTH_URL}>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 font-medium text-gray-700"
+            >
+              <img 
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
+                alt="Google" 
+                className="h-5 w-5" 
+              />
+              Continue with Google
+            </motion.button>
+          </a>
+        </div>
 
         <div className="mt-8 text-center">
           <p className="text-gray-600">
@@ -185,8 +215,8 @@ const Login = () => {
             </a>
           </p>
         </div>
-      </Motion.div>
-    </Motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 
