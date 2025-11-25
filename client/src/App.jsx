@@ -14,7 +14,8 @@ import Register from "./pages/public/Register";
 import ForgotPassword from "./pages/public/ForgotPassword";
 import Contact from "./pages/public/Contact";
 import CommunityGuidelines from "./pages/public/CommunityGuidelines";
-import FaqPage from './pages/public/FaqPage';
+import FaqPage from "./pages/public/FaqPage";
+import About from "./pages/public/About"; // ✅ Added
 
 import Algorithms from "./pages/algorithms/Algorithms";
 import AlgorithmDetail from "./pages/algorithms/AlgorithmDetails";
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Home />,
+      },
+      {
+        path: "about",
+        element: <About />, // ✅ Added route
       },
       {
         path: "contact",
@@ -258,9 +263,7 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Initialize theme on app startup
     const storedTheme = localStorage.getItem("theme") || "light";
-    // console.log("Initializing theme with:", storedTheme);
     dispatch(setTheme(storedTheme));
 
     const fetchUser = async () => {
