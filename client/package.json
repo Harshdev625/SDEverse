@@ -21,7 +21,7 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.24",
     "katex": "^0.16.25",
-    "lucide-react": "^0.546.0",
+    "lucide-react": "^0.555.0",
     "react": "^19.1.0",
     "react-calendar-heatmap": "^1.10.0",
     "react-dom": "^19.2.0",
