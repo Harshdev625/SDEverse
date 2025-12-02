@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
+// Define the schema FIRST!
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -17,7 +18,8 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    password: { type: String, required: true },
+    password: { type: String }, // Optional now for Google users
+    googleId: { type: String, unique: true, sparse: true }, // ADD this line for Google OAuth
     bio: { type: String, trim: true, default: "" },
     fullName: { type: String, trim: true, default: "" },
     avatarUrl: { type: String, trim: true, default: "" },
@@ -137,8 +139,9 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Place this hook AFTER schema declaration!
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password") || !this.password) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
