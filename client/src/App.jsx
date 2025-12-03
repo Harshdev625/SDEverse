@@ -15,7 +15,8 @@ import ForgotPassword from "./pages/public/ForgotPassword";
 import Contact from "./pages/public/Contact";
 import CommunityGuidelines from "./pages/public/CommunityGuidelines";
 import FaqPage from "./pages/public/FaqPage";
-import About from "./pages/public/About"; // ✅ Added
+import About from "./pages/public/About";
+import LoginSuccess from "./pages/public/LoginSuccess";
 
 import Algorithms from "./pages/algorithms/Algorithms";
 import AlgorithmDetail from "./pages/algorithms/AlgorithmDetails";
@@ -45,7 +46,6 @@ import AdminProblemSheets from "./pages/admin/AdminProblemSheets";
 import AdminProblemManagement from "./pages/admin/AdminProblemManagement";
 
 import { getMe } from "./features/auth/authSlice";
-import { toast } from "react-toastify";
 
 import Blogs from "./pages/blogs/Blogs";
 import BlogDetail from "./pages/blogs/BlogDetail";
@@ -58,74 +58,29 @@ import ProblemSheets from "./pages/sheets/ProblemSheets";
 import SheetDetail from "./pages/sheets/SheetDetail";
 
 const router = createBrowserRouter([
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/register",
-    element: <Register />,
-  },
-  {
-    path: "/forgot-password",
-    element: <ForgotPassword />,
-  },
+  { path: "/login", element: <Login /> },
+  { path: "/register", element: <Register /> },
+  { path: "/forgot-password", element: <ForgotPassword /> },
+  { path: "/login-success", element: <LoginSuccess /> },
   {
     path: "/",
     element: <Layout />,
     children: [
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: "about",
-        element: <About />, // ✅ Added route
-      },
-      {
-        path: "contact",
-        element: <Contact />,
-      },
-      {
-        path: "feedback",
-        element: <Feedback />,
-      },
-      {
-        path: "moreinfo/:platform",
-        element: <MoreInfoPage />,
-      },
-      {
-        path: "profile/:username",
-        element: <Profile />,
-      },
-      {
-        path: "algorithms",
-        element: <Algorithms />,
-      },
-      {
-        path: "algorithms/:slug",
-        element: <AlgorithmDetail />,
-      },
-      {
-        path: "algorithms/proposals/new",
-        element: <CreateProposal />,
-      },
-      {
-        path: "algorithms/proposals/:slug/edit",
-        element: <EditProposal />,
-      },
-      {
-        path: "algorithms/:slug/contribute",
-        element: <CreateProposal />,
-      },
-      {
-        path: "data-structures",
-        element: <DataStructures />,
-      },
-      {
-        path: "data-structures/:slug",
-        element: <DataStructureDetail />,
-      },
+      { index: true, element: <Home /> },
+      { path: "about", element: <About /> },
+      { path: "contact", element: <Contact /> },
+      { path: "feedback", element: <Feedback /> },
+      { path: "moreinfo/:platform", element: <MoreInfoPage /> },
+      { path: "profile/:username", element: <Profile /> },
+
+      { path: "algorithms", element: <Algorithms /> },
+      { path: "algorithms/:slug", element: <AlgorithmDetail /> },
+      { path: "algorithms/proposals/new", element: <CreateProposal /> },
+      { path: "algorithms/proposals/:slug/edit", element: <EditProposal /> },
+      { path: "algorithms/:slug/contribute", element: <CreateProposal /> },
+
+      { path: "data-structures", element: <DataStructures /> },
+      { path: "data-structures/:slug", element: <DataStructureDetail /> },
       {
         path: "data-structures/proposals/new",
         element: <CreateDataStructureProposal />,
@@ -134,22 +89,13 @@ const router = createBrowserRouter([
         path: "data-structures/proposals/:slug/edit",
         element: <EditDataStructureProposal />,
       },
-      {
-        path: "proposals",
-        element: <MyProposals />,
-      },
-      {
-        path: "community-guidelines",
-        element: <CommunityGuidelines />,
-      },
-      {
-        path: "problem-sheets",
-        element: <ProblemSheets />,
-      },
-      {
-        path: "problem-sheets/:sheetId",
-        element: <SheetDetail />,
-      },
+
+      { path: "proposals", element: <MyProposals /> },
+      { path: "community-guidelines", element: <CommunityGuidelines /> },
+
+      { path: "problem-sheets", element: <ProblemSheets /> },
+      { path: "problem-sheets/:sheetId", element: <SheetDetail /> },
+
       {
         path: "admin/manage-algorithms",
         element: (
@@ -222,30 +168,13 @@ const router = createBrowserRouter([
           </AdminRoute>
         ),
       },
-      {
-        path: "faq",
-        element: <FaqPage />,
-      },
-      {
-        path: "blogs",
-        element: <Blogs />,
-      },
-      {
-        path: "blogs/new",
-        element: <CreateBlog />,
-      },
-      {
-        path: "my-posts",
-        element: <MyBlogs />,
-      },
-      {
-        path: "blogs/:slug",
-        element: <BlogDetail />,
-      },
-      {
-        path: "blogs/:slug/edit",
-        element: <EditBlog />,
-      },
+
+      { path: "faq", element: <FaqPage /> },
+      { path: "blogs", element: <Blogs /> },
+      { path: "blogs/new", element: <CreateBlog /> },
+      { path: "my-posts", element: <MyBlogs /> },
+      { path: "blogs/:slug", element: <BlogDetail /> },
+      { path: "blogs/:slug/edit", element: <EditBlog /> },
       {
         path: "admin/blogs/review",
         element: (
@@ -273,11 +202,7 @@ function App() {
           await dispatch(getMe(token)).unwrap();
         } catch (error) {
           console.error("User authentication failed:", error);
-          toast.error("Failed to authenticate user. Please log in again.", {
-            position: "top-right",
-            autoClose: 3000,
-            theme: "colored",
-          });
+          localStorage.removeItem("token");
         }
       }
       setIsLoading(false);
