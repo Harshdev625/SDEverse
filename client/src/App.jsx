@@ -14,7 +14,8 @@ import Register from "./pages/public/Register";
 import ForgotPassword from "./pages/public/ForgotPassword";
 import Contact from "./pages/public/Contact";
 import CommunityGuidelines from "./pages/public/CommunityGuidelines";
-import FaqPage from './pages/public/FaqPage';
+import FaqPage from "./pages/public/FaqPage";
+import About from "./pages/public/About"; // ⭐ Added About import
 
 import Algorithms from "./pages/algorithms/Algorithms";
 import AlgorithmDetail from "./pages/algorithms/AlgorithmDetails";
@@ -73,54 +74,21 @@ const router = createBrowserRouter([
     path: "/",
     element: <Layout />,
     children: [
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: "contact",
-        element: <Contact />,
-      },
-      {
-        path: "feedback",
-        element: <Feedback />,
-      },
-      {
-        path: "moreinfo/:platform",
-        element: <MoreInfoPage />,
-      },
-      {
-        path: "profile/:username",
-        element: <Profile />,
-      },
-      {
-        path: "algorithms",
-        element: <Algorithms />,
-      },
-      {
-        path: "algorithms/:slug",
-        element: <AlgorithmDetail />,
-      },
-      {
-        path: "algorithms/proposals/new",
-        element: <CreateProposal />,
-      },
-      {
-        path: "algorithms/proposals/:slug/edit",
-        element: <EditProposal />,
-      },
-      {
-        path: "algorithms/:slug/contribute",
-        element: <CreateProposal />,
-      },
-      {
-        path: "data-structures",
-        element: <DataStructures />,
-      },
-      {
-        path: "data-structures/:slug",
-        element: <DataStructureDetail />,
-      },
+      { index: true, element: <Home /> },
+      { path: "about", element: <About /> },        // ⭐ Added About route
+      { path: "contact", element: <Contact /> },
+      { path: "feedback", element: <Feedback /> },
+      { path: "moreinfo/:platform", element: <MoreInfoPage /> },
+      { path: "profile/:username", element: <Profile /> },
+
+      { path: "algorithms", element: <Algorithms /> },
+      { path: "algorithms/:slug", element: <AlgorithmDetail /> },
+      { path: "algorithms/proposals/new", element: <CreateProposal /> },
+      { path: "algorithms/proposals/:slug/edit", element: <EditProposal /> },
+      { path: "algorithms/:slug/contribute", element: <CreateProposal /> },
+
+      { path: "data-structures", element: <DataStructures /> },
+      { path: "data-structures/:slug", element: <DataStructureDetail /> },
       {
         path: "data-structures/proposals/new",
         element: <CreateDataStructureProposal />,
@@ -129,22 +97,13 @@ const router = createBrowserRouter([
         path: "data-structures/proposals/:slug/edit",
         element: <EditDataStructureProposal />,
       },
-      {
-        path: "proposals",
-        element: <MyProposals />,
-      },
-      {
-        path: "community-guidelines",
-        element: <CommunityGuidelines />,
-      },
-      {
-        path: "problem-sheets",
-        element: <ProblemSheets />,
-      },
-      {
-        path: "problem-sheets/:sheetId",
-        element: <SheetDetail />,
-      },
+
+      { path: "proposals", element: <MyProposals /> },
+      { path: "community-guidelines", element: <CommunityGuidelines /> },
+
+      { path: "problem-sheets", element: <ProblemSheets /> },
+      { path: "problem-sheets/:sheetId", element: <SheetDetail /> },
+
       {
         path: "admin/manage-algorithms",
         element: (
@@ -217,30 +176,13 @@ const router = createBrowserRouter([
           </AdminRoute>
         ),
       },
-      {
-        path: "faq",
-        element: <FaqPage />,
-      },
-      {
-        path: "blogs",
-        element: <Blogs />,
-      },
-      {
-        path: "blogs/new",
-        element: <CreateBlog />,
-      },
-      {
-        path: "my-posts",
-        element: <MyBlogs />,
-      },
-      {
-        path: "blogs/:slug",
-        element: <BlogDetail />,
-      },
-      {
-        path: "blogs/:slug/edit",
-        element: <EditBlog />,
-      },
+
+      { path: "faq", element: <FaqPage /> },
+      { path: "blogs", element: <Blogs /> },
+      { path: "blogs/new", element: <CreateBlog /> },
+      { path: "my-posts", element: <MyBlogs /> },
+      { path: "blogs/:slug", element: <BlogDetail /> },
+      { path: "blogs/:slug/edit", element: <EditBlog /> },
       {
         path: "admin/blogs/review",
         element: (
@@ -258,9 +200,7 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Initialize theme on app startup
     const storedTheme = localStorage.getItem("theme") || "light";
-    // console.log("Initializing theme with:", storedTheme);
     dispatch(setTheme(storedTheme));
 
     const fetchUser = async () => {
