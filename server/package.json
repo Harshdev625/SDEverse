@@ -34,7 +34,7 @@
     "express-validator": "^7.3.1",
     "jsdom": "^27.3.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.0.1",
+    "mongoose": "^9.1.1",
     "node-cron": "^4.2.1",
     "resend": "^6.6.0",
     "slugify": "^1.6.6"
