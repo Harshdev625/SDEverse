@@ -6,6 +6,8 @@ import { motion as Motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import SDEverse from "../../assets/sdeverse.png";
+import { MdDarkMode } from "react-icons/md";
+import { MdLightMode } from "react-icons/md";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -14,6 +16,11 @@ const Login = () => {
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
+  const [toggleMode, setToggleMode] = useState(()=>{
+    const savedTheme = localStorage.getItem('login-theme')
+ 
+    return savedTheme === 'dark'
+  })
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,13 +29,22 @@ const Login = () => {
     e.preventDefault();
     dispatch(loginUser(formData));
   };
-
+  const handleModeChange = () => {
+    setToggleMode(!toggleMode)
+  }
   useEffect(() => {
     if (user) {
       toast.success("Login successful!");
       navigate("/");
     }
   }, [user, navigate]);
+  useEffect(() => {
+    if (toggleMode) {
+      localStorage.setItem('login-theme' ,'dark')
+    } else {
+      localStorage.setItem('login-theme' ,'light')
+    } 
+  }, [toggleMode]);
 
   useEffect(() => {
     if (error) {
@@ -41,9 +57,12 @@ const Login = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4"
+      className={`min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 ${toggleMode ? 'dark' : ''} dark:from-[#030712] dark:via-[#030712] dark:to-[#030712] ` }
     >
-      <div className="absolute inset-0 z-0 overflow-hidden">
+      <button onClick={handleModeChange} className="absolute top-4 right-4 w-[50px] h-[50px] flex items-center justify-center z-20">
+        {!toggleMode ? <MdDarkMode className="text-3xl" /> : <MdLightMode className="text-3xl text-white" />}
+      </button>
+      <div className="absolute inset-0 z-0 overflow-hidden" style={{ display: toggleMode ? 'none' : 'block' }}>
         <div className="absolute -top-1/4 -left-1/4 w-[500px] h-[500px] bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
         <div className="absolute top-1/3 -right-1/4 w-[500px] h-[500px] bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-1/4 left-1/4 w-[500px] h-[500px] bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
@@ -53,10 +72,10 @@ const Login = () => {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="relative z-10 max-w-md w-full bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 border border-white/30"
+        className="relative z-10 max-w-md w-full bg-white/80 dark:bg-gray-900 backdrop-blur-lg rounded-2xl shadow-xl p-8 border border-white/30"
       >
-        <Link to="/" className="p-1 rounded-sm border w-6 text-indigo-700 flex items-center hover:bg-indigo-700 hover:text-white ">
-         <ArrowLeft className="w-5 h-5" />
+        <Link to="/" className="p-1 rounded-sm border w-6 text-indigo-700 flex items-center hover:bg-indigo-700 hover:text-white dark:bg-transparent dark:text-gray-400 dark:hover:bg-gray-400 dark:hover:text-[#191A18]">
+          <ArrowLeft className="w-5 h-5" />
         </Link>
 
         <div className="text-center mb-8">
@@ -64,16 +83,16 @@ const Login = () => {
             whileHover={{ scale: 1.05 }}
             className="mx-auto mb-4"
           >
-          <img
-            src={SDEverse}
-            alt="SDEverse Logo"
-            className="w-20 h-20 mx-auto object-contain"
-          />
+            <img
+              src={SDEverse}
+              alt="SDEverse Logo"
+              className="w-20 h-20 mx-auto object-contain"
+            />
           </Motion.div>
-          <h2 className="text-3xl font-bold text-indigo-700 mb-2">
+          <h2 className="text-3xl font-bold text-indigo-700 dark:text-[#2C2CD4] mb-2">
             Welcome back to SDEverse
           </h2>
-          <p className="text-gray-600">Sign in to continue your journey</p>
+          <p className="text-gray-600 dark:text-gray-400">Sign in to continue your journey</p>
         </div>
 
         {error && (
@@ -88,7 +107,7 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-indigo-400 mb-2">
               Email
             </label>
             <div className="relative">
@@ -98,13 +117,13 @@ const Login = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition"
+                className="w-full px-4 py-3 bg-white dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white rounded-lg border border-gray-300 c focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition"
                 placeholder="your.email@example.com"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-400"
+                  className="h-5 w-5 text-gray-400 dark:text-gray-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -122,12 +141,12 @@ const Login = () => {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-indigo-400">
                 Password
               </label>
               <a
                 href="/forgot-password"
-                className="text-sm text-indigo-600 hover:text-indigo-500"
+                className="text-sm text-indigo-600 hover:text-indigo-500 dark:text-blue-500"
               >
                 Forgot password?
               </a>
@@ -139,18 +158,18 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition"
+                className="w-full px-4 py-3 bg-white dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white rounded-lg border border-gray-300 dark:border-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:ring-opacity-50 transition"
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 "
               >
                 {showPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-400" />
+                  <EyeOff className="h-5 w-5 text-gray-400 dark:text-gray-400" />
                 ) : (
-                  <Eye className="h-5 w-5 text-gray-400" />
+                  <Eye className="h-5 w-5 text-gray-400 dark:text-gray-400" />
                 )}
               </button>
             </div>
@@ -161,7 +180,7 @@ const Login = () => {
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-medium shadow-lg hover:shadow-indigo-200/50 transition-all duration-300 flex items-center justify-center"
+            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-medium shadow-lg hover:shadow-indigo-200/50 dark:hover:shadow-gray-800 transition-all duration-300 flex items-center justify-center"
           >
             {loading ? (
               <>
@@ -175,11 +194,11 @@ const Login = () => {
         </form>
 
         <div className="mt-8 text-center">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Don't have an account?{" "}
             <a
               href="/register"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-blue-500"
             >
               Sign up
             </a>
