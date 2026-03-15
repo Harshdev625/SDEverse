@@ -226,6 +226,31 @@ The application will be available at:
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:5000`
 
+## Testing & Coverage
+
+### Run Frontend Tests
+```bash
+cd client
+npm test
+npm run test:coverage
+npm run test:ui
+```
+
+### Run Backend Tests
+```bash
+cd server
+npm test
+npm run test:coverage
+npm run test:ui
+```
+
+### Coverage HTML Reports (Browser Page)
+
+- Frontend: `client/coverage/index.html`
+- Backend: `server/coverage/index.html`
+
+Run coverage first, then open these HTML files in your browser for detailed file-by-file results.
+
 ## 📁 Project Structure
 
 ```

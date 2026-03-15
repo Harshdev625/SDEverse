@@ -14,11 +14,6 @@ const validateProblem = [
     .trim()
     .notEmpty().withMessage('Title is required')
     .isLength({ min: 3 }).withMessage('Title must be at least 3 characters'),
-  
-  body('order')
-    .optional({ checkFalsy: true })
-    .notEmpty().withMessage('Order is required')
-    .isInt({ min: 1 }).withMessage('Order must be a positive number'),
     
   body('difficulty')
     .optional({ checkFalsy: true })

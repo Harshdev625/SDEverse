@@ -1,24 +1,15 @@
 const mongoose = require('mongoose');
 
 const problemSchema = new mongoose.Schema({
-    sheetId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "ProblemSheet",
-        required: true,
-        index: true,
-    },
     title: {
         type: String,
         required: true,
         trim: true,
+        unique: true, // Ensure problem titles are unique across the system
     },
     description: {
         type: String,
         trim: true,
-    },
-    order: {
-        type: Number,
-        required: true,
     },
     difficulty: {
         type: String,
@@ -63,7 +54,8 @@ const problemSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Index for efficient queries
-problemSchema.index({ sheetId: 1, difficulty: 1 });
-problemSchema.index({ sheetId: 1, order: 1 });
+problemSchema.index({ difficulty: 1 });
+problemSchema.index({ platform: 1 });
+problemSchema.index({ tags: 1 });
 
 module.exports = mongoose.model('Problem', problemSchema);

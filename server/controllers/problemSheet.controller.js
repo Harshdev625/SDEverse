@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const ProblemSheet = require('../models/sheet.model');
 const ProblemProgress = require('../models/userProgress.model');
 const Problem = require('../models/problem.model');
+const SheetProblem = require('../models/sheetProblem.model');
 const generateUniqueSlug = require('../utils/generateUniqueSlug');
 const useTransactions = process.env.NODE_ENV === 'production';
 
@@ -143,7 +144,7 @@ const problemSheetController = {
       }
 
       // Delete all associated data
-      const deleteProblems = await Problem.deleteMany({ sheetId: sheet._id }, sessionOption);
+      const deleteSheetProblems = await SheetProblem.deleteMany({ sheetId: sheet._id }, sessionOption);
       const deleteProgress = await ProblemProgress.deleteMany({ sheetId: sheet._id }, sessionOption);
       const deleteSheet = await ProblemSheet.deleteOne({ _id: sheet._id }, sessionOption);
 
@@ -162,7 +163,7 @@ const problemSheetController = {
         message: 'Problem sheet and all associated data deleted successfully.',
         deletedData: {
           sheet: deleteSheet.deletedCount,
-          problems: deleteProblems.deletedCount,
+          sheetProblems: deleteSheetProblems.deletedCount,
           progress: deleteProgress.deletedCount
         }
       });
@@ -287,37 +288,88 @@ const problemSheetController = {
 
       const skip = (pageNum - 1) * limitNum;
 
-      // Build filter
-      const filter = { sheetId: sheet._id };
+      // Build aggregation pipeline to join SheetProblems with Problems
+      const pipeline = [
+        { $match: { sheetId: sheet._id } },
+        {
+          $lookup: {
+            from: 'problems',
+            localField: 'problemId',
+            foreignField: '_id',
+            as: 'problemDetails'
+          }
+        },
+        { $unwind: '$problemDetails' },
+      ];
+
+      // Add difficulty filter if specified
       if (difficulty && difficulty !== 'all') {
-        filter.difficulty = difficulty;
+        pipeline.push({ 
+          $match: { 'problemDetails.difficulty': difficulty } 
+        });
       }
 
-      // Fetch problems
-      const problems = await Problem.find(filter)
-        .select('-hints -solution')
-        .skip(skip)
-        .limit(parseInt(limit))
-        .sort({ order: 1 })
-        .lean();
+      // Add sorting and pagination
+      pipeline.push(
+        { $sort: { order: 1 } },
+        { $skip: skip },
+        { $limit: limitNum },
+        {
+          $project: {
+            _id: '$problemDetails._id',
+            title: '$problemDetails.title',
+            description: '$problemDetails.description',
+            difficulty: '$problemDetails.difficulty',
+            platform: '$problemDetails.platform',
+            platformLink: '$problemDetails.platformLink',
+            tags: '$problemDetails.tags',
+            order: '$order',
+            createdAt: '$problemDetails.createdAt',
+            updatedAt: '$problemDetails.updatedAt',
+          }
+        }
+      );
 
-      // Get total count for pagination
-      const total = await Problem.countDocuments(filter);
+      const problems = await SheetProblem.aggregate(pipeline);
+
+      // Get total count
+      const countPipeline = [
+        { $match: { sheetId: sheet._id } },
+        {
+          $lookup: {
+            from: 'problems',
+            localField: 'problemId',
+            foreignField: '_id',
+            as: 'problemDetails'
+          }
+        },
+        { $unwind: '$problemDetails' },
+      ];
+
+      if (difficulty && difficulty !== 'all') {
+        countPipeline.push({ 
+          $match: { 'problemDetails.difficulty': difficulty } 
+        });
+      }
+
+      countPipeline.push({ $count: 'total' });
+      const countResult = await SheetProblem.aggregate(countPipeline);
+      const total = countResult[0]?.total || 0;
 
       // If user is logged in, add progress info
       if (userId && problems.length > 0) {
         const problemIds = problems.map(p => p._id);
         const progress = await ProblemProgress.find(
-          { problemId: { $in: problemIds }, userId }
+          { problemId: { $in: problemIds }, userId, sheetId: sheet._id }
         ).lean();
 
         const progressMap = {};
         progress.forEach(p => {
-          progressMap[p.problemId] = p;
+          progressMap[p.problemId.toString()] = p;
         });
 
         problems.forEach(problem => {
-          const prog = progressMap[problem._id];
+          const prog = progressMap[problem._id.toString()];
           problem.completed = prog?.completed || false;
         });
       }
@@ -348,25 +400,49 @@ const problemSheetController = {
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
-      const filter = { sheetId: new mongoose.Types.ObjectId(sheetId), userId };
-
-      // Get problem difficulties
-      let problemFilter = { sheetId: new mongoose.Types.ObjectId(sheetId) };
-      if (difficulty && difficulty !== 'all') {
-        problemFilter.difficulty = difficulty;
+      // Find sheet by ID or slug
+      let sheet;
+      if (mongoose.Types.ObjectId.isValid(sheetId)) {
+        sheet = await ProblemSheet.findById(sheetId).select('_id').lean();
+      } else {
+        sheet = await ProblemSheet.findOne({ slug: sheetId }).select('_id').lean();
       }
 
-      const problems = await Problem.aggregate([
-        { $match: problemFilter },
-        { $group: {
-            _id: '$difficulty',
-            total: { $sum: 1 }
+      if (!sheet) {
+        return res.status(404).json({ error: 'Sheet not found' });
+      }
+
+      // Get problem difficulties via SheetProblem junction
+      const problemsPipeline = [
+        { $match: { sheetId: sheet._id } },
+        {
+          $lookup: {
+            from: 'problems',
+            localField: 'problemId',
+            foreignField: '_id',
+            as: 'problemDetails'
           }
+        },
+        { $unwind: '$problemDetails' },
+      ];
+
+      if (difficulty && difficulty !== 'all') {
+        problemsPipeline.push({ 
+          $match: { 'problemDetails.difficulty': difficulty } 
+        });
+      }
+
+      problemsPipeline.push({
+        $group: {
+          _id: '$problemDetails.difficulty',
+          total: { $sum: 1 }
         }
-      ]);
+      });
+
+      const problems = await SheetProblem.aggregate(problemsPipeline);
 
       // Get user progress
-      const progressFilter = { sheetId: new mongoose.Types.ObjectId(sheetId), userId };
+      const progressFilter = { sheetId: sheet._id, userId };
 
       const progress = await ProblemProgress.aggregate([
         { $match: progressFilter },
