@@ -1,4 +1,4 @@
-import { getCroppedImg } from "./cropImage";
+import { getCroppedImg } from "../../../utils/cropImage";
 
 describe("cropImage utility", () => {
   afterEach(() => {

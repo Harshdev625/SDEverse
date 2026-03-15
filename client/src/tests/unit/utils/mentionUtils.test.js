@@ -1,4 +1,4 @@
-import { extractMentions, formatMentions } from "./mentionUtils";
+import { extractMentions, formatMentions } from "../../../utils/mentionUtils";
 
 describe("mentionUtils", () => {
   it("formats @mentions into profile links", () => {

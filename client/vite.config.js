@@ -12,7 +12,16 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov", "html"],
-      include: ["src/utils/**/*.js"],
+      include: [
+        "src/utils/**/*.js",
+        "src/constants/**/*.js",
+        "src/features/**/*API.js",
+        "src/features/theme/themeSlice.js",
+        "src/hooks/**/*.js",
+        "src/components/AdminRoute.jsx",
+        "src/components/NavLinks.jsx",
+        "src/components/ScrollToTop.jsx",
+      ],
       thresholds: {
         lines: 80,
         functions: 80,
