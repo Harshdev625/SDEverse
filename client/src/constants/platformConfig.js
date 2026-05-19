@@ -1,6 +1,5 @@
 import {
   SiGithub,
-  SiLinkedin,
   SiX,
   SiFacebook,
   SiInstagram,
@@ -9,6 +8,9 @@ import {
   SiCodechef,
   SiSpoj,
 } from "react-icons/si";
+
+import { FaLinkedin } from "react-icons/fa";
+
 import { Code2, Link2 } from "lucide-react";
 
 export const PLATFORM_CONFIG = {
@@ -21,6 +23,7 @@ export const PLATFORM_CONFIG = {
     name: "GitHub",
     category: "competitive",
   },
+
   leetcode: {
     Icon: SiLeetcode,
     bar: "from-yellow-400 to-amber-600",
@@ -30,6 +33,7 @@ export const PLATFORM_CONFIG = {
     name: "LeetCode",
     category: "competitive",
   },
+
   codeforces: {
     Icon: SiCodeforces,
     bar: "from-red-500 to-red-700",
@@ -39,6 +43,7 @@ export const PLATFORM_CONFIG = {
     name: "Codeforces",
     category: "competitive",
   },
+
   codechef: {
     Icon: SiCodechef,
     bar: "from-orange-500 to-orange-700",
@@ -48,6 +53,7 @@ export const PLATFORM_CONFIG = {
     name: "CodeChef",
     category: "competitive",
   },
+
   atcoder: {
     Icon: Code2,
     bar: "from-purple-500 to-purple-700",
@@ -57,6 +63,7 @@ export const PLATFORM_CONFIG = {
     name: "AtCoder",
     category: "competitive",
   },
+
   spoj: {
     Icon: SiSpoj,
     bar: "from-green-500 to-emerald-700",
@@ -68,7 +75,7 @@ export const PLATFORM_CONFIG = {
   },
 
   linkedin: {
-    Icon: SiLinkedin,
+    Icon: FaLinkedin,
     bar: "from-blue-500 to-blue-700",
     bgColor: "bg-blue-50 dark:bg-blue-900/30",
     textColor: "text-blue-700 dark:text-blue-300",
@@ -76,6 +83,7 @@ export const PLATFORM_CONFIG = {
     name: "LinkedIn",
     category: "social",
   },
+
   twitter: {
     Icon: SiX,
     bar: "from-sky-400 to-sky-600",
@@ -85,6 +93,7 @@ export const PLATFORM_CONFIG = {
     name: "Twitter / X",
     category: "social",
   },
+
   facebook: {
     Icon: SiFacebook,
     bar: "from-blue-600 to-blue-800",
@@ -94,6 +103,7 @@ export const PLATFORM_CONFIG = {
     name: "Facebook",
     category: "social",
   },
+
   instagram: {
     Icon: SiInstagram,
     bar: "from-pink-500 to-pink-700",
@@ -122,17 +132,26 @@ export const getPlatformConfig = (platform) => {
 export const getCompetitivePlatforms = () => {
   return Object.entries(PLATFORM_CONFIG)
     .filter(([, config]) => config.category === "competitive")
-    .map(([key, config]) => ({ key, ...config }));
+    .map(([key, config]) => ({
+      key,
+      ...config,
+    }));
 };
 
 export const getSocialPlatforms = () => {
   return Object.entries(PLATFORM_CONFIG)
     .filter(([, config]) => config.category === "social")
-    .map(([key, config]) => ({ key, ...config }));
+    .map(([key, config]) => ({
+      key,
+      ...config,
+    }));
 };
 
 export const getPlatformsWithDetails = () => {
   return Object.entries(PLATFORM_CONFIG)
     .filter(([, config]) => config.hasDetails)
-    .map(([key, config]) => ({ key, ...config }));
+    .map(([key, config]) => ({
+      key,
+      ...config,
+    }));
 };
