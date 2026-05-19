@@ -22,7 +22,7 @@
     "axios": "^1.13.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "framer-motion": "^12.23.26",
+    "framer-motion": "^12.38.0",
     "katex": "^0.16.44",
     "lucide-react": "^0.562.0",
     "react": "^19.1.0",
