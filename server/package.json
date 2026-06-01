@@ -34,7 +34,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-async-handler": "^1.2.0",
-    "express-validator": "^7.3.1",
+    "express-validator": "^7.3.2",
     "jsdom": "^29.0.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.1",
