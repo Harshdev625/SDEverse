@@ -43,7 +43,7 @@
     "slugify": "^1.6.9"
   },
   "devDependencies": {
-    "@vitest/ui": "^4.1.7",
+    "@vitest/ui": "^4.1.9",
     "@vitest/coverage-v8": "^4.1.8",
     "nodemon": "^3.1.14",
     "supertest": "^7.1.4",
